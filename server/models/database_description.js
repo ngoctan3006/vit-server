@@ -93,3 +93,26 @@ const group = {
     updated_at: new Date(''),
     deleted_at: new Date('')
 };
+
+const event = {
+    _id: '',
+    name: '',
+    description: '',
+    chief: memberId,
+    reference: '',
+    created_at: new Date(''),
+    updated_at: new Date(''),
+    deleted_at: new Date('')
+};
+
+const activity = {
+    _id: '',
+    name: '',
+    event: eventId,
+    description: '',
+    chief: memberId,
+    reference: '',
+    created_at: new Date(''),
+    updated_at: new Date(''),
+    deleted_at: new Date('')
+};
