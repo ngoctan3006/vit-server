@@ -13,15 +13,15 @@ const UserSchema = new mongoose.Schema(
         },
         positions: {
             type: [String],
-            required: true
+            default: ['member']
         },
         firstName: {
             type: String,
-            required: true
+            default: null
         },
         fullName: {
             type: String,
-            required: true
+            default: null
         },
         gender: {
             type: String,
@@ -30,33 +30,35 @@ const UserSchema = new mongoose.Schema(
         },
         birthday: {
             type: Date,
-            required: true
+            default: null
         },
         homeTown: {
             type: String,
-            required: true
+            default: null
         },
         address: {
-            type: String
+            type: String,
+            default: null
         },
         school: {
             type: String,
-            required: true
+            default: null
         },
         studentId: {
             type: String,
-            required: true
+            default: null
         },
         phoneNumber: {
             type: String,
-            required: true
+            default: null
         },
         email: {
             type: String,
-            required: true
+            default: null
         },
         facebook: {
-            type: String
+            type: String,
+            default: null
         }
     },
     {
