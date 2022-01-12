@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import { ADMIN } from './constants.js';
 
 dotenv.config();
 
@@ -28,8 +29,8 @@ const verifyToken = (req, res, next) => {
 };
 
 export const verifyAdmin = (req, res, next) => {
-    if (!req.positions.includes('admin'))
-        return res.status(403).json({
+    if (!req.positions.includes(ADMIN))
+        return res.status(401).json({
             success: false,
             message: 'Not admin'
         });
