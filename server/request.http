@@ -1,0 +1,32 @@
+@apiURL = http://localhost:2109/api/v1/
+
+GET {{apiURL}}users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluMSIsInBvc2l0aW9uIjoiYWRtaW4iLCJpYXQiOjE2NDE5NzcwODR9.KHlMQL5vOde40k7I3nnS0hmU_L-aSGd1HmGrDOFep7k
+
+###
+POST {{apiURL}}users/register
+Content-Type: application/json
+
+{
+    "username": "admin1",
+    "password": "admin",
+    "position": "admin",
+    "firstName": "admin",
+    "fullName": "admin",
+    "gender": "male",
+    "birthday": "2009-09-21",
+    "homeTown": "admin",
+    "school": "admin",
+    "studentId": "admin",
+    "phoneNumber": "admin",
+    "email": "admin"
+}
+
+###
+POST {{apiURL}}users/login
+Content-Type: application/json
+
+{
+    "username": "admin1",
+    "password": "admin"
+}
