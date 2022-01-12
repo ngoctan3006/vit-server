@@ -8,11 +8,6 @@ const router = express.Router();
 
 dotenv.config();
 
-/**
- * @route api/v1/users/
- * @desc get users
- * @acces private
- */
 router.get('/', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const users = await User.find();
@@ -29,11 +24,6 @@ router.get('/', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
-/**
- * @route api/v1/users/login
- * @desc login users
- * @acces public
- */
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -76,11 +66,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-/**
- * @route api/v1/users/register
- * @desc register users
- * @acces public
- */
 router.post('/register', async (req, res) => {
     const {
         username,
@@ -91,10 +76,12 @@ router.post('/register', async (req, res) => {
         gender,
         birthday,
         homeTown,
+        address,
         school,
         studentId,
         phoneNumber,
-        email
+        email,
+        facebook
     } = req.body;
 
     if (!username || !password) {
@@ -125,10 +112,12 @@ router.post('/register', async (req, res) => {
             gender,
             birthday,
             homeTown,
+            address,
             school,
             studentId,
             phoneNumber,
-            email
+            email,
+            facebook
         });
         await newUser.save();
 
@@ -143,6 +132,112 @@ router.post('/register', async (req, res) => {
             success: true,
             message: 'resgister successfully',
             accessToken
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+});
+
+router.put('/update/:id', verifyToken, async (req, res) => {
+    const {
+        firstName,
+        fullName,
+        gender,
+        birthday,
+        homeTown,
+        address,
+        school,
+        phoneNumber,
+        email,
+        facebook
+    } = req.body;
+    try {
+        let updatedUser = {
+            firstName,
+            fullName,
+            gender,
+            birthday,
+            homeTown,
+            address,
+            school,
+            phoneNumber,
+            email,
+            facebook
+        };
+
+        updatedUser = await User.findOneAndUpdate(
+            { username: req.username, _id: req.params.id },
+            updatedUser,
+            { new: true }
+        );
+        if (!updatedUser) {
+            return res.status(401).json({
+                success: false,
+                message: 'user not authorized'
+            });
+        }
+
+        // const { password, ...userWithoutPassword } = updatedUser;
+
+        res.json({
+            success: true,
+            message: 'update successfully!'
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+});
+
+router.put('/changepasword/:id', verifyToken, async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    try {
+        const user = await User.findOne({
+            username: req.username
+        });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: 'username or password is incorrect'
+            });
+        }
+        const passwordValid = await argon2.verify(user.password, oldPassword);
+        if (!passwordValid) {
+            return res.status(400).json({
+                success: false,
+                message: 'password is incorrect'
+            });
+        }
+
+        const hashedPassword = await argon2.hash(newPassword);
+        let updatedUser = {
+            password: hashedPassword
+        };
+
+        updatedUser = await User.findOneAndUpdate(
+            { username: req.username, _id: req.params.id },
+            updatedUser,
+            { new: true }
+        );
+        if (!updatedUser) {
+            return res.status(401).json({
+                success: false,
+                message: 'user not authorized'
+            });
+        }
+
+        // const { password, ...userWithoutPassword } = updatedUser;
+
+        res.json({
+            success: true,
+            message: 'change password successfully!'
         });
     } catch (err) {
         console.log(err);
