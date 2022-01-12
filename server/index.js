@@ -1,8 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import connectDB from './database/index.js';
+import connectDB from './database/mongoDB.js';
 import route from './routes/index.js';
 
+// Connect to MongoDB
 connectDB();
 
 const app = express();

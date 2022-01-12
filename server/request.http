@@ -1,0 +1,41 @@
+@apiURL = http://localhost:2109/api/v1/
+
+GET {{apiURL}}users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicG9zaXRpb25zIjpbIm1lbWJlciJdLCJpYXQiOjE2NDE5ODYzMDh9.kCmlMRfgZsJimyrvPDgj5SvdDVvdyqRFJowwCWgOXFo
+
+###
+POST {{apiURL}}users/register
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin",
+    "positions": "admin",
+    "gender": "male"
+}
+
+###
+POST {{apiURL}}users/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin"
+}
+
+###
+PUT {{apiURL}}users/update/61dec2b3977a9f917c4ec1a6
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicG9zaXRpb25zIjoiYWRtaW4iLCJpYXQiOjE2NDE5ODg3ODd9.wQWzwvXNUi1D_O_PwD7dz2vlv81_RJYHvrhTPiC-8GI
+Content-Type: application/json
+
+{
+    "firstName": "VIT",
+    "fullName": "TNCNTT-TT",
+    "birthday": "2009-09-21",
+    "homeTown": "Trường CNTT & TT",
+    "address": "Trường CNTT & TT",
+    "school": "Trường CNTT & TT",
+    "phoneNumber": "0123456789",
+    "email": "tinhnguyen.ict@gmail.com",
+    "facebook": "fb.com/tinhnguyenvit"
+}

@@ -20,27 +20,10 @@ const user = {
     _id: '',
     username: '',
     password: '',
-    position: positionId,
-    created_at: new Date(''),
-    updated_at: new Date(''),
-    deleted_at: new Date('')
-};
-
-const position = {
-    _id: '',
-    name: '',
-    description: '',
-    created_at: new Date(''),
-    updated_at: new Date(''),
-    deleted_at: new Date('')
-};
-
-const member = {
-    _id: '',
+    positions: [String],
     first_name: '',
     full_name: '',
-    nickname: '',
-    gender: 0 / 1 / 2,
+    gender: '',
     birthday: '',
     home_town: '',
     address: '',
