@@ -28,7 +28,7 @@ const verifyToken = (req, res, next) => {
 };
 
 export const verifyAdmin = (req, res, next) => {
-    if (req.position !== 'admin')
+    if (!req.position.includes('admin'))
         return res.status(403).json({
             success: false,
             message: 'Not admin'

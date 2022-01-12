@@ -8,9 +8,9 @@ POST {{apiURL}}users/register
 Content-Type: application/json
 
 {
-    "username": "admin1",
+    "username": "admin3",
     "password": "admin",
-    "position": "admin",
+    "position": ["admin", "vice", "chief"],
     "firstName": "admin",
     "fullName": "admin",
     "gender": "male",
