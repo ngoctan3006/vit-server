@@ -20,7 +20,7 @@ const user = {
     _id: '',
     username: '',
     password: '',
-    position: positionId,
+    positions: [String],
     first_name: '',
     full_name: '',
     gender: '',

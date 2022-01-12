@@ -1,7 +1,9 @@
 import users from './users.js';
+import groups from './groups.js';
 
 export default (app) => {
     app.use('/api/v1/users', users);
+    app.use('/api/v1/groups', groups);
 
     app.use('/', (req, res) => {
         res.send(

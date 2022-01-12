@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         req.username = decoded.username;
-        req.position = decoded.position;
+        req.positions = decoded.positions;
         next();
     } catch (error) {
         console.log(error);
@@ -28,7 +28,7 @@ const verifyToken = (req, res, next) => {
 };
 
 export const verifyAdmin = (req, res, next) => {
-    if (!req.position.includes('admin'))
+    if (!req.positions.includes('admin'))
         return res.status(403).json({
             success: false,
             message: 'Not admin'

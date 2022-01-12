@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
             });
         }
         const accessToken = jwt.sign(
-            { username, position: user.position },
+            { username, positions: user.positions },
             process.env.ACCESS_TOKEN_SECRET
         );
 
@@ -85,7 +85,7 @@ router.post('/register', async (req, res) => {
     const {
         username,
         password,
-        position,
+        positions,
         firstName,
         fullName,
         gender,
@@ -119,7 +119,7 @@ router.post('/register', async (req, res) => {
         const newUser = new User({
             username,
             password: hashedPassword,
-            position,
+            positions,
             firstName,
             fullName,
             gender,
@@ -135,7 +135,7 @@ router.post('/register', async (req, res) => {
         // return token
         // const accessToken = jwt.sign({ userId: newUser._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.EXPIRES_TIME })
         const accessToken = jwt.sign(
-            { username, position },
+            { username, positions },
             process.env.ACCESS_TOKEN_SECRET
         );
 
