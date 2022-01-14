@@ -1,12 +1,11 @@
 import express from 'express';
-import Vit from '../models/Vit.js';
-import verifyToken, { verifyAdmin } from '../middleware/auth.js';
+import VIT from '../models/VIT.js';
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
     try {
-        const data = await Vit.find();
+        const data = await VIT.find();
         res.json({
             success: true,
             data
