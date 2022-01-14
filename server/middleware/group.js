@@ -1,70 +1,39 @@
 import {
-	CAN_VIEW_GROUP,
-	CAN_CREATE_GROUP,
-	CAN_UPDATE_GROUP,
-	CAN_DELETE_GROUP
+    CAN_VIEW_GROUP,
+    CAN_CREATE_GROUP,
+    CAN_UPDATE_GROUP,
+    CAN_DELETE_GROUP,
+    NOT_AUTHORIZED
 } from './constants.js';
 
 export const authorizeViewGroup = (req, res, next) => {
-	if (canViewGroup(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canViewGroup = req.positions.checkIntersection(CAN_VIEW_GROUP);
+    if (canViewGroup) next();
+    else {
+        res.status(403).json(NOT_AUTHORIZED);
+    }
 };
 
 export const authorizeCreateGroup = (req, res, next) => {
-	if (canCreateGroup(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canCreateGroup = req.positions.checkIntersection(CAN_CREATE_GROUP);
+    if (canCreateGroup) next();
+    else {
+        res.status(403).json(NOT_AUTHORIZED);
+    }
 };
 
 export const authorizeUpdateGroup = (req, res, next) => {
-	if (canUpdateGroup(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canUpdateGroup = req.positions.checkIntersection(CAN_UPDATE_GROUP);
+    if (canUpdateGroup) next();
+    else {
+        res.status(403).json(NOT_AUTHORIZED);
+    }
 };
 
 export const authorizeDeleteGroup = (req, res, next) => {
-	if (canDeleteGroup(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canDeleteGroup = req.positions.checkIntersection(CAN_DELETE_GROUP);
+    if (canDeleteGroup) next();
+    else {
+        res.status(403).json(NOT_AUTHORIZED);
+    }
 };
-
-function canViewGroup(positions) {
-	return positions.some((element) => {
-		return CAN_VIEW_GROUP.includes(element);
-	});
-}
-
-function canCreateGroup(positions) {
-	return positions.some((element) => {
-		return CAN_CREATE_GROUP.includes(element);
-	});
-}
-
-function canUpdateGroup(positions) {
-	return positions.some((element) => {
-		return CAN_UPDATE_GROUP.includes(element);
-	});
-}
-
-function canDeleteGroup(positions) {
-	return positions.some((element) => {
-		return CAN_DELETE_GROUP.includes(element);
-	});
-}
