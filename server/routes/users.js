@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import verifyToken, { verifyAdmin } from '../middleware/auth.js';
 import User from '../models/User.js';
+
 const router = express.Router();
 
 dotenv.config();
@@ -16,10 +17,10 @@ router.get('/', verifyToken, verifyAdmin, async (req, res) => {
             users
         });
     } catch (error) {
-        console.log(error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Internal server error',
+            error
         });
     }
 });
@@ -57,11 +58,11 @@ router.post('/login', async (req, res) => {
             message: 'login successfully',
             accessToken
         });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Internal server error',
+            error
         });
     }
 });
@@ -133,11 +134,11 @@ router.post('/register', async (req, res) => {
             message: 'resgister successfully',
             accessToken
         });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Internal server error',
+            error
         });
     }
 });
@@ -187,11 +188,11 @@ router.put('/update/:id', verifyToken, async (req, res) => {
             success: true,
             message: 'update successfully!'
         });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Internal server error',
+            error
         });
     }
 });
@@ -239,11 +240,11 @@ router.put('/changepasword/:id', verifyToken, async (req, res) => {
             success: true,
             message: 'change password successfully!'
         });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Internal server error',
+            error
         });
     }
 });
