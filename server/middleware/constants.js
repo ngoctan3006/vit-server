@@ -14,4 +14,15 @@ export const CAN_CREATE_EVENT = ['admin', 'boss'];
 export const CAN_UPDATE_EVENT = ['admin', 'boss'];
 export const CAN_DELETE_EVENT = ['admin', 'boss'];
 
+// Club apis authorization
+export const CAN_CREATE_CLUB = ['admin', 'boss'];
+export const CAN_UPDATE_CLUB = ['admin', 'boss'];
+export const CAN_DELETE_CLUB = ['admin', 'boss'];
+
+// Error message
+export const NOT_AUTHORIZED = {
+    success: false,
+    message: 'Not authorized'
+};
+
 export const ADMIN = 'admin';
