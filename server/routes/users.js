@@ -182,8 +182,6 @@ router.put('/update/:id', verifyToken, async (req, res) => {
             });
         }
 
-        // const { password, ...userWithoutPassword } = updatedUser;
-
         res.json({
             success: true,
             message: 'update successfully!'
@@ -233,8 +231,6 @@ router.put('/changepasword/:id', verifyToken, async (req, res) => {
                 message: 'user not authorized'
             });
         }
-
-        // const { password, ...userWithoutPassword } = updatedUser;
 
         res.json({
             success: true,

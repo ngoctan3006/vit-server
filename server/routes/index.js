@@ -1,10 +1,12 @@
 import users from './users.js';
 import groups from './groups.js';
+import clubs from './clubs.js';
 import vit from './vit.js';
 
 export default (app) => {
     app.use('/api/v1/users', users);
     app.use('/api/v1/groups', groups);
+    app.use('/api/v1/clubs', clubs);
     app.use('/api/v1/vit', vit);
 
     app.use('/', (req, res) => {
