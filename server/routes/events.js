@@ -74,6 +74,78 @@ router.put('/', verifyToken, authorizeUpdateEvent, async (req, res) => {
 	else res.status(200).send({ success: true, data: newEvent });
 });
 
+router.put(
+	'/enroll-members',
+	verifyToken,
+	authorizeUpdateEvent,
+	async (req, res) => {
+		try {
+			const newEvent = await Event.findOneAndUpdate(
+				{ _id: req.body._id },
+				{ $addToSet: { enrolledMembers: req.body.userIds } },
+				{ new: true }
+			);
+			res.send({ success: true, data: newEvent });
+		} catch (err) {
+			res.send({ success: false, err });
+		}
+	}
+);
+
+router.put(
+	'/add-participants',
+	verifyToken,
+	authorizeUpdateEvent,
+	async (req, res) => {
+		try {
+			const newEvent = await Event.findOneAndUpdate(
+				{ _id: req.body._id },
+				{ $addToSet: { participants: req.body.userIds } },
+				{ new: true }
+			);
+			res.send({ success: true, data: newEvent });
+		} catch (err) {
+			res.send({ success: false, err });
+		}
+	}
+);
+
+router.put(
+	'/remove-enrolled-members',
+	verifyToken,
+	authorizeUpdateEvent,
+	async (req, res) => {
+		try {
+			const newEvent = await Event.findOneAndUpdate(
+				{ _id: req.body._id },
+				{ $pull: { enrolledMembers: { $in: req.body.userIds } } },
+				{ new: true }
+			);
+			res.send({ success: true, data: newEvent });
+		} catch (err) {
+			res.send({ success: false, err });
+		}
+	}
+);
+
+router.put(
+	'/remove-participants',
+	verifyToken,
+	authorizeUpdateEvent,
+	async (req, res) => {
+		try {
+			const newEvent = await Event.findOneAndUpdate(
+				{ _id: req.body._id },
+				{ $pull: { participants: { $in: req.body.userIds } } },
+				{ new: true }
+			);
+			res.send({ success: true, data: newEvent });
+		} catch (err) {
+			res.send({ success: false, err });
+		}
+	}
+);
+
 router.delete('/:id', verifyToken, authorizeDeleteEvent, async (req, res) => {
 	res.status(200).send({ success: true, data: req.params.id });
 });
