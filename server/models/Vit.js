@@ -33,9 +33,12 @@ const VitSchema = new mongoose.Schema(
         captain: {
             type: mongoose.Schema.Types.ObjectId
         },
-        viceCaption: {
+        viceCaptain: {
             type: [mongoose.Schema.Types.ObjectId]
         }
+    },
+    {
+        collection: 'vit'
     },
     {
         timestamps: true
