@@ -67,6 +67,42 @@ router.put('/', verifyToken, authorizeUpdateGroup, async (req, res) => {
 	else res.status(200).send({ success: true, data: newGroup });
 });
 
+router.put(
+	'/add-members',
+	verifyToken,
+	authorizeUpdateGroup,
+	async (req, res) => {
+		try {
+			const newGroup = await Group.findOneAndUpdate(
+				{ _id: req.body._id },
+				{ $addToSet: { members: req.body.userIds } },
+				{ new: true }
+			);
+			res.send({ success: true, data: newGroup });
+		} catch (err) {
+			res.send({ success: false, err });
+		}
+	}
+);
+
+router.put(
+	'/remove-members',
+	verifyToken,
+	authorizeUpdateGroup,
+	async (req, res) => {
+		try {
+			const newGroup = await Group.findOneAndUpdate(
+				{ _id: req.body._id },
+				{ $pull: { members: { $in: req.body.userIds } } },
+				{ new: true }
+			);
+			res.send({ success: true, data: newGroup });
+		} catch (err) {
+			res.send({ success: false, err });
+		}
+	}
+);
+
 router.delete('/:id', verifyToken, authorizeDeleteGroup, async (req, res) => {
 	res.status(200).send({ success: true, data: req.params.id });
 });

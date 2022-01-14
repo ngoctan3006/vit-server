@@ -91,9 +91,11 @@ const event = {
 const activity = {
     _id: '',
     name: '',
-    event: eventId,
     description: '',
+    event: eventId,
     chief: memberId,
+    enrolledMembers: memberId,
+    participants: memberId,
     reference: '',
     created_at: new Date(''),
     updated_at: new Date(''),
