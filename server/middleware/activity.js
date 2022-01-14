@@ -3,7 +3,7 @@ import {
     CAN_UPDATE_ACTIVITY,
     CAN_DELETE_ACTIVITY,
     NOT_AUTHORIZED
-} from './constants.js';
+} from '../common/constants.js';
 
 export const authorizeViewActivity = (req, res, next) => {
     next();

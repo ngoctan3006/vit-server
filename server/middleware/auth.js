@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import { ADMIN } from './constants.js';
+import { ADMIN } from '../common/constants.js';
 
 dotenv.config();
 

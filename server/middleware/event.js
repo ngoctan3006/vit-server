@@ -3,7 +3,7 @@ import {
     CAN_UPDATE_EVENT,
     CAN_DELETE_EVENT,
     NOT_AUTHORIZED
-} from './constants.js';
+} from '../common/constants.js';
 
 export const authorizeViewEvent = (req, res, next) => {
     next();

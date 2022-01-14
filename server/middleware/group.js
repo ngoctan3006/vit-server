@@ -4,7 +4,7 @@ import {
     CAN_UPDATE_GROUP,
     CAN_DELETE_GROUP,
     NOT_AUTHORIZED
-} from './constants.js';
+} from '../common/constants.js';
 
 export const authorizeViewGroup = (req, res, next) => {
     const canViewGroup = req.positions.checkIntersection(CAN_VIEW_GROUP);
