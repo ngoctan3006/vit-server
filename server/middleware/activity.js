@@ -1,57 +1,37 @@
 import {
-	CAN_CREATE_ACTIVITY,
-	CAN_UPDATE_ACTIVITY,
-	CAN_DELETE_ACTIVITY
+    CAN_CREATE_ACTIVITY,
+    CAN_UPDATE_ACTIVITY,
+    CAN_DELETE_ACTIVITY,
+    NOT_AUTHORIZED
 } from './constants.js';
 
 export const authorizeViewActivity = (req, res, next) => {
-	next();
+    next();
 };
 
 export const authorizeCreateActivity = (req, res, next) => {
-	if (canCreateActivity(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canCreateActivity =
+        req.positions.checkIntersection(CAN_CREATE_ACTIVITY);
+    if (canCreateActivity) next();
+    else {
+        return res.status(403).json(NOT_AUTHORIZED);
+    }
 };
 
 export const authorizeUpdateActivity = (req, res, next) => {
-	if (canUpdateActivity(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canUpdateActivity =
+        req.positions.checkIntersection(CAN_UPDATE_ACTIVITY);
+    if (canUpdateActivity) next();
+    else {
+        return res.status(403).json(NOT_AUTHORIZED);
+    }
 };
 
 export const authorizeDeleteActivity = (req, res, next) => {
-	if (canDeleteActivity(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canDeleteActivity =
+        req.positions.checkIntersection(CAN_DELETE_ACTIVITY);
+    if (canDeleteActivity) next();
+    else {
+        return res.status(403).json(NOT_AUTHORIZED);
+    }
 };
-
-function canCreateActivity(positions) {
-	return positions.some((element) => {
-		return CAN_CREATE_ACTIVITY.includes(element);
-	});
-}
-
-function canUpdateActivity(positions) {
-	return positions.some((element) => {
-		return CAN_UPDATE_ACTIVITY.includes(element);
-	});
-}
-
-function canDeleteActivity(positions) {
-	return positions.some((element) => {
-		return CAN_DELETE_ACTIVITY.includes(element);
-	});
-}
