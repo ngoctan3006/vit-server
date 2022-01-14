@@ -1,57 +1,34 @@
 import {
-	CAN_CREATE_EVENT,
-	CAN_UPDATE_EVENT,
-	CAN_DELETE_EVENT
+    CAN_CREATE_EVENT,
+    CAN_UPDATE_EVENT,
+    CAN_DELETE_EVENT,
+    NOT_AUTHORIZED
 } from './constants.js';
 
 export const authorizeViewEvent = (req, res, next) => {
-	next();
+    next();
 };
 
 export const authorizeCreateEvent = (req, res, next) => {
-	if (canCreateEvent(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canCreateEvent = req.positions.checkIntersection(CAN_CREATE_EVENT);
+    if (canCreateEvent) next();
+    else {
+        return res.status(403).json(NOT_AUTHORIZED);
+    }
 };
 
 export const authorizeUpdateEvent = (req, res, next) => {
-	if (canUpdateEvent(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canUpdateEvent = req.positions.checkIntersection(CAN_UPDATE_EVENT);
+    if (canUpdateEvent) next();
+    else {
+        return res.status(403).json(NOT_AUTHORIZED);
+    }
 };
 
 export const authorizeDeleteEvent = (req, res, next) => {
-	if (canDeleteEvent(req.positions)) next();
-	else {
-		return res.status(403).json({
-			success: false,
-			message: 'Not authorized'
-		});
-	}
+    const canDeleteEvent = req.positions.checkIntersection(CAN_DELETE_EVENT);
+    if (canDeleteEvent) next();
+    else {
+        return res.status(403).json(NOT_AUTHORIZED);
+    }
 };
-
-function canCreateEvent(positions) {
-	return positions.some((element) => {
-		return CAN_CREATE_EVENT.includes(element);
-	});
-}
-
-function canUpdateEvent(positions) {
-	return positions.some((element) => {
-		return CAN_UPDATE_EVENT.includes(element);
-	});
-}
-
-function canDeleteEvent(positions) {
-	return positions.some((element) => {
-		return CAN_DELETE_EVENT.includes(element);
-	});
-}
