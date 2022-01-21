@@ -2,12 +2,12 @@ import express from 'express';
 import argon2 from 'argon2';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import verifyToken, { verifyAdmin } from '../middleware/auth.js';
 import User from '../models/User.js';
-
-const router = express.Router();
+import verifyToken, { verifyAdmin } from '../middleware/authMiddleware.js';
 
 dotenv.config();
+
+const router = express.Router();
 
 router.get('/', verifyToken, verifyAdmin, async (req, res) => {
     try {
