@@ -1,18 +1,9 @@
 import {
-    CAN_VIEW_GROUP,
     CAN_CREATE_GROUP,
     CAN_UPDATE_GROUP,
     CAN_DELETE_GROUP,
     NOT_AUTHORIZED
 } from '../common/constants.js';
-
-export const authorizeViewGroup = (req, res, next) => {
-    const canViewGroup = req.positions.checkIntersection(CAN_VIEW_GROUP);
-    if (canViewGroup) next();
-    else {
-        res.status(403).json(NOT_AUTHORIZED);
-    }
-};
 
 export const authorizeCreateGroup = (req, res, next) => {
     const canCreateGroup = req.positions.checkIntersection(CAN_CREATE_GROUP);

@@ -2,7 +2,6 @@ import express from 'express';
 import Group from '../models/Group.js';
 import verifyToken from '../middleware/authMiddleware.js';
 import {
-    authorizeViewGroup,
     authorizeCreateGroup,
     authorizeUpdateGroup,
     authorizeDeleteGroup
@@ -10,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.get('/', verifyToken, authorizeViewGroup, async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
     try {
         const groups = await Group.find();
         res.json({
@@ -18,9 +17,8 @@ router.get('/', verifyToken, authorizeViewGroup, async (req, res) => {
             groups
         });
     } catch (err) {
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Internal server error',
             err
         });
     }
@@ -29,16 +27,15 @@ router.get('/', verifyToken, authorizeViewGroup, async (req, res) => {
 router.post('/', verifyToken, authorizeCreateGroup, async (req, res) => {
     const { name, description, chief, vice, members, reference } = req.body;
 
-    const newGroup = new Group({
-        name,
-        description,
-        chief,
-        vice,
-        members,
-        reference
-    });
-
     try {
+        const newGroup = new Group({
+            name,
+            description,
+            chief,
+            vice,
+            members,
+            reference
+        });
         await newGroup.save();
         res.status(201).send({ success: true, data: newGroup });
     } catch (err) {
@@ -61,10 +58,20 @@ router.put('/', verifyToken, authorizeUpdateGroup, async (req, res) => {
         reference: req.body.reference
     };
 
-    newGroup = await Group.findOneAndUpdate(oldGroup, newGroup, { new: true });
-
-    if (!newGroup) res.status(400).send({ success: false });
-    else res.status(200).send({ success: true, data: newGroup });
+    try {
+        newGroup = await Group.findOneAndUpdate(oldGroup, newGroup, {
+            new: true
+        });
+        if (!newGroup) {
+            return res.status(404).json({
+                success: false,
+                message: 'Group not found'
+            });
+        }
+        res.status(200).send({ success: true, data: newGroup });
+    } catch (error) {
+        res.status(400).send({ success: false });
+    }
 });
 
 router.put(
@@ -78,9 +85,15 @@ router.put(
                 { $addToSet: { members: req.body.userIds } },
                 { new: true }
             );
+            if (!newGroup) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Group not found'
+                });
+            }
             res.send({ success: true, data: newGroup });
         } catch (err) {
-            res.send({ success: false, err });
+            res.status(400).json({ success: false, err });
         }
     }
 );
@@ -96,9 +109,15 @@ router.put(
                 { $pull: { members: { $in: req.body.userIds } } },
                 { new: true }
             );
+            if (!newGroup) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Group not found'
+                });
+            }
             res.send({ success: true, data: newGroup });
         } catch (err) {
-            res.send({ success: false, err });
+            res.status(400).json({ success: false, err });
         }
     }
 );
