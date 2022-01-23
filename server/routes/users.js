@@ -85,10 +85,10 @@ router.post('/register', async (req, res) => {
         facebook
     } = req.body;
 
-    if (!username || !password) {
+    if (!username || !password || !gender) {
         return res.status(400).json({
             success: false,
-            message: 'Missing username or password'
+            message: 'Missing username or password or gender'
         });
     }
 
@@ -118,7 +118,11 @@ router.post('/register', async (req, res) => {
             studentId,
             phoneNumber,
             email,
-            facebook
+            facebook: facebook
+                ? facebook?.startsWith('https://')
+                    ? facebook
+                    : `https://${facebook}`
+                : null
         });
         await newUser.save();
 
@@ -135,15 +139,14 @@ router.post('/register', async (req, res) => {
             accessToken
         });
     } catch (error) {
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Internal server error',
             error
         });
     }
 });
 
-router.put('/update/:id', verifyToken, async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
     const {
         firstName,
         fullName,
@@ -167,7 +170,11 @@ router.put('/update/:id', verifyToken, async (req, res) => {
             school,
             phoneNumber,
             email,
-            facebook
+            facebook: facebook
+                ? facebook?.startsWith('https://')
+                    ? facebook
+                    : `https://${facebook}`
+                : null
         };
 
         updatedUser = await User.findOneAndUpdate(
@@ -195,7 +202,7 @@ router.put('/update/:id', verifyToken, async (req, res) => {
     }
 });
 
-router.put('/changepasword/:id', verifyToken, async (req, res) => {
+router.put('/password/:id', verifyToken, async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     try {
         const user = await User.findOne({
