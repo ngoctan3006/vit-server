@@ -1,5 +1,4 @@
 // Group apis authorization
-export const CAN_VIEW_GROUP = ['admin', 'boss', 'group_chief', 'group_vice'];
 export const CAN_CREATE_GROUP = ['admin', 'boss', 'group_chief', 'group_vice'];
 export const CAN_UPDATE_GROUP = ['admin', 'boss', 'group_chief', 'group_vice'];
 export const CAN_DELETE_GROUP = ['admin', 'boss', 'group_chief', 'group_vice'];
@@ -18,6 +17,11 @@ export const CAN_DELETE_EVENT = ['admin', 'boss'];
 export const CAN_CREATE_CLUB = ['admin', 'boss'];
 export const CAN_UPDATE_CLUB = ['admin', 'boss'];
 export const CAN_DELETE_CLUB = ['admin', 'boss'];
+
+// Department apis authorization
+export const CAN_CREATE_DEPARTMENT = ['admin', 'boss'];
+export const CAN_UPDATE_DEPARTMENT = ['admin', 'boss'];
+export const CAN_DELETE_DEPARTMENT = ['admin', 'boss'];
 
 // Error message
 export const NOT_AUTHORIZED = {
