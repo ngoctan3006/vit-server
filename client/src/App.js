@@ -2,13 +2,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './assets/css/main.css';
 import './assets/css/theme.css';
 import Layout from './components/layout/Layout';
-import Activities from './pages/Activities';
-import Clubs from './pages/Clubs';
-import Dashboard from './pages/Dashboard';
-import Departments from './pages/Departments';
-import Events from './pages/Events';
-import Groups from './pages/Groups';
-import Members from './pages/Members';
+import Activities from './pages/activities/Activities';
+import Clubs from './pages/clubs/Clubs';
+import Dashboard from './pages/dashboard/Dashboard';
+import Departments from './pages/departments/Departments';
+import Events from './pages/events/Events';
+import Groups from './pages/groups/Groups';
+import Members from './pages/members/Members';
 
 const App = () => {
     return (
