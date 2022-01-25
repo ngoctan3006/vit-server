@@ -29,6 +29,7 @@
 
 .mode-list {
     margin-top: 20px;
+    text-transform: capitalize;
 }
 
 .mode-list > li {
