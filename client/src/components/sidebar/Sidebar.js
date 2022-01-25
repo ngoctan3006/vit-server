@@ -9,9 +9,8 @@ const Sidebar = () => {
     const location = useLocation();
 
     useEffect(() => {
-        const currPath = location.pathname;
         const activeItem = sidebarItems.findIndex(
-            (item) => item.link === currPath
+            (item) => item.link === location.pathname
         );
 
         setActiveIndex(activeItem);
