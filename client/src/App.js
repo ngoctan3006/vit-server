@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './assets/css/main.css';
+import './assets/css/theme.css';
 import Layout from './components/layout/Layout';
 import Activities from './pages/Activities';
 import Clubs from './pages/Clubs';
