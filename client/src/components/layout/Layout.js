@@ -9,8 +9,8 @@ const Layout = () => {
         <div className='layout'>
             <Sidebar />
             <div className='main'>
+                <TopNav />
                 <div className='main__content'>
-                    <TopNav />
                     <Outlet />
                 </div>
             </div>
