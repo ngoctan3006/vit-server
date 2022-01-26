@@ -38,6 +38,9 @@
     --border-radius: 15px;
     --topnav-height: 110px;
     --transition-cubic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    --normal-font-size: 1rem;
+    --small-font-size: 0.75rem;
 }
 
 * {
@@ -121,4 +124,13 @@ input:focus {
 .orange-color {
     background-color: var(--main-color-orange);
     color: #fff;
+}
+
+.spinner-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
 }

@@ -10,24 +10,40 @@ import Departments from './pages/departments/Departments';
 import Events from './pages/events/Events';
 import Groups from './pages/groups/Groups';
 import Members from './pages/members/Members';
+import Login from './pages/login/Login';
+import NotFound from './pages/notFound/NotFound';
+import AuthProvider from './contexts/AuthContext';
+import RequireAuth from './components/auth/RequireAuth';
 
 const App = () => {
     return (
-        <ThemeProvider>
-            <BrowserRouter>
-                <Routes>
-                    <Route path='/' element={<Layout />}>
-                        <Route index element={<Dashboard />} />
-                        <Route path='/departments' element={<Departments />} />
-                        <Route path='/clubs' element={<Clubs />} />
-                        <Route path='/groups' element={<Groups />} />
-                        <Route path='/activities' element={<Activities />} />
-                        <Route path='/events' element={<Events />} />
-                        <Route path='/members' element={<Members />} />
-                    </Route>
-                </Routes>
-            </BrowserRouter>
-        </ThemeProvider>
+        <AuthProvider>
+            <ThemeProvider>
+                <BrowserRouter>
+                    <Routes>
+                        <Route element={<RequireAuth />}>
+                            <Route path='/' element={<Layout />}>
+                                <Route index element={<Dashboard />} />
+                                <Route
+                                    path='departments'
+                                    element={<Departments />}
+                                />
+                                <Route path='clubs' element={<Clubs />} />
+                                <Route path='groups' element={<Groups />} />
+                                <Route
+                                    path='activities'
+                                    element={<Activities />}
+                                />
+                                <Route path='events' element={<Events />} />
+                                <Route path='members' element={<Members />} />
+                            </Route>
+                        </Route>
+                        <Route path='/login' element={<Login />} />
+                        <Route path='*' element={<NotFound />} />
+                    </Routes>
+                </BrowserRouter>
+            </ThemeProvider>
+        </AuthProvider>
     );
 };
 
