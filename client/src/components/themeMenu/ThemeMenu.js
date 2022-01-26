@@ -1,7 +1,8 @@
-import { useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
+import { ThemeContext } from '../../contexts/ThemeContext';
 import './themeMenu.css';
 
-const mode_settings = [
+const theme_settings = [
     {
         name: 'light',
         background: 'light-background',
@@ -60,8 +61,30 @@ const clickOutsideRef = (content_ref, toggle_ref) => {
 };
 
 const ThemeMenu = () => {
+    const {
+        themeState: { color, theme },
+        setColor,
+        setTheme
+    } = useContext(ThemeContext);
+
     const menu_ref = useRef(null);
     const menu_toggle_ref = useRef(null);
+
+    useEffect(() => {
+        const themeClass = theme_settings.filter(
+            (theme) => theme.name === localStorage.getItem('theme')
+        );
+        const colorClass = color_settings.filter(
+            (color) => color.name === localStorage.getItem('color')
+        );
+
+        if (themeClass.length) {
+            setTheme(themeClass[0]);
+        }
+        if (colorClass.length) {
+            setColor(colorClass[0]);
+        }
+    }, []);
 
     clickOutsideRef(menu_ref, menu_toggle_ref);
 
@@ -82,10 +105,16 @@ const ThemeMenu = () => {
                 <div className='theme-menu__select'>
                     <span>Choose mode</span>
                     <ul className='mode-list'>
-                        {mode_settings.map((item, index) => (
-                            <li key={index}>
+                        {theme_settings.map((item, index) => (
+                            <li key={index} onClick={() => setTheme(item)}>
                                 <div
-                                    className={`mode-list__color ${item.background} `}>
+                                    className={`mode-list__color ${
+                                        item.background
+                                    } ${
+                                        item.name === theme?.name
+                                            ? 'active'
+                                            : ''
+                                    }`}>
                                     <i className='bx bx-check'></i>
                                 </div>
                                 <span>{item.name}</span>
@@ -97,9 +126,15 @@ const ThemeMenu = () => {
                     <span>Choose color</span>
                     <ul className='mode-list'>
                         {color_settings.map((item, index) => (
-                            <li key={index}>
+                            <li key={index} onClick={() => setColor(item)}>
                                 <div
-                                    className={`mode-list__color ${item.background}`}>
+                                    className={`mode-list__color ${
+                                        item.background
+                                    } ${
+                                        item.name === color?.name
+                                            ? 'active'
+                                            : ''
+                                    }`}>
                                     <i className='bx bx-check'></i>
                                 </div>
                                 <span>{item.name}</span>
