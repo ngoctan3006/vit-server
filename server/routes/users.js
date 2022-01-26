@@ -9,6 +9,30 @@ dotenv.config();
 
 const router = express.Router();
 
+router.get('/auth', verifyToken, async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.username }).select(
+            '-password'
+        );
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: 'Không tìm thấy tài khoản của bạn!'
+            });
+        }
+        res.json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({
+            success: false,
+            error
+        });
+    }
+});
+
 router.get('/', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const users = await User.find();
@@ -17,9 +41,8 @@ router.get('/', verifyToken, verifyAdmin, async (req, res) => {
             users
         });
     } catch (error) {
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Internal server error',
             error
         });
     }
@@ -30,7 +53,7 @@ router.post('/login', async (req, res) => {
     if (!username || !password) {
         return res.status(400).json({
             success: false,
-            message: 'Missing username or password'
+            message: 'Thiếu tên đăng nhập hoặc mật khẩu!'
         });
     }
     try {
@@ -38,14 +61,14 @@ router.post('/login', async (req, res) => {
         if (!user) {
             return res.status(400).json({
                 success: false,
-                message: 'username or password is incorrect'
+                message: 'Sai tên đăng nhập hoặc mật khẩu!'
             });
         }
         const passwordValid = await argon2.verify(user.password, password);
         if (!passwordValid) {
             return res.status(400).json({
                 success: false,
-                message: 'username or password is incorrect'
+                message: 'Sai tên đăng nhập hoặc mật khẩu!'
             });
         }
         const accessToken = jwt.sign(
@@ -55,13 +78,12 @@ router.post('/login', async (req, res) => {
 
         return res.send({
             success: true,
-            message: 'login successfully',
+            message: 'Đăng nhập thành công!',
             accessToken
         });
     } catch (error) {
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Internal server error',
             error
         });
     }
@@ -82,13 +104,14 @@ router.post('/register', async (req, res) => {
         studentId,
         phoneNumber,
         email,
+        mailSis,
         facebook
     } = req.body;
 
     if (!username || !password || !gender) {
         return res.status(400).json({
             success: false,
-            message: 'Missing username or password or gender'
+            message: 'Thiếu tên đăng nhập hoặc mật khẩu hoặc giới tính!'
         });
     }
 
@@ -98,7 +121,7 @@ router.post('/register', async (req, res) => {
         if (user) {
             return res.status(400).json({
                 success: false,
-                message: 'username is already in use'
+                message: 'Tên đăng nhập đã tồn tại!'
             });
         }
 
@@ -118,6 +141,7 @@ router.post('/register', async (req, res) => {
             studentId,
             phoneNumber,
             email,
+            mailSis,
             facebook: facebook
                 ? facebook?.startsWith('https://')
                     ? facebook
@@ -135,7 +159,7 @@ router.post('/register', async (req, res) => {
 
         return res.send({
             success: true,
-            message: 'resgister successfully',
+            message: 'Đăng ký thành công!',
             accessToken
         });
     } catch (error) {
@@ -146,7 +170,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.put('/:id', verifyToken, async (req, res) => {
+router.put('/', verifyToken, async (req, res) => {
     const {
         firstName,
         fullName,
@@ -155,8 +179,10 @@ router.put('/:id', verifyToken, async (req, res) => {
         homeTown,
         address,
         school,
+        studentId,
         phoneNumber,
         email,
+        mailSis,
         facebook
     } = req.body;
     try {
@@ -168,8 +194,10 @@ router.put('/:id', verifyToken, async (req, res) => {
             homeTown,
             address,
             school,
+            studentId,
             phoneNumber,
             email,
+            mailSis,
             facebook: facebook
                 ? facebook?.startsWith('https://')
                     ? facebook
@@ -178,31 +206,31 @@ router.put('/:id', verifyToken, async (req, res) => {
         };
 
         updatedUser = await User.findOneAndUpdate(
-            { username: req.username, _id: req.params.id },
+            { username: req.username },
             updatedUser,
             { new: true }
-        );
+        ).select('-password');
         if (!updatedUser) {
             return res.status(401).json({
                 success: false,
-                message: 'user not authorized'
+                message: 'Không tìm thấy tài khoản của bạn!'
             });
         }
 
         res.json({
             success: true,
-            message: 'update successfully!'
+            message: 'Cập nhật thành công!',
+            user: updatedUser
         });
     } catch (error) {
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Internal server error',
             error
         });
     }
 });
 
-router.put('/password/:id', verifyToken, async (req, res) => {
+router.put('/password', verifyToken, async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     try {
         const user = await User.findOne({
@@ -211,14 +239,14 @@ router.put('/password/:id', verifyToken, async (req, res) => {
         if (!user) {
             return res.status(400).json({
                 success: false,
-                message: 'username or password is incorrect'
+                message: 'Sai tên đăng nhập hoặc mật khẩu!'
             });
         }
         const passwordValid = await argon2.verify(user.password, oldPassword);
         if (!passwordValid) {
             return res.status(400).json({
                 success: false,
-                message: 'password is incorrect'
+                message: 'Mật khẩu không chính xác!'
             });
         }
 
@@ -228,25 +256,24 @@ router.put('/password/:id', verifyToken, async (req, res) => {
         };
 
         updatedUser = await User.findOneAndUpdate(
-            { username: req.username, _id: req.params.id },
+            { username: req.username },
             updatedUser,
             { new: true }
-        );
+        ).select('-password');
         if (!updatedUser) {
             return res.status(401).json({
                 success: false,
-                message: 'user not authorized'
+                message: 'Không tìm thấy tài khoản của bạn!'
             });
         }
 
         res.json({
             success: true,
-            message: 'change password successfully!'
+            message: 'Thay đổi mật khẩu thành công!'
         });
     } catch (error) {
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Internal server error',
             error
         });
     }

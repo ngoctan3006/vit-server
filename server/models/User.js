@@ -56,6 +56,10 @@ const UserSchema = new mongoose.Schema(
             type: String,
             default: null
         },
+        mailSis: {
+            type: String,
+            default: null
+        },
         facebook: {
             type: String,
             default: null

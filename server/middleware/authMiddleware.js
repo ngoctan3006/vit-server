@@ -10,7 +10,7 @@ const verifyToken = (req, res, next) => {
     if (!token) {
         return res.status(401).json({
             success: false,
-            message: 'acces token not found'
+            message: 'Không tìm thấy access token!'
         });
     }
 
@@ -23,7 +23,7 @@ const verifyToken = (req, res, next) => {
         console.log(error);
         res.status(403).json({
             success: false,
-            message: 'Invalid token'
+            message: 'Token không hợp lệ!'
         });
     }
 };
@@ -32,7 +32,7 @@ export const verifyAdmin = (req, res, next) => {
     if (!req.positions.includes(ADMIN))
         return res.status(401).json({
             success: false,
-            message: 'Not admin'
+            message: 'Bạn không phải admin!'
         });
     next();
 };
