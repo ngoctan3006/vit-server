@@ -22,7 +22,7 @@
 
 .back-to-home {
     width: max-content;
-    margin: 1.5rem auto 0 auto;
+    margin: 1.5rem auto 0;
     padding: 15px 25px;
     border-radius: var(--border-radius);
     background-image: linear-gradient(
