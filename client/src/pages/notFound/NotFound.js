@@ -6,7 +6,7 @@ const NotFound = () => {
     return (
         <div className='not-found__container'>
             <div className='not-found__inner'>
-                <img src={image} alt='image 404' />
+                <img src={image} alt='404' />
                 <h1>{'Khum có gì ở đây đâu =)))'}</h1>
                 <Link to='/'>
                     <div className='back-to-home'>Quay lại trang chủ</div>
