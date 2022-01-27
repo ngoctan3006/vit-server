@@ -79,7 +79,8 @@ router.post('/login', async (req, res) => {
         return res.send({
             success: true,
             message: 'Đăng nhập thành công!',
-            accessToken
+            accessToken,
+            positions: user.positions
         });
     } catch (error) {
         res.status(400).json({
