@@ -14,6 +14,8 @@ import Login from './pages/login/Login';
 import NotFound from './pages/notFound/NotFound';
 import AuthProvider from './contexts/AuthContext';
 import RequireAuth from './components/auth/RequireAuth';
+import Logout from './components/logout/Logout';
+import Profile from './pages/profile/Profile';
 
 const App = () => {
     return (
@@ -36,7 +38,9 @@ const App = () => {
                                 />
                                 <Route path='events' element={<Events />} />
                                 <Route path='members' element={<Members />} />
+                                <Route path='profile' element={<Profile />} />
                             </Route>
+                            <Route path='/logout' element={<Logout />} />
                         </Route>
                         <Route path='/login' element={<Login />} />
                         <Route path='*' element={<NotFound />} />

@@ -3,6 +3,11 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// prototype
+Array.prototype.checkIntersection = function (arr) {
+    return this.some((el) => arr.includes(el));
+};
+
 ReactDOM.render(
     <React.StrictMode>
         <App />

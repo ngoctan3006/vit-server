@@ -1,7 +1,7 @@
 import { createContext, useEffect, useReducer } from 'react';
 import axios from 'axios';
 import authReducer from '../reducers/authReducer';
-import { apiUrl, LOCAL_STORAGE_TOKEN_NAME, SET_AUTH } from './constants';
+import { ADMIN, apiUrl, LOCAL_STORAGE_TOKEN_NAME, SET_AUTH } from './constants';
 import setAuthToken from '../utils/setAuthToken';
 
 export const AuthContext = createContext();
@@ -20,7 +20,9 @@ const AuthProvider = ({ children }) => {
 
         try {
             const response = await axios.get(`${apiUrl}/users/auth`);
-            if (response.data.success) {
+            const canAccess =
+                response.data?.user?.positions.checkIntersection(ADMIN);
+            if (response.data.success && canAccess) {
                 dispatch({
                     type: SET_AUTH,
                     payload: {
@@ -29,7 +31,7 @@ const AuthProvider = ({ children }) => {
                     }
                 });
             }
-        } catch (err) {
+        } catch (error) {
             localStorage.removeItem(LOCAL_STORAGE_TOKEN_NAME);
             setAuthToken(null);
             dispatch({
@@ -50,6 +52,13 @@ const AuthProvider = ({ children }) => {
                 `${apiUrl}/users/login`,
                 userInfo
             );
+            const canAccess = response.data?.positions.checkIntersection(ADMIN);
+            if (!canAccess) {
+                return {
+                    success: false,
+                    message: 'Không có quyền truy cập!'
+                };
+            }
             if (response.data.success) {
                 localStorage.setItem(
                     LOCAL_STORAGE_TOKEN_NAME,

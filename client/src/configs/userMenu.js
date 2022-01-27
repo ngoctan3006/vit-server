@@ -1,15 +1,18 @@
 const userMenu = [
     {
         icon: 'bx bx-user',
-        content: 'Profile'
+        content: 'Profile',
+        link: '/profile'
     },
     {
         icon: 'bx bx-cog',
-        content: 'Settings'
+        content: 'Settings',
+        link: '/'
     },
     {
         icon: 'bx bx-log-out-circle bx-rotate-180',
-        content: 'Logout'
+        content: 'Logout',
+        link: '/logout'
     }
 ];
 

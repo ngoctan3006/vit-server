@@ -40,6 +40,9 @@ const LoginForm = () => {
                 }
             } catch (error) {
                 console.log(error);
+                setFormError({
+                    password: 'Tài khoản hoặc mật khẩu không đúng!'
+                });
             }
         }
     }, [formError]);

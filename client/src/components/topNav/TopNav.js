@@ -5,11 +5,8 @@ import ThemeMenu from '../themeMenu/ThemeMenu';
 import userAvatar from '../../assets/images/avatar.jpg';
 import userMenu from '../../configs/userMenu';
 import notifications from '../../configs/notifications';
-
-const userInfo = {
-    name: 'Tân',
-    image: userAvatar
-};
+import { useContext } from 'react';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const renderUserToggle = (user) => (
     <div className='topnav__right-user'>
@@ -21,7 +18,7 @@ const renderUserToggle = (user) => (
 );
 
 const renderUserMenu = (item, index) => (
-    <Link to='/' key={index}>
+    <Link to={item.link} key={index}>
         <div className='notification-item'>
             <i className={item.icon}></i>
             <span>{item.content}</span>
@@ -37,6 +34,17 @@ const renderNotificationItem = (item, index) => (
 );
 
 const TopNav = () => {
+    const {
+        authState: {
+            user: { firstName }
+        }
+    } = useContext(AuthContext);
+
+    const userInfo = {
+        name: firstName,
+        image: userAvatar
+    };
+
     return (
         <div className='topnav'>
             <div className='topnav__search'>
