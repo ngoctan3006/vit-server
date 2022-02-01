@@ -7,12 +7,12 @@ const sidebarItems = [
     {
         name: 'Mảng',
         link: '/departments',
-        icon: 'bx bx-home-alt'
+        icon: 'bx bx-layout'
     },
     {
         name: 'Câu lạc bộ',
         link: '/clubs',
-        icon: 'bx bx-home-alt'
+        icon: 'bx bxs-widget'
     },
     {
         name: 'Nhóm',
@@ -22,17 +22,17 @@ const sidebarItems = [
     {
         name: 'Hoạt động',
         link: '/activities',
-        icon: 'bx bx-home-alt'
+        icon: 'bx bx-shape-triangle'
     },
     {
         name: 'Sự kiện',
         link: '/events',
-        icon: 'bx bx-home-alt'
+        icon: 'bx bx-calendar-event'
     },
     {
         name: 'Thành viên',
         link: '/members',
-        icon: 'bx bx-home-alt'
+        icon: 'bx bx-user'
     }
 ];
 
