@@ -190,7 +190,7 @@ router.post('/register-many', async (req, res) => {
 
 router.put('/', verifyToken, async (req, res) => {
     const {
-        firstName,
+        displayName,
         fullName,
         gender,
         birthday,
@@ -201,11 +201,12 @@ router.put('/', verifyToken, async (req, res) => {
         phoneNumber,
         email,
         mailSis,
-        facebook
+        facebook,
+        dateJoin
     } = req.body;
     try {
         let updatedUser = {
-            firstName,
+            displayName,
             fullName,
             gender,
             birthday,
@@ -220,7 +221,8 @@ router.put('/', verifyToken, async (req, res) => {
                 ? facebook?.startsWith('https://')
                     ? facebook
                     : `https://${facebook}`
-                : null
+                : null,
+            dateJoin
         };
 
         updatedUser = await User.findOneAndUpdate(
