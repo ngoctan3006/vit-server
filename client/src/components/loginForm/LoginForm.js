@@ -29,19 +29,23 @@ const LoginForm = () => {
         setIsSubmit(true);
     };
 
-    useEffect(async () => {
-        if (Object.keys(formError).length === 0 && isSubmit) {
-            try {
-                const response = await login(userInfo);
-                if (!response.success) {
-                    setFormError({
-                        password: response.message
-                    });
+    useEffect(() => {
+        const formLogin = async () => {
+            if (Object.keys(formError).length === 0 && isSubmit) {
+                try {
+                    const response = await login(userInfo);
+                    if (!response.success) {
+                        setFormError({
+                            password: response.message
+                        });
+                    }
+                } catch (error) {
+                    console.log(error);
                 }
-            } catch (error) {
-                console.log(error);
             }
-        }
+        };
+
+        formLogin();
     }, [formError]);
 
     const validate = (values) => {
