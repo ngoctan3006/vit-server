@@ -35,7 +35,7 @@ router.get('/auth', verifyToken, async (req, res) => {
 
 router.get('/', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await User.find().select('-password');
         res.json({
             success: true,
             users
@@ -166,6 +166,21 @@ router.post('/register', async (req, res) => {
             success: true,
             message: 'Đăng ký thành công!',
             accessToken
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            error
+        });
+    }
+});
+
+router.post('/register-many', async (req, res) => {
+    try {
+        await User.insertMany(req.body);
+        res.status(201).json({
+            success: true,
+            message: 'Thành công!'
         });
     } catch (error) {
         res.status(400).json({
