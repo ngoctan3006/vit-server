@@ -15,7 +15,7 @@ const UserSchema = new mongoose.Schema(
             type: [String],
             default: ['member']
         },
-        firstName: {
+        displayName: {
             type: String,
             default: null
         },
@@ -62,6 +62,14 @@ const UserSchema = new mongoose.Schema(
         },
         facebook: {
             type: String,
+            default: null
+        },
+        dateJoin: {
+            type: Date,
+            default: null
+        },
+        dateOut: {
+            type: Date,
             default: null
         }
     },
