@@ -107,8 +107,7 @@ router.post('/register', async (req, res) => {
         email,
         mailSis,
         facebook,
-        dateJoin,
-        dateOut
+        dateJoin
     } = req.body;
 
     if (!username || !password || !gender) {
@@ -150,8 +149,7 @@ router.post('/register', async (req, res) => {
                     ? facebook
                     : `https://${facebook}`
                 : null,
-            dateJoin,
-            dateOut
+            dateJoin
         });
         await newUser.save();
 
