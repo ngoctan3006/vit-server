@@ -1,7 +1,13 @@
 import { createContext, useEffect, useReducer } from 'react';
 import axios from 'axios';
 import authReducer from '../reducers/authReducer';
-import { ADMIN, apiUrl, LOCAL_STORAGE_TOKEN_NAME, SET_AUTH } from './constants';
+import {
+    ADMIN,
+    apiUrl,
+    LOAD_ALL_USERS,
+    LOCAL_STORAGE_TOKEN_NAME,
+    SET_AUTH
+} from './constants';
 import setAuthToken from '../utils/setAuthToken';
 
 export const AuthContext = createContext();
@@ -10,7 +16,9 @@ const AuthProvider = ({ children }) => {
     const [authState, dispatch] = useReducer(authReducer, {
         authLoading: true,
         isAuthenticated: false,
-        user: null
+        user: null,
+        users: [],
+        usersLoad: false
     });
 
     const loadUser = async () => {
@@ -88,10 +96,26 @@ const AuthProvider = ({ children }) => {
         });
     };
 
+    const getUsers = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/users`);
+
+            if (response.data.success) {
+                dispatch({
+                    type: LOAD_ALL_USERS,
+                    payload: response.data.users
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     const authContextData = {
         authState,
         login,
-        logout
+        logout,
+        getUsers
     };
 
     return (
