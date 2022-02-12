@@ -36,12 +36,12 @@ const renderNotificationItem = (item, index) => (
 const TopNav = () => {
     const {
         authState: {
-            user: { firstName }
+            user: { displayName }
         }
     } = useContext(AuthContext);
 
     const userInfo = {
-        name: firstName,
+        name: displayName,
         image: userAvatar
     };
 
