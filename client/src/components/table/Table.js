@@ -44,7 +44,10 @@ const Table = (props) => {
                     {props.bodyData && props.renderBody ? (
                         <tbody>
                             {dataShow.map((item, index) =>
-                                props.renderBody(item, index)
+                                props.renderBody(
+                                    item,
+                                    currPage * Number(props.limit) + index
+                                )
                             )}
                         </tbody>
                     ) : null}

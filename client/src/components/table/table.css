@@ -6,6 +6,7 @@ table {
     width: 100%;
     min-width: 400px;
     border-spacing: 0;
+    font-size: 14px;
 }
 
 thead {
@@ -18,7 +19,6 @@ tr {
 
 th,
 td {
-    text-transform: capitalize;
     padding: 15px 10px;
 }
 
