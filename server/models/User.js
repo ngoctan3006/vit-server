@@ -28,6 +28,10 @@ const UserSchema = new mongoose.Schema(
             enum: ['male', 'female', 'other'],
             required: true
         },
+        gen: {
+            type: String,
+            default: null
+        },
         birthday: {
             type: Date,
             default: null
@@ -45,6 +49,10 @@ const UserSchema = new mongoose.Schema(
             default: null
         },
         studentId: {
+            type: String,
+            default: null
+        },
+        className: {
             type: String,
             default: null
         },

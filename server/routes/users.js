@@ -91,24 +91,8 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
-    const {
-        username,
-        password,
-        positions,
-        displayName,
-        fullName,
-        gender,
-        birthday,
-        homeTown,
-        address,
-        school,
-        studentId,
-        phoneNumber,
-        email,
-        mailSis,
-        facebook,
-        dateJoin
-    } = req.body;
+    const { username, password, gender, positions, facebook, ...rest } =
+        req.body;
 
     if (!username || !password || !gender) {
         return res.status(400).json({
@@ -129,28 +113,19 @@ router.post('/register', async (req, res) => {
 
         // all good
         const hashedPassword = await argon2.hash(password);
-        const newUser = new User({
+        let newUser = {
+            ...rest,
             username,
             password: hashedPassword,
-            positions,
-            displayName,
-            fullName,
             gender,
-            birthday,
-            homeTown,
-            address,
-            school,
-            studentId,
-            phoneNumber,
-            email,
-            mailSis,
+            positions,
             facebook: facebook
                 ? facebook?.startsWith('https://')
                     ? facebook
                     : `https://${facebook}`
-                : null,
-            dateJoin
-        });
+                : null
+        };
+        newUser = new User(newUser);
         await newUser.save();
 
         // return token
@@ -166,6 +141,7 @@ router.post('/register', async (req, res) => {
             accessToken
         });
     } catch (error) {
+        console.error(error);
         res.status(400).json({
             success: false,
             error
