@@ -1,11 +1,11 @@
 import express from 'express';
 import Department from '../models/Department.js';
-import verifyToken from '../middleware/authMiddleware.js';
+import verifyToken from '../middleware/auth.js';
 import {
     authorizeCreateDepartment,
     authorizeDeleteDepartment,
     authorizeUpdateDepartment
-} from '../middleware/departmentMiddleware.js';
+} from '../middleware/department.js';
 
 const router = express.Router();
 
@@ -59,11 +59,9 @@ router.put('/', verifyToken, authorizeUpdateDepartment, async (req, res) => {
     };
 
     try {
-        newDepartment = await Department.findOneAndUpdate(
-            oldDepartment,
-            newDepartment,
-            { new: true }
-        );
+        newDepartment = await Department.findOneAndUpdate(oldDepartment, newDepartment, {
+            new: true
+        });
         if (!newDepartment) {
             return res.status(404).json({
                 success: false,
@@ -76,61 +74,46 @@ router.put('/', verifyToken, authorizeUpdateDepartment, async (req, res) => {
     }
 });
 
-router.put(
-    '/add-members',
-    verifyToken,
-    authorizeUpdateDepartment,
-    async (req, res) => {
-        try {
-            const newDepartment = await Group.findOneAndUpdate(
-                { _id: req.body._id },
-                { $addToSet: { members: req.body.userIds } },
-                { new: true }
-            );
-            if (!newDepartment) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Department not found'
-                });
-            }
-            res.send({ success: true, data: newDepartment });
-        } catch (err) {
-            res.send({ success: false, err });
+router.put('/add-members', verifyToken, authorizeUpdateDepartment, async (req, res) => {
+    try {
+        const newDepartment = await Group.findOneAndUpdate(
+            { _id: req.body._id },
+            { $addToSet: { members: req.body.userIds } },
+            { new: true }
+        );
+        if (!newDepartment) {
+            return res.status(404).json({
+                success: false,
+                message: 'Department not found'
+            });
         }
+        res.send({ success: true, data: newDepartment });
+    } catch (err) {
+        res.send({ success: false, err });
     }
-);
+});
 
-router.put(
-    '/remove-members',
-    verifyToken,
-    authorizeUpdateDepartment,
-    async (req, res) => {
-        try {
-            const newDepartment = await Group.findOneAndUpdate(
-                { _id: req.body._id },
-                { $pull: { members: { $in: req.body.userIds } } },
-                { new: true }
-            );
-            if (!newDepartment) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Department not found'
-                });
-            }
-            res.send({ success: true, data: newDepartment });
-        } catch (err) {
-            res.send({ success: false, err });
+router.put('/remove-members', verifyToken, authorizeUpdateDepartment, async (req, res) => {
+    try {
+        const newDepartment = await Group.findOneAndUpdate(
+            { _id: req.body._id },
+            { $pull: { members: { $in: req.body.userIds } } },
+            { new: true }
+        );
+        if (!newDepartment) {
+            return res.status(404).json({
+                success: false,
+                message: 'Department not found'
+            });
         }
+        res.send({ success: true, data: newDepartment });
+    } catch (err) {
+        res.send({ success: false, err });
     }
-);
+});
 
-router.delete(
-    '/:id',
-    verifyToken,
-    authorizeDeleteDepartment,
-    async (req, res) => {
-        res.status(200).send({ success: true, data: req.params.id });
-    }
-);
+router.delete('/:id', verifyToken, authorizeDeleteDepartment, async (req, res) => {
+    res.status(200).send({ success: true, data: req.params.id });
+});
 
 export default router;

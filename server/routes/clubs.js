@@ -1,6 +1,6 @@
 import express from 'express';
 import Club from '../models/Club.js';
-import verifyToken from '../middleware/authMiddleware.js';
+import verifyToken from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -20,8 +20,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', verifyToken, async (req, res) => {
-    const { name, department, description, chief, vice, members, reference } =
-        req.body;
+    const { name, department, description, chief, vice, members, reference } = req.body;
 
     const newClub = new Club({
         name,

@@ -3,7 +3,7 @@ import argon2 from 'argon2';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import verifyToken, { verifyAdmin } from '../middleware/authMiddleware.js';
+import verifyToken, { verifyAdmin } from '../middleware/auth.js';
 
 dotenv.config();
 
@@ -11,9 +11,7 @@ const router = express.Router();
 
 router.get('/auth', verifyToken, async (req, res) => {
     try {
-        const user = await User.findOne({ username: req.username }).select(
-            '-password'
-        );
+        const user = await User.findOne({ username: req.username }).select('-password');
         if (!user) {
             return res.status(400).json({
                 success: false,
@@ -91,8 +89,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
-    const { username, password, gender, positions, facebook, ...rest } =
-        req.body;
+    const { username, password, gender, positions, facebook, ...rest } = req.body;
 
     if (!username || !password || !gender) {
         return res.status(400).json({
@@ -130,10 +127,7 @@ router.post('/register', async (req, res) => {
 
         // return token
         // const accessToken = jwt.sign({ userId: newUser._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.EXPIRES_TIME })
-        const accessToken = jwt.sign(
-            { username, positions },
-            process.env.ACCESS_TOKEN_SECRET
-        );
+        const accessToken = jwt.sign({ username, positions }, process.env.ACCESS_TOKEN_SECRET);
 
         return res.send({
             success: true,
@@ -201,11 +195,9 @@ router.put('/', verifyToken, async (req, res) => {
             dateJoin
         };
 
-        updatedUser = await User.findOneAndUpdate(
-            { username: req.username },
-            updatedUser,
-            { new: true }
-        ).select('-password');
+        updatedUser = await User.findOneAndUpdate({ username: req.username }, updatedUser, {
+            new: true
+        }).select('-password');
         if (!updatedUser) {
             return res.status(401).json({
                 success: false,
@@ -251,11 +243,9 @@ router.put('/password', verifyToken, async (req, res) => {
             password: hashedPassword
         };
 
-        updatedUser = await User.findOneAndUpdate(
-            { username: req.username },
-            updatedUser,
-            { new: true }
-        ).select('-password');
+        updatedUser = await User.findOneAndUpdate({ username: req.username }, updatedUser, {
+            new: true
+        }).select('-password');
         if (!updatedUser) {
             return res.status(401).json({
                 success: false,

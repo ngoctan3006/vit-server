@@ -1,11 +1,11 @@
 import express from 'express';
 import Group from '../models/Group.js';
-import verifyToken from '../middleware/authMiddleware.js';
+import verifyToken from '../middleware/auth.js';
 import {
     authorizeCreateGroup,
     authorizeUpdateGroup,
     authorizeDeleteGroup
-} from '../middleware/groupMiddleware.js';
+} from '../middleware/group.js';
 
 const router = express.Router();
 
@@ -74,53 +74,43 @@ router.put('/', verifyToken, authorizeUpdateGroup, async (req, res) => {
     }
 });
 
-router.put(
-    '/add-members',
-    verifyToken,
-    authorizeUpdateGroup,
-    async (req, res) => {
-        try {
-            const newGroup = await Group.findOneAndUpdate(
-                { _id: req.body._id },
-                { $addToSet: { members: req.body.userIds } },
-                { new: true }
-            );
-            if (!newGroup) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Group not found'
-                });
-            }
-            res.send({ success: true, data: newGroup });
-        } catch (err) {
-            res.status(400).json({ success: false, err });
+router.put('/add-members', verifyToken, authorizeUpdateGroup, async (req, res) => {
+    try {
+        const newGroup = await Group.findOneAndUpdate(
+            { _id: req.body._id },
+            { $addToSet: { members: req.body.userIds } },
+            { new: true }
+        );
+        if (!newGroup) {
+            return res.status(404).json({
+                success: false,
+                message: 'Group not found'
+            });
         }
+        res.send({ success: true, data: newGroup });
+    } catch (err) {
+        res.status(400).json({ success: false, err });
     }
-);
+});
 
-router.put(
-    '/remove-members',
-    verifyToken,
-    authorizeUpdateGroup,
-    async (req, res) => {
-        try {
-            const newGroup = await Group.findOneAndUpdate(
-                { _id: req.body._id },
-                { $pull: { members: { $in: req.body.userIds } } },
-                { new: true }
-            );
-            if (!newGroup) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Group not found'
-                });
-            }
-            res.send({ success: true, data: newGroup });
-        } catch (err) {
-            res.status(400).json({ success: false, err });
+router.put('/remove-members', verifyToken, authorizeUpdateGroup, async (req, res) => {
+    try {
+        const newGroup = await Group.findOneAndUpdate(
+            { _id: req.body._id },
+            { $pull: { members: { $in: req.body.userIds } } },
+            { new: true }
+        );
+        if (!newGroup) {
+            return res.status(404).json({
+                success: false,
+                message: 'Group not found'
+            });
         }
+        res.send({ success: true, data: newGroup });
+    } catch (err) {
+        res.status(400).json({ success: false, err });
     }
-);
+});
 
 router.delete('/:id', verifyToken, authorizeDeleteGroup, async (req, res) => {
     res.status(200).send({ success: true, data: req.params.id });

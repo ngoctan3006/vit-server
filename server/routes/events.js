@@ -1,12 +1,12 @@
 import express from 'express';
 import Event from '../models/Event.js';
-import verifyToken from '../middleware/authMiddleware.js';
+import verifyToken from '../middleware/auth.js';
 import {
     authorizeViewEvent,
     authorizeCreateEvent,
     authorizeUpdateEvent,
     authorizeDeleteEvent
-} from '../middleware/eventMiddleware.js';
+} from '../middleware/event.js';
 
 const router = express.Router();
 
@@ -27,14 +27,7 @@ router.get('/', verifyToken, authorizeViewEvent, async (req, res) => {
 });
 
 router.post('/', verifyToken, authorizeCreateEvent, async (req, res) => {
-    const {
-        name,
-        description,
-        chief,
-        enrolledMembers,
-        participants,
-        reference
-    } = req.body;
+    const { name, description, chief, enrolledMembers, participants, reference } = req.body;
 
     const newEvent = new Event({
         name,
@@ -74,77 +67,57 @@ router.put('/', verifyToken, authorizeUpdateEvent, async (req, res) => {
     else res.status(200).send({ success: true, data: newEvent });
 });
 
-router.put(
-    '/enroll-members',
-    verifyToken,
-    authorizeUpdateEvent,
-    async (req, res) => {
-        try {
-            const newEvent = await Event.findOneAndUpdate(
-                { _id: req.body._id },
-                { $addToSet: { enrolledMembers: req.body.userIds } },
-                { new: true }
-            );
-            res.send({ success: true, data: newEvent });
-        } catch (err) {
-            res.send({ success: false, err });
-        }
+router.put('/enroll-members', verifyToken, authorizeUpdateEvent, async (req, res) => {
+    try {
+        const newEvent = await Event.findOneAndUpdate(
+            { _id: req.body._id },
+            { $addToSet: { enrolledMembers: req.body.userIds } },
+            { new: true }
+        );
+        res.send({ success: true, data: newEvent });
+    } catch (err) {
+        res.send({ success: false, err });
     }
-);
+});
 
-router.put(
-    '/add-participants',
-    verifyToken,
-    authorizeUpdateEvent,
-    async (req, res) => {
-        try {
-            const newEvent = await Event.findOneAndUpdate(
-                { _id: req.body._id },
-                { $addToSet: { participants: req.body.userIds } },
-                { new: true }
-            );
-            res.send({ success: true, data: newEvent });
-        } catch (err) {
-            res.send({ success: false, err });
-        }
+router.put('/add-participants', verifyToken, authorizeUpdateEvent, async (req, res) => {
+    try {
+        const newEvent = await Event.findOneAndUpdate(
+            { _id: req.body._id },
+            { $addToSet: { participants: req.body.userIds } },
+            { new: true }
+        );
+        res.send({ success: true, data: newEvent });
+    } catch (err) {
+        res.send({ success: false, err });
     }
-);
+});
 
-router.put(
-    '/remove-enrolled-members',
-    verifyToken,
-    authorizeUpdateEvent,
-    async (req, res) => {
-        try {
-            const newEvent = await Event.findOneAndUpdate(
-                { _id: req.body._id },
-                { $pull: { enrolledMembers: { $in: req.body.userIds } } },
-                { new: true }
-            );
-            res.send({ success: true, data: newEvent });
-        } catch (err) {
-            res.send({ success: false, err });
-        }
+router.put('/remove-enrolled-members', verifyToken, authorizeUpdateEvent, async (req, res) => {
+    try {
+        const newEvent = await Event.findOneAndUpdate(
+            { _id: req.body._id },
+            { $pull: { enrolledMembers: { $in: req.body.userIds } } },
+            { new: true }
+        );
+        res.send({ success: true, data: newEvent });
+    } catch (err) {
+        res.send({ success: false, err });
     }
-);
+});
 
-router.put(
-    '/remove-participants',
-    verifyToken,
-    authorizeUpdateEvent,
-    async (req, res) => {
-        try {
-            const newEvent = await Event.findOneAndUpdate(
-                { _id: req.body._id },
-                { $pull: { participants: { $in: req.body.userIds } } },
-                { new: true }
-            );
-            res.send({ success: true, data: newEvent });
-        } catch (err) {
-            res.send({ success: false, err });
-        }
+router.put('/remove-participants', verifyToken, authorizeUpdateEvent, async (req, res) => {
+    try {
+        const newEvent = await Event.findOneAndUpdate(
+            { _id: req.body._id },
+            { $pull: { participants: { $in: req.body.userIds } } },
+            { new: true }
+        );
+        res.send({ success: true, data: newEvent });
+    } catch (err) {
+        res.send({ success: false, err });
     }
-);
+});
 
 router.delete('/:id', verifyToken, authorizeDeleteEvent, async (req, res) => {
     res.status(200).send({ success: true, data: req.params.id });
