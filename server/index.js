@@ -1,10 +1,10 @@
 import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import cors from 'cors';
-import connectDB from './database/mongoDB.js';
 import route from './routes/index.js';
 
-// Connect to MongoDB
-connectDB();
+dotenv.config();
 
 // prototype
 Array.prototype.checkIntersection = function (arr) {
@@ -12,13 +12,14 @@ Array.prototype.checkIntersection = function (arr) {
 };
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '30mb', extended: true }));
 app.use(cors());
 
 route(app);
 
 const PORT = process.env.PORT || 2109;
 
-app.listen(PORT, () => {
-    console.log(`Server is running on PORT ${PORT}`);
-});
+mongoose
+    .connect(process.env.CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
+    .catch((error) => console.log(error.message));
