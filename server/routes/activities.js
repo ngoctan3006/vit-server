@@ -21,7 +21,7 @@ const router = express.Router();
 
 router.get('/', verifyToken, authorizeViewActivity, viewAllActivities);
 router.post('/', verifyToken, authorizeCreateActivity, createActivity);
-router.put('/', verifyToken, authorizeUpdateActivity, updateActivity);
+router.put('/:id', verifyToken, authorizeUpdateActivity, updateActivity);
 router.put('/:id/enroll-members', verifyToken, authorizeUpdateActivity, enrollMembers);
 router.put('/:id/add-participants', verifyToken, authorizeUpdateActivity, addParticipants);
 router.put(
