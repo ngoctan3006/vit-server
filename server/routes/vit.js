@@ -1,5 +1,5 @@
 import express from 'express';
-import { viewVIT } from '../controllers/vit';
+import { viewVIT } from '../controllers/vit.js';
 
 const router = express.Router();
 
