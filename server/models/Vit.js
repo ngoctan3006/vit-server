@@ -30,8 +30,9 @@ const VitSchema = new mongoose.Schema(
         description: {
             type: String
         },
-        captain: {
-            type: mongoose.Schema.Types.ObjectId
+        captain: { 
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'users'
         },
         viceCaptain: {
             type: [mongoose.Schema.Types.ObjectId]

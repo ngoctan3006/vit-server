@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
     try {
-        const data = await VIT.find();
+        const data = await VIT.find().populate('captain');
         res.json({
             success: true,
             data
