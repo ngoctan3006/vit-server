@@ -1,0 +1,35 @@
+.not-found__container {
+    height: 100vh;
+    background: url('../../assets/images/bg.png') center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.not-found__inner {
+    width: 50%;
+}
+
+.not-found__inner > img {
+    width: 100%;
+}
+
+.not-found__inner > h1 {
+    text-align: center;
+    margin-top: 3rem;
+    color: var(--txt-color);
+}
+
+.back-to-home {
+    width: max-content;
+    margin: 1.5rem auto 0;
+    padding: 15px 25px;
+    border-radius: var(--border-radius);
+    background-image: linear-gradient(
+        to right,
+        var(--main-color),
+        var(--second-color)
+    );
+    color: var(--txt-white);
+    font-weight: 600;
+}

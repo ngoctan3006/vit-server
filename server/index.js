@@ -6,6 +6,11 @@ import route from './routes/index.js';
 // Connect to MongoDB
 connectDB();
 
+// prototype
+Array.prototype.checkIntersection = function (arr) {
+    return this.some((el) => arr.includes(el));
+};
+
 const app = express();
 app.use(express.json());
 app.use(cors());

@@ -15,7 +15,7 @@ const UserSchema = new mongoose.Schema(
             type: [String],
             default: ['member']
         },
-        firstName: {
+        displayName: {
             type: String,
             default: null
         },
@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema(
             type: String,
             enum: ['male', 'female', 'other'],
             required: true
+        },
+        gen: {
+            type: String,
+            default: null
         },
         birthday: {
             type: Date,
@@ -48,6 +52,10 @@ const UserSchema = new mongoose.Schema(
             type: String,
             default: null
         },
+        className: {
+            type: String,
+            default: null
+        },
         phoneNumber: {
             type: String,
             default: null
@@ -56,8 +64,20 @@ const UserSchema = new mongoose.Schema(
             type: String,
             default: null
         },
+        mailSis: {
+            type: String,
+            default: null
+        },
         facebook: {
             type: String,
+            default: null
+        },
+        dateJoin: {
+            type: Date,
+            default: null
+        },
+        dateOut: {
+            type: Date,
             default: null
         }
     },
