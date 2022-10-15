@@ -25,8 +25,8 @@ export const CAN_DELETE_DEPARTMENT = ['admin', 'boss'];
 
 // Error message
 export const NOT_AUTHORIZED = {
-    success: false,
-    message: 'Not authorized'
+  success: false,
+  message: 'Not authorized',
 };
 
 export const ADMIN = 'admin';
