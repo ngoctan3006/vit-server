@@ -6,21 +6,21 @@ import TopNav from '../topNav/TopNav';
 import './layout.css';
 
 const Layout = () => {
-    const {
-        themeState: { color, theme }
-    } = useContext(ThemeContext);
+  const {
+    themeState: { color, theme }
+  } = useContext(ThemeContext);
 
-    return (
-        <div className={`layout ${theme?.class} ${color?.class}`}>
-            <Sidebar />
-            <div className='main'>
-                <TopNav />
-                <div className='main__content'>
-                    <Outlet />
-                </div>
-            </div>
+  return (
+    <div className={`layout ${theme?.class} ${color?.class}`}>
+      <Sidebar />
+      <div className="main">
+        <TopNav />
+        <div className="main__content">
+          <Outlet />
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Layout;

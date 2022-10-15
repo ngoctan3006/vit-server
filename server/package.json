@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "nodemon index",
+    "start:dev": "nodemon index",
     "start": "node index"
   },
   "keywords": [],
