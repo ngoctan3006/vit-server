@@ -1,1 +1,1 @@
-# VIT web app
+# VIT server
