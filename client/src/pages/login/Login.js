@@ -5,21 +5,21 @@ import { AuthContext } from '../../contexts/AuthContext';
 import './login.css';
 
 const Login = () => {
-    const {
-        authState: { isAuthenticated }
-    } = useContext(AuthContext);
+  const {
+    authState: { isAuthenticated }
+  } = useContext(AuthContext);
 
-    if (isAuthenticated) return <Navigate to='/' />;
+  if (isAuthenticated) return <Navigate to="/" />;
 
-    return (
-        <div className='login-form__container'>
-            <div className='dark-overlay'>
-                <div className='login-form__inner'>
-                    <LoginForm />
-                </div>
-            </div>
+  return (
+    <div className="login-form__container">
+      <div className="dark-overlay">
+        <div className="login-form__inner">
+          <LoginForm />
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Login;

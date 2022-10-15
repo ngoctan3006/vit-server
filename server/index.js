@@ -8,7 +8,7 @@ dotenv.config();
 
 // prototype
 Array.prototype.checkIntersection = function (arr) {
-    return this.some((el) => arr.includes(el));
+  return this.some((el) => arr.includes(el));
 };
 
 const app = express();
@@ -20,6 +20,11 @@ route(app);
 const PORT = process.env.PORT || 2109;
 
 mongoose
-    .connect(process.env.CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
-    .catch((error) => console.log(error.message));
+  .connect(process.env.CONNECTION_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() =>
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+  )
+  .catch((error) => console.log(error.message));

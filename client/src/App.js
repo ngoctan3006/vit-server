@@ -18,37 +18,31 @@ import Logout from './components/logout/Logout';
 import Profile from './pages/profile/Profile';
 
 const App = () => {
-    return (
-        <AuthProvider>
-            <ThemeProvider>
-                <BrowserRouter>
-                    <Routes>
-                        <Route element={<RequireAuth />}>
-                            <Route path='/' element={<Layout />}>
-                                <Route index element={<Dashboard />} />
-                                <Route
-                                    path='departments'
-                                    element={<Departments />}
-                                />
-                                <Route path='clubs' element={<Clubs />} />
-                                <Route path='groups' element={<Groups />} />
-                                <Route
-                                    path='activities'
-                                    element={<Activities />}
-                                />
-                                <Route path='events' element={<Events />} />
-                                <Route path='members' element={<Members />} />
-                                <Route path='profile' element={<Profile />} />
-                            </Route>
-                            <Route path='/logout' element={<Logout />} />
-                        </Route>
-                        <Route path='/login' element={<Login />} />
-                        <Route path='*' element={<NotFound />} />
-                    </Routes>
-                </BrowserRouter>
-            </ThemeProvider>
-        </AuthProvider>
-    );
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<RequireAuth />}>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="departments" element={<Departments />} />
+                <Route path="clubs" element={<Clubs />} />
+                <Route path="groups" element={<Groups />} />
+                <Route path="activities" element={<Activities />} />
+                <Route path="events" element={<Events />} />
+                <Route path="members" element={<Members />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
+              <Route path="/logout" element={<Logout />} />
+            </Route>
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </AuthProvider>
+  );
 };
 
 export default App;

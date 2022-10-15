@@ -1,13 +1,13 @@
 import express from 'express';
 import verifyToken, { verifyAdmin } from '../middleware/auth.js';
 import {
-    authUser,
-    changePassword,
-    getAllUsers,
-    login,
-    register,
-    registerMany,
-    updateUser
+  authUser,
+  changePassword,
+  getAllUsers,
+  login,
+  register,
+  registerMany,
+  updateUser,
 } from '../controllers/users.js';
 
 const router = express.Router();
