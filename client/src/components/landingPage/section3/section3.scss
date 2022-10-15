@@ -1,0 +1,88 @@
+.section3 {
+    .fp-overflow {
+        height: 100vh;
+
+        .swiper {
+            width: 100%;
+            height: 100%;
+
+            .swiper-slide {
+                color: #fff;
+                box-sizing: border-box;
+                position: relative;
+                cursor: grab;
+
+                &:active {
+                    cursor: grabbing;
+                }
+
+                .content {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) !important;
+
+                    .title {
+                        font-size: 80px;
+                        font-weight: bolder;
+                    }
+
+                    .text {
+                        font-size: 32px;
+                        font-weight: bold;
+                        max-width: 1000px;
+                        line-height: 1.3;
+                    }
+                }
+            }
+
+            .parallax-bg {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 130%;
+                height: 100%;
+                -webkit-background-size: cover;
+                background-size: cover;
+                background-position: center;
+            }
+
+            .swiper-3d .swiper-slide-shadow-left,
+            .swiper-3d .swiper-slide-shadow-right {
+                background: none;
+            }
+        }
+
+        // .slide1 {
+        //     background-image: url(../../../assets/images/LandingPage/slide-image-3-1.jpg);
+        // }
+
+        // .slide2 {
+        //     background-image: url(../../../assets/images/LandingPage/slide-image-3-2.jpg);
+        // }
+
+        // .slide3 {
+        //     background-image: url(../../../assets/images/LandingPage/slide-image-3-3.jpg);
+        // }
+
+        // .slide4 {
+        //     background-image: url(../../../assets/images/LandingPage/slide-image-3-4.jpg);
+        // }
+
+        // .slide5 {
+        //     background-image: url(../../../assets/images/LandingPage/slide-image-3-5.jpg);
+        // }
+
+        // .slide6 {
+        //     background-image: url(../../../assets/images/LandingPage/slide-image-3-6.jpg);
+        // }
+
+        // .slide7 {
+        //     background-image: url(../../../assets/images/LandingPage/slide-image-3-7.jpg);
+        // }
+
+        // .slide8 {
+        //     background-image: url(../../../assets/images/LandingPage/slide-image-3-8.jpg);
+        // }
+    }
+}

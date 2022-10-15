@@ -2,7 +2,7 @@ import VIT from '../models/VIT.js';
 
 export const viewVIT = async (req, res) => {
   try {
-    const vit = await VIT.find();
+    const vit = await VIT.find().populate('captain');
     res.json({
       success: true,
       data: vit,
