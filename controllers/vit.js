@@ -1,4 +1,4 @@
-import VIT from '../models/VIT.js';
+import VIT from '../models/Vit.js';
 
 export const viewVIT = async (req, res) => {
   try {
