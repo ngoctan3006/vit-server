@@ -1,0 +1,240 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// generator erd {
+//   provider  = "prisma-erd-generator"
+//   tableOnly = true
+// }
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int             @id @default(autoincrement())
+  username    String          @unique
+  password    String
+  fullname    String
+  bio         String?
+  avatar      String?
+  birthday    DateTime?
+  hometown    String?
+  address     String?
+  school      String?
+  student_id  String?
+  class       String?
+  cccd        String?
+  date_join   DateTime?
+  date_out    DateTime?
+  last_login  DateTime?
+  gender      Gender          @default(other)
+  status      Status          @default(ACTIVE)
+  position    Position        @default(MEMBER)
+  contacts    UserContact[]
+  activities  UserActivity[]
+  groups      GroupUser[]
+  departments DeparmentUser[]
+  clubs       ClubUser[]
+  events      UserEvent[]
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
+}
+
+model Contact {
+  id       Int           @id @default(autoincrement())
+  type     ContactType
+  icon     String
+  base_url String
+  users    UserContact[]
+}
+
+model UserContact {
+  id         Int     @id @default(autoincrement())
+  user_id    Int
+  user       User    @relation(fields: [user_id], references: [id])
+  contact_id Int
+  contact    Contact @relation(fields: [contact_id], references: [id])
+  value      String
+  default    Boolean @default(false)
+}
+
+model Activity {
+  id          Int            @id @default(autoincrement())
+  name        String
+  description String
+  start_date  DateTime
+  end_date    DateTime
+  location    String
+  users       UserActivity[]
+  event_id    Int
+  event       Event          @relation(fields: [event_id], references: [id])
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  deleted_at  DateTime?
+}
+
+model UserActivity {
+  id          Int                @id @default(autoincrement())
+  user_id     Int
+  user        User               @relation(fields: [user_id], references: [id])
+  activity_id Int
+  activity    Activity           @relation(fields: [activity_id], references: [id])
+  status      UserActivityStatus @default(REGISTERED)
+  created_at  DateTime           @default(now())
+  updated_at  DateTime           @updatedAt
+
+  @@unique([user_id, activity_id])
+}
+
+model Event {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String
+  start_date  DateTime
+  end_date    DateTime
+  location    String
+  activities  Activity[]
+  users       UserEvent[]
+  groups      Group[]
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+  deleted_at  DateTime?
+}
+
+model UserEvent {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+  event_id   Int
+  event      Event    @relation(fields: [event_id], references: [id])
+  position   Position @default(MEMBER)
+  status     Status   @default(ACTIVE)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, event_id])
+}
+
+model Group {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String
+  event_id    Int
+  event       Event       @relation(fields: [event_id], references: [id])
+  users       GroupUser[]
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+  deleted_at  DateTime?
+}
+
+model GroupUser {
+  id         Int      @id @default(autoincrement())
+  group_id   Int
+  group      Group    @relation(fields: [group_id], references: [id])
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+  position   Position @default(MEMBER)
+  status     Status   @default(ACTIVE)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([group_id, user_id])
+}
+
+model Department {
+  id          Int             @id @default(autoincrement())
+  name        String
+  description String
+  users       DeparmentUser[]
+  clubs       Club[]
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
+  deleted_at  DateTime?
+}
+
+model DeparmentUser {
+  id            Int        @id @default(autoincrement())
+  department_id Int
+  department    Department @relation(fields: [department_id], references: [id])
+  user_id       Int
+  user          User       @relation(fields: [user_id], references: [id])
+  position      Position   @default(MEMBER)
+  status        Status     @default(ACTIVE)
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+
+  @@unique([department_id, user_id])
+}
+
+model Club {
+  id           Int        @id @default(autoincrement())
+  name         String
+  description  String
+  deparment_id Int
+  deparment    Department @relation(fields: [deparment_id], references: [id])
+  users        ClubUser[]
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  deleted_at   DateTime?
+}
+
+model ClubUser {
+  id         Int      @id @default(autoincrement())
+  club_id    Int
+  club       Club     @relation(fields: [club_id], references: [id])
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+  position   Position @default(MEMBER)
+  status     Status   @default(ACTIVE)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([club_id, user_id])
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum Position {
+  CHIEF
+  VICE
+  DEPARMENT_CHIEF
+  DEPARMENT_VICE
+  CLUB_CHIEF
+  CLUB_VICE
+  GROUP_CHIEF
+  GROUP_VICE
+  MEMBER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum ContactType {
+  phone
+  email
+  facebook
+  instagram
+  twitter
+  linkedin
+  tiktok
+  github
+  website
+}
+
+enum UserActivityStatus {
+  REGISTERED
+  ACCEPTED
+  CANCLED
+}
