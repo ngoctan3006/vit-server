@@ -18,14 +18,17 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migrate": "npx prisma migrate dev --name",
-    "generate": "npx prisma generate"
+    "migrate": "prisma migrate dev --name",
+    "generate": "prisma generate",
+    "studio": "prisma studio"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.0.0",
+    "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^6.3.0",
     "@prisma/client": "^4.11.0",
     "@prisma/generator-helper": "^4.11.0",
     "reflect-metadata": "^0.1.13",
