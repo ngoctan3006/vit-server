@@ -17,7 +17,6 @@ async function bootstrap() {
     .setTitle(configService.get<string>('APP_NAME'))
     .setDescription('VIT server api documentation')
     .setVersion('0.1')
-    .addServer(prefix)
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
