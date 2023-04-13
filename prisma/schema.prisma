@@ -32,7 +32,7 @@ model User {
   date_join   DateTime?
   date_out    DateTime?
   last_login  DateTime?
-  gender      Gender          @default(other)
+  gender      Gender          @default(OTHER)
   status      Status          @default(ACTIVE)
   position    Position        @default(MEMBER)
   contacts    UserContact[]
@@ -198,9 +198,9 @@ model ClubUser {
 }
 
 enum Gender {
-  male
-  female
-  other
+  MALE
+  FEMALE
+  OTHER
 }
 
 enum Position {
