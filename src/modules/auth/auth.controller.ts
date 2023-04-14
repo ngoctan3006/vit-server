@@ -16,8 +16,8 @@ export class AuthController {
     return await this.authService.signin(signinData);
   }
 
+  @Roles(Position.ADMIN, Position.CHIEF, Position.DEPARMENT_CHIEF)
   @Post('signup')
-  @Roles(Position.ADMIN)
   async signup(@Body() signupData: SignupDto) {
     return await this.authService.signup(signupData);
   }

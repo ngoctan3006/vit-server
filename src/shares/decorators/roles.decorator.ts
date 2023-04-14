@@ -7,6 +7,6 @@ export const ROLES_KEY = 'roles';
 export const Roles = (...roles: Position[]) => {
   return applyDecorators(
     SetMetadata(ROLES_KEY, roles),
-    UseGuards(RolesGuard, JwtGuard)
+    UseGuards(JwtGuard, RolesGuard)
   );
 };

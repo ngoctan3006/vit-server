@@ -4,4 +4,6 @@ export class JwtPayload {
   id: number;
   username: string;
   position: Position;
+  iat?: number;
+  exp?: number;
 }
