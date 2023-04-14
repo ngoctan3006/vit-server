@@ -12,9 +12,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signin')
-  @Roles(Position.MEMBER, Position.ADMIN, Position.CHIEF)
   async signin(@Body() signinData: SigninDto) {
-    return 'signin';
+    return await this.authService.signin(signinData);
   }
 
   @Post('signup')

@@ -6,6 +6,8 @@ import { UserService } from '../user/user.service';
 import { ResponseLoginDto } from './dto/response-login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { JwtPayload } from './strategies/jwt.payload';
+import { comparePassword } from 'src/shares/utils/password.util';
+import { SigninDto } from './dto/signin.dto';
 
 @Injectable()
 export class AuthService {
@@ -39,6 +41,25 @@ export class AuthService {
       console.log(error);
       throw new BadRequestException(error.message);
     }
+  }
+
+  async signin(signinData: SigninDto): Promise<ResponseLoginDto> {
+    const { username, password } = signinData;
+    const user = await this.userService.findByUsername(username);
+    if (!user) {
+      throw new BadRequestException('Username or password is incorrect');
+    }
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) {
+      throw new BadRequestException('Username or password is incorrect');
+    }
+    const { accessToken, refreshToken } = await this.generateToken(user);
+    delete user.password;
+    return {
+      accessToken,
+      refreshToken,
+      user,
+    };
   }
 
   async generateToken(user: User): Promise<{
