@@ -204,6 +204,7 @@ enum Gender {
 }
 
 enum Position {
+  ADMIN
   CHIEF
   VICE
   DEPARMENT_CHIEF
