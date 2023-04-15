@@ -47,7 +47,7 @@ model User {
 
 model Contact {
   id       Int           @id @default(autoincrement())
-  type     ContactType
+  type     ContactType   @unique
   icon     String
   base_url String
   users    UserContact[]
