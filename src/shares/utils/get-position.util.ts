@@ -1,7 +1,8 @@
 import { Position } from '@prisma/client';
 import { removeAccents } from './remove-accents.util';
 
-export const getPosition = (position: string): Position => {
+export const getPosition = (position?: string): Position => {
+  if (!position) return Position.MEMBER;
   const rmAc = removeAccents(position).toLowerCase();
   switch (rmAc) {
     case 'doi truong':
