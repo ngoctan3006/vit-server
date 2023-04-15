@@ -1,5 +1,6 @@
 export const removeAccents = (str: string): string => {
   str = str.normalize('NFC');
+  str = str.trim();
   const AccentsMap = [
     'aàảãáạăằẳẵắặâầẩẫấậ',
     'AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ',
