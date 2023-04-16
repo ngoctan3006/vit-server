@@ -9,15 +9,16 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { password, date_join, date_out, ...userData } = createUserDto;
+    const { password, birthday, date_join, date_out, ...userData } =
+      createUserDto;
 
-    return this.prisma.user.create({
+    return await this.prisma.user.create({
       data: {
         ...userData,
         password: await hashPassword(password),
         date_join: new Date(date_join),
         date_out: date_out ? new Date(date_out) : null,
-        birthday: new Date(userData.birthday),
+        birthday: birthday ? new Date(birthday) : null,
         email: userData.email?.toLowerCase(),
         phone: userData.phone?.split(' ').join(''),
       },
@@ -25,20 +26,29 @@ export class UserService {
   }
 
   async createMany(createUserDtos: CreateUserDto[]) {
-    const newUser = await this.prisma.user.createMany({
+    return await this.prisma.user.createMany({
       data: await Promise.all(
         createUserDtos.map(
-          async ({ password, date_join, date_out, ...userData }) => ({
+          async ({
+            email,
+            phone,
+            birthday,
+            password,
+            date_join,
+            date_out,
+            ...userData
+          }) => ({
             ...userData,
             password: await hashPassword(password),
             date_join: new Date(date_join),
             date_out: date_out ? new Date(date_out) : null,
+            birthday: birthday ? new Date(birthday) : null,
+            email: email?.toLowerCase(),
+            phone: phone?.split(' ').join(''),
           })
         )
       ),
     });
-
-    return newUser;
   }
 
   async findByUsername(username: string): Promise<User | null> {

@@ -2,7 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { generateUsername } from 'src/shares/utils/generate-username.util';
+import { getGender } from 'src/shares/utils/get-gender.util';
+import { getPosition } from 'src/shares/utils/get-position.util';
 import { comparePassword } from 'src/shares/utils/password.util';
+import { read, utils } from 'xlsx';
 import { UserService } from '../user/user.service';
 import { ResponseLoginDto } from './dto/response-login.dto';
 import { SigninDto } from './dto/signin.dto';
@@ -18,14 +22,13 @@ export class AuthService {
   ) {}
 
   async signup(signupData: SignupDto): Promise<ResponseLoginDto> {
-    const isExists = await this.userService.checkUserExists(
-      signupData.username
-    );
-    if (isExists) {
-      throw new BadRequestException('Username already exists');
-    }
-
     try {
+      const isExists = await this.userService.checkUserExists(
+        signupData.username
+      );
+      if (isExists) {
+        throw new BadRequestException('Username already exists');
+      }
       const newUser = await this.userService.create(signupData);
       const { accessToken, refreshToken } = await this.generateToken(newUser);
       delete newUser.password;
@@ -57,6 +60,51 @@ export class AuthService {
       refreshToken,
       user,
     };
+  }
+
+  async importMany(file: Express.Multer.File) {
+    try {
+      const fileData = read(file.buffer, { type: 'buffer' });
+      const jsonData = utils.sheet_to_json(
+        fileData.Sheets[fileData.SheetNames[0]]
+      );
+      const usernameList = (await this.userService.getAllUsername()).map(
+        (item) => item.username
+      );
+      const userData = jsonData.map((user: any) => {
+        let username = generateUsername(user.Fullname);
+        const usernameCount = usernameList.filter(
+          (item) => item.replace(/\d/g, '') === username
+        ).length;
+        if (usernameCount > 0) {
+          username = `${username}${usernameCount + 1}`;
+        }
+        usernameList.push(username);
+
+        return {
+          username,
+          password: Math.random().toString(36).slice(-8),
+          fullname: user.Fullname,
+          phone: user.Phone?.split(' ').join(''),
+          email: user.Email?.toLowerCase(),
+          birthday: user.Birthday,
+          school: user.School,
+          student_id: user.StudentID,
+          class: user.Class,
+          date_join: user['Date Join']?.toString(),
+          date_out: user['Date Out']?.toString(),
+          gender: getGender(user.Gender),
+          position: getPosition(user.Position),
+        };
+      });
+      const result = await this.userService.createMany(userData);
+      console.log(result);
+
+      return userData;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
+    }
   }
 
   async generateToken(user: User): Promise<{
