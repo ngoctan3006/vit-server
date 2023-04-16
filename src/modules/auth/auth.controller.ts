@@ -16,7 +16,12 @@ export class AuthController {
     return await this.authService.signin(signinData);
   }
 
-  @Roles(Position.ADMIN, Position.CHIEF, Position.DEPARMENT_CHIEF)
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
   @Post('signup')
   async signup(@Body() signupData: SignupDto) {
     return await this.authService.signup(signupData);

@@ -26,6 +26,16 @@ export class CreateUserDto {
   @IsString()
   fullname: string;
 
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
@@ -80,14 +90,4 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   position?: Position;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  email?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  phone?: string;
 }
