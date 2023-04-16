@@ -20,6 +20,8 @@ model User {
   username    String          @unique
   password    String
   fullname    String
+  email       String          @unique
+  phone       String          @unique
   bio         String?
   avatar      String?
   birthday    DateTime?
@@ -35,7 +37,7 @@ model User {
   gender      Gender          @default(OTHER)
   status      Status          @default(ACTIVE)
   position    Position        @default(MEMBER)
-  contacts    UserContact[]
+  social      UserSocial[]
   activities  UserActivity[]
   groups      GroupUser[]
   departments DeparmentUser[]
@@ -45,22 +47,22 @@ model User {
   updated_at  DateTime        @updatedAt
 }
 
-model Contact {
-  id       Int           @id @default(autoincrement())
-  type     ContactType   @unique
+model Social {
+  id       Int          @id @default(autoincrement())
+  type     String       @unique
   icon     String
   base_url String
-  users    UserContact[]
+  users    UserSocial[]
 }
 
-model UserContact {
-  id         Int     @id @default(autoincrement())
-  user_id    Int
-  user       User    @relation(fields: [user_id], references: [id])
-  contact_id Int
-  contact    Contact @relation(fields: [contact_id], references: [id])
-  value      String
-  default    Boolean @default(false)
+model UserSocial {
+  id        Int     @id @default(autoincrement())
+  user_id   Int
+  user      User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  social_id Int
+  social    Social  @relation(fields: [social_id], references: [id], onDelete: Cascade)
+  value     String
+  default   Boolean @default(false)
 }
 
 model Activity {
@@ -72,7 +74,7 @@ model Activity {
   location    String
   users       UserActivity[]
   event_id    Int
-  event       Event          @relation(fields: [event_id], references: [id])
+  event       Event          @relation(fields: [event_id], references: [id], onDelete: Cascade)
   created_at  DateTime       @default(now())
   updated_at  DateTime       @updatedAt
   deleted_at  DateTime?
@@ -81,9 +83,9 @@ model Activity {
 model UserActivity {
   id          Int                @id @default(autoincrement())
   user_id     Int
-  user        User               @relation(fields: [user_id], references: [id])
+  user        User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
   activity_id Int
-  activity    Activity           @relation(fields: [activity_id], references: [id])
+  activity    Activity           @relation(fields: [activity_id], references: [id], onDelete: Cascade)
   status      UserActivityStatus @default(REGISTERED)
   created_at  DateTime           @default(now())
   updated_at  DateTime           @updatedAt
@@ -109,9 +111,9 @@ model Event {
 model UserEvent {
   id         Int      @id @default(autoincrement())
   user_id    Int
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   event_id   Int
-  event      Event    @relation(fields: [event_id], references: [id])
+  event      Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
   position   Position @default(MEMBER)
   status     Status   @default(ACTIVE)
   created_at DateTime @default(now())
@@ -125,7 +127,7 @@ model Group {
   name        String
   description String
   event_id    Int
-  event       Event       @relation(fields: [event_id], references: [id])
+  event       Event       @relation(fields: [event_id], references: [id], onDelete: Cascade)
   users       GroupUser[]
   created_at  DateTime    @default(now())
   updated_at  DateTime    @updatedAt
@@ -135,9 +137,9 @@ model Group {
 model GroupUser {
   id         Int      @id @default(autoincrement())
   group_id   Int
-  group      Group    @relation(fields: [group_id], references: [id])
+  group      Group    @relation(fields: [group_id], references: [id], onDelete: Cascade)
   user_id    Int
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   position   Position @default(MEMBER)
   status     Status   @default(ACTIVE)
   created_at DateTime @default(now())
@@ -160,9 +162,9 @@ model Department {
 model DeparmentUser {
   id            Int        @id @default(autoincrement())
   department_id Int
-  department    Department @relation(fields: [department_id], references: [id])
+  department    Department @relation(fields: [department_id], references: [id], onDelete: Cascade)
   user_id       Int
-  user          User       @relation(fields: [user_id], references: [id])
+  user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   position      Position   @default(MEMBER)
   status        Status     @default(ACTIVE)
   created_at    DateTime   @default(now())
@@ -176,7 +178,7 @@ model Club {
   name         String
   description  String
   deparment_id Int
-  deparment    Department @relation(fields: [deparment_id], references: [id])
+  deparment    Department @relation(fields: [deparment_id], references: [id], onDelete: Cascade)
   users        ClubUser[]
   created_at   DateTime   @default(now())
   updated_at   DateTime   @updatedAt
@@ -186,9 +188,9 @@ model Club {
 model ClubUser {
   id         Int      @id @default(autoincrement())
   club_id    Int
-  club       Club     @relation(fields: [club_id], references: [id])
+  club       Club     @relation(fields: [club_id], references: [id], onDelete: Cascade)
   user_id    Int
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   position   Position @default(MEMBER)
   status     Status   @default(ACTIVE)
   created_at DateTime @default(now())
@@ -205,14 +207,21 @@ enum Gender {
 
 enum Position {
   ADMIN
-  CHIEF
-  VICE
-  DEPARMENT_CHIEF
-  DEPARMENT_VICE
-  CLUB_CHIEF
-  CLUB_VICE
-  GROUP_CHIEF
-  GROUP_VICE
+  DOI_TRUONG
+  DOI_PHO
+  TRUONG_PHONG_TRAO
+  PHO_PHONG_TRAO
+  TRUONG_HANH_CHINH
+  PHO_HANH_CHINH
+  TRUONG_HAU_CAN
+  PHO_HAU_CAN
+  TRUONG_TRUYEN_THONG
+  PHO_TRUYEN_THONG
+  CN_MEDIA
+  CN_GUITAR
+  CN_DANCER
+  NHOM_TRUONG
+  NHOM_PHO
   MEMBER
 }
 
@@ -220,18 +229,6 @@ enum Status {
   ACTIVE
   INACTIVE
   BLOCKED
-}
-
-enum ContactType {
-  phone
-  email
-  facebook
-  instagram
-  twitter
-  linkedin
-  tiktok
-  github
-  website
 }
 
 enum UserActivityStatus {
