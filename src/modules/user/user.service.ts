@@ -1,28 +1,57 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from '@prisma/client';
+import { Queue } from 'bull';
 import { hashPassword } from 'src/shares/utils/password.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectQueue('send-mail') private readonly sendMail: Queue
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { password, birthday, date_join, date_out, ...userData } =
       createUserDto;
 
-    return await this.prisma.user.create({
-      data: {
-        ...userData,
-        password: await hashPassword(password),
-        date_join: new Date(date_join),
-        date_out: date_out ? new Date(date_out) : null,
-        birthday: birthday ? new Date(birthday) : null,
-        email: userData.email?.toLowerCase(),
-        phone: userData.phone?.split(' ').join(''),
-      },
-    });
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          ...userData,
+          password: await hashPassword(password),
+          date_join: new Date(date_join),
+          date_out: date_out ? new Date(date_out) : null,
+          birthday: birthday ? new Date(birthday) : null,
+          email: userData.email?.toLowerCase(),
+          phone: userData.phone?.split(' ').join(''),
+        },
+      });
+
+      await this.sendMail.add(
+        'welcome',
+        {
+          email: user.email,
+          name: user.fullname,
+          username: user.username,
+          password,
+        },
+        {
+          removeOnComplete: true,
+        }
+      );
+
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async createMany(createUserDtos: CreateUserDto[]) {
@@ -74,13 +103,30 @@ export class UserService {
     });
   }
 
-  async checkUserExists(username: string): Promise<boolean> {
-    const count = await this.prisma.user.count({
+  async checkUserExists(
+    username: string,
+    email: string,
+    phone: string
+  ): Promise<string | boolean> {
+    const usernameExist = await this.prisma.user.count({
       where: {
         username,
       },
     });
-    return count > 0;
+    if (usernameExist > 0) return 'Username already exists';
+    const emailExist = await this.prisma.user.count({
+      where: {
+        email: email.toLowerCase(),
+      },
+    });
+    if (emailExist > 0) return 'Email already exists';
+    const phoneExist = await this.prisma.user.count({
+      where: {
+        phone: phone.split(' ').join(''),
+      },
+    });
+    if (phoneExist > 0) return 'Phone already exists';
+    return false;
   }
 
   async getAllUsername() {

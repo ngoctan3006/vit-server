@@ -6,14 +6,16 @@ export const mailConfig = {
   useFactory: (configService: ConfigService) => ({
     transport: {
       host: configService.get<string>('MAIL_HOST'),
-      secure: configService.get<boolean>('MAIL_SECURE'),
+      secure: false,
       auth: {
         user: configService.get<string>('MAIL_USER'),
         pass: configService.get<string>('MAIL_PASSWORD'),
       },
     },
     defaults: {
-      from: `${configService.get<string>('MAIL_FROM')}`,
+      from: `${configService.get<string>(
+        'MAIL_FROM_NAME'
+      )} <${configService.get<string>('MAIL_FROM_ADDRESS')}>`,
     },
     template: {
       dir: join(__dirname + '/../modules/mail/templates'),
