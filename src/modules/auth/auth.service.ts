@@ -71,7 +71,7 @@ export class AuthService {
 
   async importMany(file: Express.Multer.File) {
     try {
-      const fileData = read(file.buffer, { type: 'buffer' });
+      const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
       const jsonData = utils.sheet_to_json(
         fileData.Sheets[fileData.SheetNames[0]]
       );
@@ -98,8 +98,10 @@ export class AuthService {
           school: user.School,
           student_id: user.StudentID,
           class: user.Class,
-          date_join: user['Date Join']?.toString(),
-          date_out: user['Date Out']?.toString(),
+          date_join: new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
+          date_out:
+            user['Date Out'] ??
+            new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
           gender: getGender(user.Gender),
           position: getPosition(user.Position),
         };

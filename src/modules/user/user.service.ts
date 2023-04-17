@@ -55,29 +55,47 @@ export class UserService {
   }
 
   async createMany(createUserDtos: CreateUserDto[]) {
-    return await this.prisma.user.createMany({
-      data: await Promise.all(
-        createUserDtos.map(
-          async ({
-            email,
-            phone,
-            birthday,
-            password,
-            date_join,
-            date_out,
-            ...userData
-          }) => ({
-            ...userData,
-            password: await hashPassword(password),
-            date_join: new Date(date_join),
-            date_out: date_out ? new Date(date_out) : null,
-            birthday: birthday ? new Date(birthday) : null,
-            email: email?.toLowerCase(),
-            phone: phone?.split(' ').join(''),
-          })
-        )
-      ),
+    const data = await Promise.all(
+      createUserDtos.map(
+        async ({
+          email,
+          phone,
+          birthday,
+          password,
+          date_join,
+          date_out,
+          ...userData
+        }) => ({
+          ...userData,
+          password: await hashPassword(password),
+          date_join: new Date(date_join),
+          date_out: date_out ? new Date(date_out) : null,
+          birthday: birthday ? new Date(birthday) : null,
+          email: email?.toLowerCase(),
+          phone: phone?.split(' ').join(''),
+        })
+      )
+    );
+    const res = await this.prisma.user.createMany({
+      data,
     });
+
+    for (const user of createUserDtos) {
+      await this.sendMail.add(
+        'welcome',
+        {
+          email: user.email?.toLowerCase(),
+          name: user.fullname,
+          username: user.username,
+          password: user.password,
+        },
+        {
+          removeOnComplete: true,
+        }
+      );
+    }
+
+    return res;
   }
 
   async getUserInfoById(id: number): Promise<User | null> {

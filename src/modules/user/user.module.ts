@@ -10,7 +10,6 @@ import { UserService } from './user.service';
     BullModule.registerQueue({
       name: 'send-mail',
     }),
-    MailModule,
   ],
   controllers: [UserController],
   providers: [UserService, EmailConsumer],
