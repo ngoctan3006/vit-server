@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -22,12 +26,15 @@ export class AuthService {
   ) {}
 
   async signup(signupData: SignupDto): Promise<ResponseLoginDto> {
+    const { email, phone, username } = signupData;
     try {
       const isExists = await this.userService.checkUserExists(
-        signupData.username
+        username,
+        email,
+        phone
       );
       if (isExists) {
-        throw new BadRequestException('Username already exists');
+        throw new BadRequestException(isExists);
       }
       const newUser = await this.userService.create(signupData);
       const { accessToken, refreshToken } = await this.generateToken(newUser);
@@ -39,7 +46,7 @@ export class AuthService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error.message);
+      throw new InternalServerErrorException(error.message);
     }
   }
 
@@ -64,7 +71,7 @@ export class AuthService {
 
   async importMany(file: Express.Multer.File) {
     try {
-      const fileData = read(file.buffer, { type: 'buffer' });
+      const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
       const jsonData = utils.sheet_to_json(
         fileData.Sheets[fileData.SheetNames[0]]
       );
@@ -91,8 +98,10 @@ export class AuthService {
           school: user.School,
           student_id: user.StudentID,
           class: user.Class,
-          date_join: user['Date Join']?.toString(),
-          date_out: user['Date Out']?.toString(),
+          date_join: new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
+          date_out:
+            user['Date Out'] ??
+            new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
           gender: getGender(user.Gender),
           position: getPosition(user.Position),
         };
@@ -103,7 +112,7 @@ export class AuthService {
       return userData;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error.message);
+      throw new InternalServerErrorException(error.message);
     }
   }
 

@@ -74,12 +74,12 @@ export class CreateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_join?: string;
+  date_join?: string | number;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_out?: string;
+  date_out?: string | number;
 
   @ApiProperty({ required: false, enum: Gender })
   @IsOptional()
