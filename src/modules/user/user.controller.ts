@@ -20,6 +20,6 @@ export class UserController {
   @Get(':id')
   @UseInterceptors(CacheInterceptor)
   async getUserById(@Param('id', new ParseIntPipe()) id: number) {
-    return await this.userService.findById(id);
+    return await this.userService.getUserInfoById(id);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { hashPassword } from 'src/shares/utils/password.util';
 import { PrismaService } from '../prisma/prisma.service';
@@ -49,6 +49,13 @@ export class UserService {
         )
       ),
     });
+  }
+
+  async getUserInfoById(id: number): Promise<User | null> {
+    const user = await this.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    delete user.password;
+    return user;
   }
 
   async findByUsername(username: string): Promise<User | null> {
