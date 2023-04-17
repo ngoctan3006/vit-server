@@ -1,4 +1,4 @@
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { HandlebarsAdapter } from '@nest-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 
