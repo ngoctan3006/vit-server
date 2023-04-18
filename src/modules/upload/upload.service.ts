@@ -23,7 +23,7 @@ export class UploadService {
     return s3.getSignedUrl('getObject', {
       Bucket: this.bucketName,
       Key: key,
-      Expires: 60 * 60 * 12,
+      Expires: 60 * 60 * 12, // 12 hours
     });
   }
 

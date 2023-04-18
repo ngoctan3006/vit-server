@@ -8,20 +8,17 @@ export class MailService {
 
   async sendWelcomeMail(welcomeData: WelcomeDto) {
     const { email, name, username, password } = welcomeData;
-    try {
-      await this.mailerService.sendMail({
-        to: email,
-        subject: 'Chào mừng bạn đã đến với Đại gia đình VIT',
-        template: './welcome',
-        context: {
-          name,
-          username,
-          password,
-        },
-      });
-      console.log(`Mail sent to ${email} successfully`);
-    } catch (error) {
-      console.log(error);
-    }
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Chào mừng bạn đã đến với Đại gia đình VIT',
+      template: './welcome',
+      context: {
+        name,
+        username,
+        password,
+      },
+    });
+    console.log(`Mail sent to ${email} successfully`);
   }
 }
