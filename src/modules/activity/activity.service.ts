@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Activity } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -64,14 +68,14 @@ export class ActivityService {
   async findOne(id: number): Promise<ResponseDto<Activity>> {
     const activity = await this.prisma.activity.findUnique({ where: { id } });
     if (!activity || activity.deleted_at)
-      throw new BadRequestException('Activity not found');
+      throw new NotFoundException('Activity not found');
     return { data: activity };
   }
 
   async findOneDeleted(id: number): Promise<ResponseDto<Activity>> {
     const activity = await this.prisma.activity.findUnique({ where: { id } });
     if (!activity || !activity.deleted_at)
-      throw new BadRequestException('Activity not found');
+      throw new NotFoundException('Activity not found');
     return { data: activity };
   }
 

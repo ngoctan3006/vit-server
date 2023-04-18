@@ -12,6 +12,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Activity, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
+import { PaginationDto } from 'src/shares/dto/pagination.dto';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ActivityService } from './activity.service';
@@ -27,19 +28,23 @@ export class ActivityController {
   @UseGuards(JwtGuard)
   @Get()
   async findAll(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
+    @Query() pagination: PaginationDto
   ): Promise<ResponseDto<Activity[]>> {
-    return await this.activityService.findAll(+page, +limit);
+    return await this.activityService.findAll(
+      +pagination.page,
+      +pagination.limit
+    );
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Get('trash')
   async findAllDeleted(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
+    @Query() pagination: PaginationDto
   ): Promise<ResponseDto<Activity[]>> {
-    return await this.activityService.findAllDeleted(+page, +limit);
+    return await this.activityService.findAllDeleted(
+      +pagination.page,
+      +pagination.limit
+    );
   }
 
   @UseGuards(JwtGuard)
