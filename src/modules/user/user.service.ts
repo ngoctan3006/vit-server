@@ -13,6 +13,7 @@ import { comparePassword } from './../../shares/utils/password.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { getKeyS3 } from 'src/shares/utils/get-key-s3.util';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -143,6 +144,30 @@ export class UserService {
     return 'Change password successfully';
   }
 
+  async update(id: number, data: UpdateUserDto): Promise<User> {
+    const { email, phone, birthday, ...userData } = data;
+    await this.getUserInfoById(id);
+    const checkUserExists = await this.checkUserExists({
+      email,
+      phone,
+    });
+    if (checkUserExists) throw new BadRequestException(checkUserExists);
+
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        ...userData,
+        email: email?.toLowerCase(),
+        phone: phone?.split(' ').join(''),
+        birthday: birthday ? new Date(birthday) : null,
+      },
+    });
+
+    return await this.getUserInfoById(id);
+  }
+
   async findByUsername(username: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: {
@@ -159,29 +184,36 @@ export class UserService {
     });
   }
 
-  async checkUserExists(
-    username: string,
-    email: string,
-    phone: string
-  ): Promise<string | boolean> {
-    const usernameExist = await this.prisma.user.count({
-      where: {
-        username,
-      },
-    });
-    if (usernameExist > 0) return 'Username already exists';
-    const emailExist = await this.prisma.user.count({
-      where: {
-        email: email.toLowerCase(),
-      },
-    });
-    if (emailExist > 0) return 'Email already exists';
-    const phoneExist = await this.prisma.user.count({
-      where: {
-        phone: phone.split(' ').join(''),
-      },
-    });
-    if (phoneExist > 0) return 'Phone already exists';
+  async checkUserExists(data: {
+    username?: string;
+    email?: string;
+    phone?: string;
+  }): Promise<string | false> {
+    const { username, email, phone } = data;
+    if (username) {
+      const usernameExist = await this.prisma.user.count({
+        where: {
+          username,
+        },
+      });
+      if (usernameExist > 0) return 'Username already exists';
+    }
+    if (email) {
+      const emailExist = await this.prisma.user.count({
+        where: {
+          email: email.toLowerCase(),
+        },
+      });
+      if (emailExist > 0) return 'Email already exists';
+    }
+    if (phone) {
+      const phoneExist = await this.prisma.user.count({
+        where: {
+          phone: phone.split(' ').join(''),
+        },
+      });
+      if (phoneExist > 0) return 'Phone already exists';
+    }
     return false;
   }
 

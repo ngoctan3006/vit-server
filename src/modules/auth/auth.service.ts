@@ -28,11 +28,11 @@ export class AuthService {
   async signup(signupData: SignupDto): Promise<ResponseLoginDto> {
     const { email, phone, username } = signupData;
 
-    const isExists = await this.userService.checkUserExists(
+    const isExists = await this.userService.checkUserExists({
       username,
       email,
-      phone
-    );
+      phone,
+    });
     if (isExists) {
       throw new BadRequestException(isExists);
     }

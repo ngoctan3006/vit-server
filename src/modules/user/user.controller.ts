@@ -18,6 +18,7 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/shares/decorators/get-user.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -60,5 +61,14 @@ export class UserController {
     file: Express.Multer.File
   ): Promise<User> {
     return await this.userService.changeAvatar(id, file);
+  }
+
+  @UseGuards(JwtGuard)
+  @Put('profile')
+  async updateProfile(
+    @GetUser('id') id: number,
+    @Body() data: UpdateUserDto
+  ): Promise<User> {
+    return await this.userService.update(id, data);
   }
 }

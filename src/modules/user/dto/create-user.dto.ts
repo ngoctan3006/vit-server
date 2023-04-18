@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender, Position } from '@prisma/client';
 import {
+  IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -28,7 +29,7 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
+  @IsEmail()
   email: string;
 
   @ApiProperty()
