@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix(prefix);
   app.enableCors({ origin: '*' });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const config = new DocumentBuilder()
     .setTitle(configService.get<string>('APP_NAME'))
