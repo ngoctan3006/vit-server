@@ -5,6 +5,7 @@ import {
   Param,
   Post,
   Put,
+  Delete,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -52,5 +53,13 @@ export class ActivityController {
     @Body() data: UpdateActivityDto
   ): Promise<ResponseDto<Activity>> {
     return await this.activityService.update(+id, data);
+  }
+
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Delete(':id')
+  async softDelete(
+    @Param('id') id: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.activityService.remove(+id);
   }
 }

@@ -40,7 +40,8 @@ export class ActivityService {
 
   async findOne(id: number): Promise<ResponseDto<Activity>> {
     const activity = await this.prisma.activity.findUnique({ where: { id } });
-    if (!activity) throw new BadRequestException('Activity not found');
+    if (!activity || activity.deleted_at)
+      throw new BadRequestException('Activity not found');
     return { data: activity };
   }
 
@@ -61,5 +62,18 @@ export class ActivityService {
     });
 
     return await this.findOne(id);
+  }
+
+  async remove(id: number): Promise<ResponseDto<{ message: string }>> {
+    await this.prisma.activity.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+
+    return {
+      data: {
+        message: 'Delete activity successfully',
+      },
+    };
   }
 }
