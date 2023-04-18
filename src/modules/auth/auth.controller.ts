@@ -6,7 +6,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
 import { AuthService } from './auth.service';
@@ -29,6 +29,7 @@ export class AuthController {
     Position.DOI_PHO,
     Position.TRUONG_HANH_CHINH
   )
+  @ApiBearerAuth()
   @Post('signup')
   async signup(@Body() signupData: SignupDto) {
     return await this.authService.signup(signupData);
@@ -40,6 +41,7 @@ export class AuthController {
     Position.DOI_PHO,
     Position.TRUONG_HANH_CHINH
   )
+  @ApiBearerAuth()
   @Post('import-many')
   @UseInterceptors(FileInterceptor('file'))
   async importMany(@UploadedFile() file: Express.Multer.File) {

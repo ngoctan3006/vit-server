@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Activity, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
 import { ResponseDto } from 'src/shares/dto/response.dto';
@@ -20,6 +20,7 @@ import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Controller('activity')
 @ApiTags('activity')
+@ApiBearerAuth()
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 
