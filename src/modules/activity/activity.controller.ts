@@ -1,11 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
   Put,
-  Delete,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -32,10 +32,27 @@ export class ActivityController {
     return await this.activityService.findAll(+page, +limit);
   }
 
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Get('trash')
+  async findAllDeleted(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ): Promise<ResponseDto<Activity[]>> {
+    return await this.activityService.findAllDeleted(+page, +limit);
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<ResponseDto<Activity>> {
     return await this.activityService.findOne(+id);
+  }
+
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Get('trash/:id')
+  async findOneDeleted(
+    @Param('id') id: number
+  ): Promise<ResponseDto<Activity>> {
+    return await this.activityService.findOneDeleted(+id);
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)

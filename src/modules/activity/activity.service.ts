@@ -38,9 +38,39 @@ export class ActivityService {
     };
   }
 
+  async findAllDeleted(
+    page: number,
+    limit: number
+  ): Promise<ResponseDto<Activity[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
+    return {
+      data: await this.prisma.activity.findMany({
+        where: {
+          NOT: {
+            deleted_at: null,
+          },
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      metadata: {
+        totalPage: Math.ceil((await this.prisma.activity.count()) / limit),
+      },
+    };
+  }
+
   async findOne(id: number): Promise<ResponseDto<Activity>> {
     const activity = await this.prisma.activity.findUnique({ where: { id } });
     if (!activity || activity.deleted_at)
+      throw new BadRequestException('Activity not found');
+    return { data: activity };
+  }
+
+  async findOneDeleted(id: number): Promise<ResponseDto<Activity>> {
+    const activity = await this.prisma.activity.findUnique({ where: { id } });
+    if (!activity || !activity.deleted_at)
       throw new BadRequestException('Activity not found');
     return { data: activity };
   }
@@ -65,6 +95,7 @@ export class ActivityService {
   }
 
   async remove(id: number): Promise<ResponseDto<{ message: string }>> {
+    await this.findOne(id);
     await this.prisma.activity.update({
       where: { id },
       data: { deleted_at: new Date() },
