@@ -27,27 +27,23 @@ export class AuthService {
 
   async signup(signupData: SignupDto): Promise<ResponseLoginDto> {
     const { email, phone, username } = signupData;
-    try {
-      const isExists = await this.userService.checkUserExists(
-        username,
-        email,
-        phone
-      );
-      if (isExists) {
-        throw new BadRequestException(isExists);
-      }
-      const newUser = await this.userService.create(signupData);
-      const { accessToken, refreshToken } = await this.generateToken(newUser);
-      delete newUser.password;
-      return {
-        accessToken,
-        refreshToken,
-        user: newUser,
-      };
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(error.message);
+
+    const isExists = await this.userService.checkUserExists({
+      username,
+      email,
+      phone,
+    });
+    if (isExists) {
+      throw new BadRequestException(isExists);
     }
+    const newUser = await this.userService.create(signupData);
+    const { accessToken, refreshToken } = await this.generateToken(newUser);
+    delete newUser.password;
+    return {
+      accessToken,
+      refreshToken,
+      user: newUser,
+    };
   }
 
   async signin(signinData: SigninDto): Promise<ResponseLoginDto> {
@@ -70,50 +66,45 @@ export class AuthService {
   }
 
   async importMany(file: Express.Multer.File) {
-    try {
-      const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
-      const jsonData = utils.sheet_to_json(
-        fileData.Sheets[fileData.SheetNames[0]]
-      );
-      const usernameList = (await this.userService.getAllUsername()).map(
-        (item) => item.username
-      );
-      const userData = jsonData.map((user: any) => {
-        let username = generateUsername(user.Fullname);
-        const usernameCount = usernameList.filter(
-          (item) => item.replace(/\d/g, '') === username
-        ).length;
-        if (usernameCount > 0) {
-          username = `${username}${usernameCount + 1}`;
-        }
-        usernameList.push(username);
+    const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
+    const jsonData = utils.sheet_to_json(
+      fileData.Sheets[fileData.SheetNames[0]]
+    );
+    const usernameList = (await this.userService.getAllUsername()).map(
+      (item) => item.username
+    );
+    const userData = jsonData.map((user: any) => {
+      let username = generateUsername(user.Fullname);
+      const usernameCount = usernameList.filter(
+        (item) => item.replace(/\d/g, '') === username
+      ).length;
+      if (usernameCount > 0) {
+        username = `${username}${usernameCount + 1}`;
+      }
+      usernameList.push(username);
 
-        return {
-          username,
-          password: Math.random().toString(36).slice(-8),
-          fullname: user.Fullname,
-          phone: user.Phone?.split(' ').join(''),
-          email: user.Email?.toLowerCase(),
-          birthday: user.Birthday,
-          school: user.School,
-          student_id: user.StudentID,
-          class: user.Class,
-          date_join: new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
-          date_out:
-            user['Date Out'] ??
-            new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
-          gender: getGender(user.Gender),
-          position: getPosition(user.Position),
-        };
-      });
-      const result = await this.userService.createMany(userData);
-      console.log(result);
+      return {
+        username,
+        password: Math.random().toString(36).slice(-8),
+        fullname: user.Fullname,
+        phone: user.Phone?.split(' ').join(''),
+        email: user.Email?.toLowerCase(),
+        birthday: user.Birthday,
+        school: user.School,
+        student_id: user.StudentID,
+        class: user.Class,
+        date_join: new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
+        date_out:
+          user['Date Out'] ??
+          new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
+        gender: getGender(user.Gender),
+        position: getPosition(user.Position),
+      };
+    });
+    const result = await this.userService.createMany(userData);
+    console.log(result);
 
-      return userData;
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(error.message);
-    }
+    return userData;
   }
 
   async generateToken(user: User): Promise<{
