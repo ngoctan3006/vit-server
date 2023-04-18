@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as redisStore from 'cache-manager-redis-store';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
@@ -44,6 +45,7 @@ import { UserModule } from './modules/user/user.module';
       inject: [ConfigService],
     }),
     UploadModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
