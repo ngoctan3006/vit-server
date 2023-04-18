@@ -107,4 +107,14 @@ export class ActivityService {
       },
     };
   }
+
+  async restore(id: number): Promise<ResponseDto<Activity>> {
+    await this.findOneDeleted(id);
+    await this.prisma.activity.update({
+      where: { id },
+      data: { deleted_at: null },
+    });
+
+    return await this.findOne(id);
+  }
 }

@@ -79,4 +79,10 @@ export class ActivityController {
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.activityService.remove(+id);
   }
+
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Put('restore/:id')
+  async restore(@Param('id') id: number): Promise<ResponseDto<Activity>> {
+    return await this.activityService.restore(+id);
+  }
 }
