@@ -1,6 +1,6 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { MailModule } from '../mail/mail.module';
+import { UploadModule } from '../upload/upload.module';
 import { EmailConsumer } from './consumers/email.consumer';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
@@ -10,6 +10,7 @@ import { UserService } from './user.service';
     BullModule.registerQueue({
       name: 'send-mail',
     }),
+    UploadModule,
   ],
   controllers: [UserController],
   providers: [UserService, EmailConsumer],

@@ -8,15 +8,18 @@ import { User } from '@prisma/client';
 import { Queue } from 'bull';
 import { hashPassword } from 'src/shares/utils/password.util';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadService } from '../upload/upload.service';
 import { comparePassword } from './../../shares/utils/password.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { getKeyS3 } from 'src/shares/utils/get-key-s3.util';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    @InjectQueue('send-mail') private readonly sendMail: Queue
+    @InjectQueue('send-mail') private readonly sendMail: Queue,
+    private readonly uploadService: UploadService
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -102,10 +105,28 @@ export class UserService {
     return user;
   }
 
+  async changeAvatar(id: number, file: Express.Multer.File): Promise<User> {
+    const user = await this.getUserInfoById(id);
+
+    const { url } = await this.uploadService.uploadFile(file);
+    const key = getKeyS3(user.avatar);
+    if (key) await this.uploadService.deleteFileS3(key);
+
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        avatar: url,
+      },
+    });
+
+    return await this.getUserInfoById(id);
+  }
+
   async changePassword(id: number, data: ChangePasswordDto): Promise<string> {
     const { password, newPassword, cfPassword } = data;
-    const user = await this.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    const user = await this.getUserInfoById(id);
     if (newPassword !== cfPassword)
       throw new BadRequestException('Password not match');
     if (!(await comparePassword(password, user.password)))

@@ -2,13 +2,17 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
+  FileTypeValidator,
   Get,
   Param,
+  ParseFilePipe,
   ParseIntPipe,
   Put,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/shares/decorators/get-user.decorator';
@@ -31,11 +35,30 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
-  @Put('/password')
+  @Put('password')
   async changePassword(
     @GetUser('id') id: number,
     @Body() data: ChangePasswordDto
   ): Promise<{ message: string }> {
     return { message: await this.userService.changePassword(id, data) };
+  }
+
+  @UseGuards(JwtGuard)
+  @Put('avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  async changeAvatar(
+    @GetUser('id') id: number,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType: /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/,
+          }),
+        ],
+      })
+    )
+    file: Express.Multer.File
+  ): Promise<User> {
+    return await this.userService.changeAvatar(id, file);
   }
 }
