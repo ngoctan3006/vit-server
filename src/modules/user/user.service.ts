@@ -1,13 +1,15 @@
 import { InjectQueue } from '@nestjs/bull';
 import {
+  BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Queue } from 'bull';
 import { hashPassword } from 'src/shares/utils/password.util';
 import { PrismaService } from '../prisma/prisma.service';
+import { comparePassword } from './../../shares/utils/password.util';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -21,37 +23,32 @@ export class UserService {
     const { password, birthday, date_join, date_out, ...userData } =
       createUserDto;
 
-    try {
-      const user = await this.prisma.user.create({
-        data: {
-          ...userData,
-          password: await hashPassword(password),
-          date_join: new Date(date_join),
-          date_out: date_out ? new Date(date_out) : null,
-          birthday: birthday ? new Date(birthday) : null,
-          email: userData.email?.toLowerCase(),
-          phone: userData.phone?.split(' ').join(''),
-        },
-      });
+    const user = await this.prisma.user.create({
+      data: {
+        ...userData,
+        password: await hashPassword(password),
+        date_join: new Date(date_join),
+        date_out: date_out ? new Date(date_out) : null,
+        birthday: birthday ? new Date(birthday) : null,
+        email: userData.email?.toLowerCase(),
+        phone: userData.phone?.split(' ').join(''),
+      },
+    });
 
-      await this.sendMail.add(
-        'welcome',
-        {
-          email: user.email,
-          name: user.fullname,
-          username: user.username,
-          password,
-        },
-        {
-          removeOnComplete: true,
-        }
-      );
+    await this.sendMail.add(
+      'welcome',
+      {
+        email: user.email,
+        name: user.fullname,
+        username: user.username,
+        password,
+      },
+      {
+        removeOnComplete: true,
+      }
+    );
 
-      return user;
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(error.message);
-    }
+    return user;
   }
 
   async createMany(createUserDtos: CreateUserDto[]) {
@@ -103,6 +100,26 @@ export class UserService {
     if (!user) throw new NotFoundException('User not found');
     delete user.password;
     return user;
+  }
+
+  async changePassword(id: number, data: ChangePasswordDto): Promise<string> {
+    const { password, newPassword, cfPassword } = data;
+    const user = await this.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    if (newPassword !== cfPassword)
+      throw new BadRequestException('Password not match');
+    if (!(await comparePassword(password, user.password)))
+      throw new BadRequestException('Password wrong');
+
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: await hashPassword(newPassword),
+      },
+    });
+    return 'Change password successfully';
   }
 
   async findByUsername(username: string): Promise<User | null> {
