@@ -3,6 +3,7 @@ import { Activity } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
+import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Injectable()
 export class ActivityService {
@@ -27,6 +28,7 @@ export class ActivityService {
 
     return {
       data: await this.prisma.activity.findMany({
+        where: { deleted_at: null },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -37,6 +39,27 @@ export class ActivityService {
   }
 
   async findOne(id: number): Promise<ResponseDto<Activity>> {
-    return { data: await this.prisma.activity.findUnique({ where: { id } }) };
+    const activity = await this.prisma.activity.findUnique({ where: { id } });
+    if (!activity) throw new BadRequestException('Activity not found');
+    return { data: activity };
+  }
+
+  async update(
+    id: number,
+    data: UpdateActivityDto
+  ): Promise<ResponseDto<Activity>> {
+    const { start_date, end_date, ...rest } = data;
+    const { data: activity } = await this.findOne(id);
+
+    await this.prisma.activity.update({
+      where: { id },
+      data: {
+        ...rest,
+        start_date: start_date ? new Date(start_date) : activity.start_date,
+        end_date: end_date ? new Date(end_date) : activity.end_date,
+      },
+    });
+
+    return await this.findOne(id);
   }
 }

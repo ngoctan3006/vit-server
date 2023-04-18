@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { ResponseDto } from 'src/shares/dto/response.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
+import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Controller('activity')
 @ApiTags('activity')
@@ -41,5 +43,14 @@ export class ActivityController {
     @Body() data: CreateActivityDto
   ): Promise<ResponseDto<Activity>> {
     return await this.activityService.create(data);
+  }
+
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Put(':id')
+  async update(
+    @Param('id') id: number,
+    @Body() data: UpdateActivityDto
+  ): Promise<ResponseDto<Activity>> {
+    return await this.activityService.update(+id, data);
   }
 }
