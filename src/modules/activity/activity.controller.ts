@@ -18,6 +18,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import { GetUser } from 'src/shares/decorators/get-user.decorator';
 
 @Controller('activity')
 @ApiTags('activity')
@@ -90,5 +91,14 @@ export class ActivityController {
   @Put('restore/:id')
   async restore(@Param('id') id: number): Promise<ResponseDto<Activity>> {
     return await this.activityService.restore(+id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('register/:id')
+  async register(
+    @GetUser('id') userId: number,
+    @Param('id') activityId: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.activityService.register(userId, +activityId);
   }
 }

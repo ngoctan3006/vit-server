@@ -1,3 +1,4 @@
+import { UserService } from './../user/user.service';
 import {
   BadRequestException,
   Injectable,
@@ -11,7 +12,10 @@ import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Injectable()
 export class ActivityService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userService: UserService
+  ) {}
 
   async create(data: CreateActivityDto): Promise<ResponseDto<Activity>> {
     const { start_date, end_date, ...rest } = data;
@@ -120,5 +124,34 @@ export class ActivityService {
     });
 
     return await this.findOne(id);
+  }
+
+  async register(
+    userId: number,
+    activityId: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    await this.findOne(activityId);
+    await this.userService.getUserInfoById(userId);
+    const isRegistered = await this.prisma.userActivity.findUnique({
+      where: {
+        user_id_activity_id: {
+          user_id: userId,
+          activity_id: activityId,
+        },
+      },
+    });
+    if (isRegistered) throw new BadRequestException('You already registered');
+    await this.prisma.userActivity.create({
+      data: {
+        user_id: userId,
+        activity_id: activityId,
+      },
+    });
+
+    return {
+      data: {
+        message: 'Register activity successfully',
+      },
+    };
   }
 }
