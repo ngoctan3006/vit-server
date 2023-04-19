@@ -101,4 +101,13 @@ export class ActivityController {
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.activityService.register(userId, +activityId);
   }
+
+  @UseGuards(JwtGuard)
+  @Put('cancel/:id')
+  async cancelRegister(
+    @GetUser('id') userId: number,
+    @Param('id') activityId: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.activityService.cancelRegister(userId, +activityId);
+  }
 }

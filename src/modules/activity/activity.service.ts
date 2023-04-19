@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Activity } from '@prisma/client';
+import { Activity, UserActivityStatus } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
@@ -151,6 +151,41 @@ export class ActivityService {
     return {
       data: {
         message: 'Register activity successfully',
+      },
+    };
+  }
+
+  async cancelRegister(
+    userId: number,
+    activityId: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    await this.findOne(activityId);
+    await this.userService.getUserInfoById(userId);
+    const isRegistered = await this.prisma.userActivity.findUnique({
+      where: {
+        user_id_activity_id: {
+          user_id: userId,
+          activity_id: activityId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+      throw new BadRequestException('You have not registered yet');
+    await this.prisma.userActivity.update({
+      where: {
+        user_id_activity_id: {
+          user_id: userId,
+          activity_id: activityId,
+        },
+      },
+      data: {
+        status: UserActivityStatus.CANCLED,
+      },
+    });
+
+    return {
+      data: {
+        message: 'Cancel register activity successfully',
       },
     };
   }
