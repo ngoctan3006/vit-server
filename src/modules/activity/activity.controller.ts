@@ -94,7 +94,7 @@ export class ActivityController {
   }
 
   @UseGuards(JwtGuard)
-  @Post('register/:id')
+  @Put('register/:id')
   async register(
     @GetUser('id') userId: number,
     @Param('id') activityId: number

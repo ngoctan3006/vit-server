@@ -140,13 +140,31 @@ export class ActivityService {
         },
       },
     });
-    if (isRegistered) throw new BadRequestException('You already registered');
-    await this.prisma.userActivity.create({
-      data: {
-        user_id: userId,
-        activity_id: activityId,
-      },
-    });
+    if (isRegistered) {
+      if (
+        isRegistered.status === UserActivityStatus.REGISTERED ||
+        isRegistered.status === UserActivityStatus.ACCEPTED
+      )
+        throw new BadRequestException('You already registered');
+      else
+        await this.prisma.userActivity.update({
+          where: {
+            user_id_activity_id: {
+              user_id: userId,
+              activity_id: activityId,
+            },
+          },
+          data: {
+            status: UserActivityStatus.REGISTERED,
+          },
+        });
+    } else
+      await this.prisma.userActivity.create({
+        data: {
+          user_id: userId,
+          activity_id: activityId,
+        },
+      });
 
     return {
       data: {
