@@ -83,7 +83,7 @@ export class ActivityController {
   async softDelete(
     @Param('id') id: number
   ): Promise<ResponseDto<{ message: string }>> {
-    return await this.activityService.remove(+id);
+    return await this.activityService.softDelete(+id);
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)

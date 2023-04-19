@@ -98,7 +98,7 @@ export class ActivityService {
     return await this.findOne(id);
   }
 
-  async remove(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softDelete(id: number): Promise<ResponseDto<{ message: string }>> {
     await this.findOne(id);
     await this.prisma.activity.update({
       where: { id },
