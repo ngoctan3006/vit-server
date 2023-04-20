@@ -103,4 +103,15 @@ export class EventController {
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.eventService.softDelete(+id);
   }
+
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Put('restore/:id')
+  async restore(@Param('id') id: number): Promise<ResponseDto<Event>> {
+    return await this.eventService.restore(+id);
+  }
 }

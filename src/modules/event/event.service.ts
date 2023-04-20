@@ -112,4 +112,14 @@ export class EventService {
       },
     };
   }
+
+  async restore(id: number): Promise<ResponseDto<Event>> {
+    await this.findOneDeleted(id);
+    await this.prisma.event.update({
+      where: { id },
+      data: { deleted_at: null },
+    });
+
+    return await this.findOne(id);
+  }
 }
