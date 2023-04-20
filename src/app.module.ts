@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EventModule } from './modules/event/event.module';
 import { MailModule } from './modules/mail/mail.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UploadModule } from './modules/upload/upload.module';
@@ -46,6 +47,7 @@ import { UserModule } from './modules/user/user.module';
     }),
     UploadModule,
     ActivityModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [AppService],
