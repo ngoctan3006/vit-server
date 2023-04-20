@@ -9,6 +9,7 @@ import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import { ApproveDto } from './dto/approve.dto';
 
 @Injectable()
 export class ActivityService {
@@ -204,6 +205,41 @@ export class ActivityService {
     return {
       data: {
         message: 'Cancel register activity successfully',
+      },
+    };
+  }
+
+  async approve(data: ApproveDto): Promise<ResponseDto<{ message: string }>> {
+    const { activityId, userId } = data;
+    await this.findOne(activityId);
+    await this.userService.getUserInfoById(userId);
+    const isRegistered = await this.prisma.userActivity.findUnique({
+      where: {
+        user_id_activity_id: {
+          user_id: userId,
+          activity_id: activityId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+      throw new BadRequestException('User have not registered yet');
+    else if (isRegistered.status === UserActivityStatus.ACCEPTED)
+      throw new BadRequestException('User already accepted');
+    await this.prisma.userActivity.update({
+      where: {
+        user_id_activity_id: {
+          user_id: userId,
+          activity_id: activityId,
+        },
+      },
+      data: {
+        status: UserActivityStatus.ACCEPTED,
+      },
+    });
+
+    return {
+      data: {
+        message: 'Accept register activity successfully',
       },
     };
   }

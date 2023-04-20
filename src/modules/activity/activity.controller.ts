@@ -11,14 +11,15 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Activity, Position } from '@prisma/client';
+import { GetUser } from 'src/shares/decorators/get-user.decorator';
 import { Roles } from 'src/shares/decorators/roles.decorator';
 import { PaginationDto } from 'src/shares/dto/pagination.dto';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ActivityService } from './activity.service';
+import { ApproveDto } from './dto/approve.dto';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
-import { GetUser } from 'src/shares/decorators/get-user.decorator';
 
 @Controller('activity')
 @ApiTags('activity')
@@ -109,5 +110,13 @@ export class ActivityController {
     @Param('id') activityId: number
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.activityService.cancelRegister(userId, +activityId);
+  }
+
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Post('approve')
+  async approveUser(
+    @Body() data: ApproveDto
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.activityService.approve(data);
   }
 }
