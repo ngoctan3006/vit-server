@@ -32,15 +32,17 @@ export class EventController {
     Position.TRUONG_HANH_CHINH
   )
   @Post()
-  create(@Body() data: CreateEventDto): Promise<ResponseDto<Event>> {
-    return this.eventService.create(data);
+  async create(@Body() data: CreateEventDto): Promise<ResponseDto<Event>> {
+    return await this.eventService.create(data);
   }
 
-  // @UseGuards(JwtGuard)
-  // @Get()
-  // findAll(@Query() pagination: PaginationDto) {
-  //   return this.eventService.findAll();
-  // }
+  @UseGuards(JwtGuard)
+  @Get()
+  async findAll(
+    @Query() pagination: PaginationDto
+  ): Promise<ResponseDto<Event[]>> {
+    return await this.eventService.findAll(pagination.page, pagination.limit);
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

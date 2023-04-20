@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Event } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -26,8 +26,20 @@ export class EventService {
     };
   }
 
-  findAll() {
-    return `This action returns all event`;
+  async findAll(page: number, limit: number): Promise<ResponseDto<Event[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
+    return {
+      data: await this.prisma.event.findMany({
+        where: { deleted_at: null },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      metadata: {
+        totalPage: Math.ceil((await this.prisma.event.count()) / limit),
+      },
+    };
   }
 
   findOne(id: number) {
