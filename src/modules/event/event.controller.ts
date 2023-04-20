@@ -1,11 +1,10 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -50,10 +49,19 @@ export class EventController {
     return await this.eventService.findOne(+id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-  //   return this.eventService.update(+id, updateEventDto);
-  // }
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Put(':id')
+  async update(
+    @Param('id') id: number,
+    @Body() data: UpdateEventDto
+  ): Promise<ResponseDto<Event>> {
+    return await this.eventService.update(+id, data);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

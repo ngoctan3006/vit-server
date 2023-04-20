@@ -53,8 +53,20 @@ export class EventService {
     return { data: event };
   }
 
-  update(id: number, updateEventDto: UpdateEventDto) {
-    return `This action updates a #${id} event`;
+  async update(id: number, data: UpdateEventDto): Promise<ResponseDto<Event>> {
+    const { start_date, end_date, ...rest } = data;
+    const { data: event } = await this.findOne(id);
+
+    await this.prisma.event.update({
+      where: { id },
+      data: {
+        ...rest,
+        start_date: start_date ? new Date(start_date) : event.start_date,
+        end_date: end_date ? new Date(end_date) : event.end_date,
+      },
+    });
+
+    return await this.findOne(id);
   }
 
   remove(id: number) {
