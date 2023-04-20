@@ -13,7 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/shares/decorators/get-user.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -23,6 +23,7 @@ import { UserService } from './user.service';
 
 @Controller('user')
 @ApiTags('user')
+@ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
