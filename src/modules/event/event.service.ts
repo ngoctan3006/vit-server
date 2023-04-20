@@ -69,7 +69,17 @@ export class EventService {
     return await this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} event`;
+  async softDelete(id: number): Promise<ResponseDto<{ message: string }>> {
+    await this.findOne(id);
+    await this.prisma.event.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+
+    return {
+      data: {
+        message: 'Delete activity successfully',
+      },
+    };
   }
 }

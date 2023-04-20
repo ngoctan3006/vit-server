@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -63,8 +64,16 @@ export class EventController {
     return await this.eventService.update(+id, data);
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.eventService.remove(+id);
-  // }
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Delete(':id')
+  async softDelete(
+    @Param('id') id: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.eventService.softDelete(+id);
+  }
 }
