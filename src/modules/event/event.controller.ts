@@ -44,10 +44,11 @@ export class EventController {
     return await this.eventService.findAll(pagination.page, pagination.limit);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.eventService.findOne(+id);
-  // }
+  @UseGuards(JwtGuard)
+  @Get(':id')
+  async findOne(@Param('id') id: number): Promise<ResponseDto<Event>> {
+    return await this.eventService.findOne(+id);
+  }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {

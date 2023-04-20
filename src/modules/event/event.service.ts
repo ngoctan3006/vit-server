@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Event } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -42,8 +46,11 @@ export class EventService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} event`;
+  async findOne(id: number): Promise<ResponseDto<Event>> {
+    const event = await this.prisma.event.findUnique({ where: { id } });
+    if (!event || event.deleted_at)
+      throw new NotFoundException('Event not found');
+    return { data: event };
   }
 
   update(id: number, updateEventDto: UpdateEventDto) {
