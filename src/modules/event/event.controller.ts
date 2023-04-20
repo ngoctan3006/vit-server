@@ -56,6 +56,17 @@ export class EventController {
     Position.DOI_PHO,
     Position.TRUONG_HANH_CHINH
   )
+  @Get('trash/:id')
+  async findOneDeleted(@Param('id') id: number): Promise<ResponseDto<Event>> {
+    return await this.eventService.findOneDeleted(+id);
+  }
+
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
   @Put(':id')
   async update(
     @Param('id') id: number,

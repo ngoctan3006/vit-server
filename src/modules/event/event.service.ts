@@ -53,6 +53,13 @@ export class EventService {
     return { data: event };
   }
 
+  async findOneDeleted(id: number): Promise<ResponseDto<Event>> {
+    const event = await this.prisma.event.findUnique({ where: { id } });
+    if (!event || !event.deleted_at)
+      throw new NotFoundException('Event not found');
+    return { data: event };
+  }
+
   async update(id: number, data: UpdateEventDto): Promise<ResponseDto<Event>> {
     const { start_date, end_date, ...rest } = data;
     const { data: event } = await this.findOne(id);
