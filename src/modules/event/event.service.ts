@@ -46,6 +46,29 @@ export class EventService {
     };
   }
 
+  async findAllDeleted(
+    page: number,
+    limit: number
+  ): Promise<ResponseDto<Event[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
+    return {
+      data: await this.prisma.event.findMany({
+        where: {
+          NOT: {
+            deleted_at: null,
+          },
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      metadata: {
+        totalPage: Math.ceil((await this.prisma.event.count()) / limit),
+      },
+    };
+  }
+
   async findOne(id: number): Promise<ResponseDto<Event>> {
     const event = await this.prisma.event.findUnique({ where: { id } });
     if (!event || event.deleted_at)

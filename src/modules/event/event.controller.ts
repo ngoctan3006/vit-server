@@ -44,6 +44,22 @@ export class EventController {
     return await this.eventService.findAll(pagination.page, pagination.limit);
   }
 
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Get('trash')
+  async findAllDeleted(
+    @Query() pagination: PaginationDto
+  ): Promise<ResponseDto<Event[]>> {
+    return await this.eventService.findAllDeleted(
+      pagination.page,
+      pagination.limit
+    );
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<ResponseDto<Event>> {
