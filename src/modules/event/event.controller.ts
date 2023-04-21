@@ -19,6 +19,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventService } from './event.service';
 import { GetUser } from 'src/shares/decorators/get-user.decorator';
+import { ApproveDto } from './dto/approve.dto';
 
 @Controller('event')
 @ApiTags('event')
@@ -132,5 +133,18 @@ export class EventController {
     @Param('id') eventId: number
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.eventService.cancelRegister(userId, +eventId);
+  }
+
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Post('approve')
+  async approveUser(
+    @Body() data: ApproveDto
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.eventService.approve(data);
   }
 }

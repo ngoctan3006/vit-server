@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { ApproveDto } from './dto/approve.dto';
 
 @Injectable()
 export class EventService {
@@ -197,6 +198,41 @@ export class EventService {
     return {
       data: {
         message: 'Cancel register activity successfully',
+      },
+    };
+  }
+
+  async approve(data: ApproveDto): Promise<ResponseDto<{ message: string }>> {
+    const { eventId, userId } = data;
+    await this.findOne(eventId);
+    await this.userService.getUserInfoById(userId);
+    const isRegistered = await this.prisma.userEvent.findUnique({
+      where: {
+        user_id_event_id: {
+          user_id: userId,
+          event_id: eventId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+      throw new BadRequestException('User have not registered yet');
+    else if (isRegistered.status === UserActivityStatus.ACCEPTED)
+      throw new BadRequestException('User already accepted');
+    await this.prisma.userEvent.update({
+      where: {
+        user_id_event_id: {
+          user_id: userId,
+          event_id: eventId,
+        },
+      },
+      data: {
+        status: UserActivityStatus.ACCEPTED,
+      },
+    });
+
+    return {
+      data: {
+        message: 'Accept register activity successfully',
       },
     };
   }
