@@ -18,6 +18,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventService } from './event.service';
+import { GetUser } from 'src/shares/decorators/get-user.decorator';
 
 @Controller('event')
 @ApiTags('event')
@@ -113,5 +114,14 @@ export class EventController {
   @Put('restore/:id')
   async restore(@Param('id') id: number): Promise<ResponseDto<Event>> {
     return await this.eventService.restore(+id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Put('register/:id')
+  async register(
+    @GetUser('id') userId: number,
+    @Param('id') eventId: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.eventService.register(userId, +eventId);
   }
 }
