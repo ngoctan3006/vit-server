@@ -33,8 +33,8 @@ export class ActivityController {
     @Query() pagination: PaginationDto
   ): Promise<ResponseDto<Activity[]>> {
     return await this.activityService.findAll(
-      +pagination.page,
-      +pagination.limit
+      pagination.page,
+      pagination.limit
     );
   }
 
@@ -44,8 +44,8 @@ export class ActivityController {
     @Query() pagination: PaginationDto
   ): Promise<ResponseDto<Activity[]>> {
     return await this.activityService.findAllDeleted(
-      +pagination.page,
-      +pagination.limit
+      pagination.page,
+      pagination.limit
     );
   }
 

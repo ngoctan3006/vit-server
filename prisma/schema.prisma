@@ -109,15 +109,15 @@ model Event {
 }
 
 model UserEvent {
-  id         Int      @id @default(autoincrement())
+  id         Int                @id @default(autoincrement())
   user_id    Int
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user       User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
   event_id   Int
-  event      Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  position   Position @default(MEMBER)
-  status     Status   @default(ACTIVE)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  event      Event              @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  position   Position           @default(MEMBER)
+  status     UserActivityStatus @default(REGISTERED)
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
 
   @@unique([user_id, event_id])
 }
