@@ -165,4 +165,39 @@ export class EventService {
       },
     };
   }
+
+  async cancelRegister(
+    userId: number,
+    eventId: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    await this.findOne(eventId);
+    await this.userService.getUserInfoById(userId);
+    const isRegistered = await this.prisma.userEvent.findUnique({
+      where: {
+        user_id_event_id: {
+          user_id: userId,
+          event_id: eventId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+      throw new BadRequestException('You have not registered yet');
+    await this.prisma.userEvent.update({
+      where: {
+        user_id_event_id: {
+          user_id: userId,
+          event_id: eventId,
+        },
+      },
+      data: {
+        status: UserActivityStatus.CANCLED,
+      },
+    });
+
+    return {
+      data: {
+        message: 'Cancel register activity successfully',
+      },
+    };
+  }
 }

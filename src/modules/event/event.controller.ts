@@ -124,4 +124,13 @@ export class EventController {
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.eventService.register(userId, +eventId);
   }
+
+  @UseGuards(JwtGuard)
+  @Put('cancel/:id')
+  async cancelRegister(
+    @GetUser('id') userId: number,
+    @Param('id') eventId: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.eventService.cancelRegister(userId, +eventId);
+  }
 }
