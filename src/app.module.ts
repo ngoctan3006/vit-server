@@ -12,6 +12,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
+import { EnvConstant } from './shares/constants/env.constant';
 
 @Module({
   imports: [
@@ -26,21 +27,21 @@ import { UserModule } from './modules/user/user.module';
       isGlobal: true,
       useFactory: (configService: ConfigService) => ({
         store: redisStore,
-        host: configService.get<string>('REDIS_HOST'),
-        port: configService.get<number>('REDIS_PORT'),
-        username: configService.get<string>('REDIS_USERNAME'),
-        password: configService.get<string>('REDIS_PASSWORD'),
-        ttl: configService.get<number>('CACHE_TTL'),
+        host: configService.get<string>(EnvConstant.REDIS_HOST),
+        port: configService.get<number>(EnvConstant.REDIS_PORT),
+        username: configService.get<string>(EnvConstant.REDIS_USERNAME),
+        password: configService.get<string>(EnvConstant.REDIS_PASSWORD),
+        ttl: configService.get<number>(EnvConstant.CACHE_TTL),
       }),
       inject: [ConfigService],
     }),
     BullModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         redis: {
-          host: configService.get<string>('REDIS_HOST'),
-          port: configService.get<number>('REDIS_PORT'),
-          username: configService.get<string>('REDIS_USERNAME'),
-          password: configService.get<string>('REDIS_PASSWORD'),
+          host: configService.get<string>(EnvConstant.REDIS_HOST),
+          port: configService.get<number>(EnvConstant.REDIS_PORT),
+          username: configService.get<string>(EnvConstant.REDIS_USERNAME),
+          password: configService.get<string>(EnvConstant.REDIS_PASSWORD),
         },
       }),
       inject: [ConfigService],
