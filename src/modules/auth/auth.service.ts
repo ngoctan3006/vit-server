@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { EnvConstant } from 'src/shares/constants/env.constant';
 import { generateUsername } from 'src/shares/utils/generate-username.util';
 import { getGender } from 'src/shares/utils/get-gender.util';
 import { getPosition } from 'src/shares/utils/get-position.util';
@@ -114,9 +115,11 @@ export class AuthService {
     };
     const accessToken = await this.jwtService.signAsync(payload);
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+      secret: this.configService.get<string>(
+        EnvConstant.JWT_REFRESH_TOKEN_SECRET
+      ),
       expiresIn: this.configService.get<number>(
-        'JWT_REFRESH_TOKEN_EXPIRATION_TIME'
+        EnvConstant.JWT_REFRESH_TOKEN_EXPIRATION_TIME
       ),
     });
     return {
@@ -130,7 +133,9 @@ export class AuthService {
   }> {
     try {
       const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        secret: this.configService.get<string>(
+          EnvConstant.JWT_REFRESH_TOKEN_SECRET
+        ),
       });
 
       const user = await this.userService.findById(payload.id);
