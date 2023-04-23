@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -117,10 +113,41 @@ export class AuthService {
       position: user.position,
     };
     const accessToken = await this.jwtService.signAsync(payload);
-    const refreshToken = await this.jwtService.signAsync(payload);
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: this.configService.get<number>(
+        'JWT_REFRESH_TOKEN_EXPIRATION_TIME'
+      ),
+    });
     return {
       accessToken,
       refreshToken,
     };
+  }
+
+  async refreshToken(refreshToken: string): Promise<{
+    accessToken: string;
+  }> {
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+      });
+
+      const user = await this.userService.findById(payload.id);
+      if (!user) {
+        throw new BadRequestException('refresh token is invalid');
+      }
+
+      delete payload.iat;
+      delete payload.exp;
+
+      const newAccessToken = await this.jwtService.signAsync(payload);
+      return {
+        accessToken: newAccessToken,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('refresh token is expired');
+    }
   }
 }

@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
 import { FileUploadDto } from './dto/file-upload.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -52,5 +53,10 @@ export class AuthController {
   @Post('import-many')
   async importMany(@UploadedFile() file: Express.Multer.File) {
     return await this.authService.importMany(file);
+  }
+
+  @Post('refresh-token')
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    return await this.authService.refreshToken(refreshTokenDto.refreshToken);
   }
 }
