@@ -29,4 +29,8 @@ export enum EnvConstant {
   REDIS_PASSWORD = 'REDIS_PASSWORD',
 
   CACHE_TTL = 'CACHE_TTL',
+
+  ENC_PASSWORD = 'ENC_PASSWORD',
+
+  CLIENT_URL = 'CLIENT_URL',
 }
