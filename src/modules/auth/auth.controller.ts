@@ -10,11 +10,11 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
 import { AuthService } from './auth.service';
-import { SigninDto } from './dto/signin.dto';
-import { SignupDto } from './dto/signup.dto';
 import { FileUploadDto } from './dto/file-upload.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { SigninDto } from './dto/signin.dto';
+import { SignupDto } from './dto/signup.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -62,7 +62,14 @@ export class AuthController {
   }
 
   @Post('request-reset-password')
-  async requestResetPassword(@Body() data: RequestResetPasswordDto) {
+  async requestResetPassword(
+    @Body() data: RequestResetPasswordDto
+  ): Promise<{ message: string }> {
     return await this.authService.requestResetPassword(data);
+  }
+
+  @Post('token')
+  async checkTokenResetPassword(@Body('token') token: string) {
+    return await this.authService.checkTokenResetPassword(token);
   }
 }

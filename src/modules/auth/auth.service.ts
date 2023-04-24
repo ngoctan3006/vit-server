@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { Queue } from 'bull';
 import { Cache } from 'cache-manager';
-import { AES } from 'crypto-js';
+import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants/env.constant';
 import { generateUsername } from 'src/shares/utils/generate-username.util';
 import { getGender } from 'src/shares/utils/get-gender.util';
@@ -164,7 +164,9 @@ export class AuthService {
     }
   }
 
-  async requestResetPassword(data: RequestResetPasswordDto) {
+  async requestResetPassword(
+    data: RequestResetPasswordDto
+  ): Promise<{ message: string }> {
     const user = await this.userService.checkUserMailAndPhone(data);
     const enc = AES.encrypt(
       JSON.stringify(data),
@@ -189,6 +191,29 @@ export class AuthService {
       }
     );
 
-    return enc;
+    return {
+      message: 'Link reset password has been sent to your email',
+    };
+  }
+
+  async checkTokenResetPassword(token: string): Promise<true> {
+    try {
+      const data = JSON.parse(
+        AES.decrypt(
+          token,
+          this.configService.get<string>(EnvConstant.ENC_PASSWORD)
+        ).toString(enc.Utf8)
+      );
+      await this.userService.checkUserMailAndPhone(data);
+      if (!(await this.cacheManager.get<string>(data?.username))) {
+        throw new BadRequestException('token is expired');
+      }
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        error?.response?.message || 'token is invalid'
+      );
+    }
   }
 }
