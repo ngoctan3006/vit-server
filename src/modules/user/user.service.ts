@@ -148,7 +148,7 @@ export class UserService {
 
   async resetPassword(id: number, data: ResetPasswordDto): Promise<string> {
     const { password, cfPassword } = data;
-    const user = await this.getUserInfoById(id);
+    await this.getUserInfoById(id);
     if (password !== cfPassword)
       throw new BadRequestException('Password not match');
 
@@ -160,7 +160,7 @@ export class UserService {
         password: await hashPassword(password),
       },
     });
-    return 'Change password successfully';
+    return 'Reset password successfully';
   }
 
   async update(id: number, data: UpdateUserDto): Promise<User> {
