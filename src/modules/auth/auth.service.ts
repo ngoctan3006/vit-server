@@ -1,7 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { Queue } from 'bull';
+import { Cache } from 'cache-manager';
+import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants/env.constant';
 import { generateUsername } from 'src/shares/utils/generate-username.util';
 import { getGender } from 'src/shares/utils/get-gender.util';
@@ -9,6 +14,8 @@ import { getPosition } from 'src/shares/utils/get-position.util';
 import { comparePassword } from 'src/shares/utils/password.util';
 import { read, utils } from 'xlsx';
 import { UserService } from '../user/user.service';
+import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResponseLoginDto } from './dto/response-login.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
@@ -19,7 +26,9 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    @InjectQueue('send-mail') private readonly sendMail: Queue,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   async signup(signupData: SignupDto): Promise<ResponseLoginDto> {
@@ -153,6 +162,81 @@ export class AuthService {
     } catch (error) {
       console.log(error);
       throw new BadRequestException('refresh token is expired');
+    }
+  }
+
+  async requestResetPassword(
+    data: RequestResetPasswordDto
+  ): Promise<{ message: string }> {
+    const user = await this.userService.checkUserMailAndPhone(data);
+    const enc = AES.encrypt(
+      JSON.stringify(data),
+      this.configService.get<string>(EnvConstant.ENC_PASSWORD)
+    ).toString();
+    await this.cacheManager.set(
+      user.username,
+      enc,
+      this.configService.get<number>(EnvConstant.CACHE_TTL)
+    );
+    await this.sendMail.add(
+      'reset-password',
+      {
+        ...data,
+        name: user.fullname,
+        resetPasswordUrl: `${this.configService.get<string>(
+          EnvConstant.CLIENT_URL
+        )}/reset-password?token=${enc}`,
+      },
+      {
+        removeOnComplete: true,
+      }
+    );
+
+    return {
+      message: 'Link reset password has been sent to your email',
+    };
+  }
+
+  async checkTokenResetPassword(token: string): Promise<User> {
+    try {
+      const data = JSON.parse(
+        AES.decrypt(
+          token,
+          this.configService.get<string>(EnvConstant.ENC_PASSWORD)
+        ).toString(enc.Utf8)
+      );
+      const cache = await this.cacheManager.get<string>(data.username);
+      if (!cache) {
+        throw new BadRequestException('token is expired');
+      }
+      if (cache !== token) {
+        throw new BadRequestException('token is invalid');
+      }
+      return await this.userService.checkUserMailAndPhone(data);
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        error?.response?.message || 'token is invalid'
+      );
+    }
+  }
+
+  async resetPassword(data: ResetPasswordDto): Promise<{ message: string }> {
+    const { token, password, cfPassword } = data;
+
+    try {
+      const user = await this.checkTokenResetPassword(token);
+      const message = await this.userService.resetPassword(user.id, {
+        password,
+        cfPassword,
+      });
+      await this.cacheManager.del(user.username);
+      return { message };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        error?.response?.message || 'token is invalid'
+      );
     }
   }
 }

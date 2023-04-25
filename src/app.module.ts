@@ -9,6 +9,7 @@ import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventModule } from './modules/event/event.module';
 import { MailModule } from './modules/mail/mail.module';
+import { EmailProcessor } from './modules/mail/processors/email.processor';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
@@ -51,6 +52,6 @@ import { EnvConstant } from './shares/constants/env.constant';
     EventModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, EmailProcessor],
 })
 export class AppModule {}
