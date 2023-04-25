@@ -16,6 +16,7 @@ import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResponseLoginDto } from './dto/response-login.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -23,7 +24,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signin')
-  async signin(@Body() signinData: SigninDto) {
+  async signin(@Body() signinData: SigninDto): Promise<ResponseLoginDto> {
     return await this.authService.signin(signinData);
   }
 
@@ -35,7 +36,7 @@ export class AuthController {
   )
   @ApiBearerAuth()
   @Post('signup')
-  async signup(@Body() signupData: SignupDto) {
+  async signup(@Body() signupData: SignupDto): Promise<ResponseLoginDto> {
     return await this.authService.signup(signupData);
   }
 
