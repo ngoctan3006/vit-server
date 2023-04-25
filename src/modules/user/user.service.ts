@@ -15,6 +15,7 @@ import { comparePassword } from './../../shares/utils/password.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class UserService {
@@ -140,6 +141,23 @@ export class UserService {
       },
       data: {
         password: await hashPassword(newPassword),
+      },
+    });
+    return 'Change password successfully';
+  }
+
+  async resetPassword(id: number, data: ResetPasswordDto): Promise<string> {
+    const { password, cfPassword } = data;
+    const user = await this.getUserInfoById(id);
+    if (password !== cfPassword)
+      throw new BadRequestException('Password not match');
+
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: await hashPassword(password),
       },
     });
     return 'Change password successfully';

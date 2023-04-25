@@ -15,6 +15,7 @@ import { comparePassword } from 'src/shares/utils/password.util';
 import { read, utils } from 'xlsx';
 import { UserService } from '../user/user.service';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResponseLoginDto } from './dto/response-login.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
@@ -196,7 +197,7 @@ export class AuthService {
     };
   }
 
-  async checkTokenResetPassword(token: string): Promise<true> {
+  async checkTokenResetPassword(token: string): Promise<User> {
     try {
       const data = JSON.parse(
         AES.decrypt(
@@ -204,11 +205,33 @@ export class AuthService {
           this.configService.get<string>(EnvConstant.ENC_PASSWORD)
         ).toString(enc.Utf8)
       );
-      await this.userService.checkUserMailAndPhone(data);
-      if (!(await this.cacheManager.get<string>(data?.username))) {
+      const cache = await this.cacheManager.get<string>(data.username);
+      if (!cache) {
         throw new BadRequestException('token is expired');
       }
-      return true;
+      if (cache !== token) {
+        throw new BadRequestException('token is invalid');
+      }
+      return await this.userService.checkUserMailAndPhone(data);
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        error?.response?.message || 'token is invalid'
+      );
+    }
+  }
+
+  async resetPassword(data: ResetPasswordDto): Promise<{ message: string }> {
+    const { token, password, cfPassword } = data;
+
+    try {
+      const user = await this.checkTokenResetPassword(token);
+      const message = await this.userService.resetPassword(user.id, {
+        password,
+        cfPassword,
+      });
+      await this.cacheManager.del(user.username);
+      return { message };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(

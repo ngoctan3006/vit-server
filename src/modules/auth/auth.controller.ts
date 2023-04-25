@@ -15,6 +15,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -69,7 +70,15 @@ export class AuthController {
   }
 
   @Post('token')
-  async checkTokenResetPassword(@Body('token') token: string) {
-    return await this.authService.checkTokenResetPassword(token);
+  async checkTokenResetPassword(@Body('token') token: string): Promise<true> {
+    await this.authService.checkTokenResetPassword(token);
+    return true;
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body() data: ResetPasswordDto
+  ): Promise<{ message: string }> {
+    return await this.authService.resetPassword(data);
   }
 }
