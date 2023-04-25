@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3 } from 'aws-sdk';
 import { extname } from 'path';
-require('aws-sdk/lib/maintenance_mode_message').suppress = true;
+import { EnvConstant } from 'src/shares/constants/env.constant';
+require('aws-sdk/lib/maintenance_mode_message').suppress = true; // Fix: The AWS SDK for JavaScript (v2) will be put into maintenance mode in 2023. Please upgrade to v3.
 
 @Injectable()
 export class UploadService {
@@ -12,10 +13,12 @@ export class UploadService {
   private readonly secretAccessKey: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.region = this.configService.get('AWS_REGION');
-    this.bucketName = this.configService.get('AWS_BUCKET_NAME');
-    this.accessKeyId = this.configService.get('AWS_ACCESS_KEY_ID');
-    this.secretAccessKey = this.configService.get('AWS_SECRET_ACCESS_KEY');
+    this.region = this.configService.get(EnvConstant.AWS_REGION);
+    this.bucketName = this.configService.get(EnvConstant.AWS_BUCKET_NAME);
+    this.accessKeyId = this.configService.get(EnvConstant.AWS_ACCESS_KEY_ID);
+    this.secretAccessKey = this.configService.get(
+      EnvConstant.AWS_SECRET_ACCESS_KEY
+    );
   }
 
   getSignedUrl(key: string) {

@@ -6,14 +6,16 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Queue } from 'bull';
+import { getKeyS3 } from 'src/shares/utils/get-key-s3.util';
 import { hashPassword } from 'src/shares/utils/password.util';
+import { RequestResetPasswordDto } from '../auth/dto/request-reset-password.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
 import { comparePassword } from './../../shares/utils/password.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { getKeyS3 } from 'src/shares/utils/get-key-s3.util';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class UserService {
@@ -127,7 +129,8 @@ export class UserService {
 
   async changePassword(id: number, data: ChangePasswordDto): Promise<string> {
     const { password, newPassword, cfPassword } = data;
-    const user = await this.getUserInfoById(id);
+    const user = await this.findById(id);
+    if (!user) throw new NotFoundException('User not found');
     if (newPassword !== cfPassword)
       throw new BadRequestException('Password not match');
     if (!(await comparePassword(password, user.password)))
@@ -142,6 +145,23 @@ export class UserService {
       },
     });
     return 'Change password successfully';
+  }
+
+  async resetPassword(id: number, data: ResetPasswordDto): Promise<string> {
+    const { password, cfPassword } = data;
+    await this.getUserInfoById(id);
+    if (password !== cfPassword)
+      throw new BadRequestException('Password not match');
+
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: await hashPassword(password),
+      },
+    });
+    return 'Reset password successfully';
   }
 
   async update(id: number, data: UpdateUserDto): Promise<User> {
@@ -223,5 +243,18 @@ export class UserService {
         username: true,
       },
     });
+  }
+
+  async checkUserMailAndPhone(data: RequestResetPasswordDto): Promise<User> {
+    const { username, email, phone } = data;
+    const user = await this.findByUsername(username);
+    if (!user) throw new NotFoundException('User not found');
+    if (user.email !== email.toLowerCase())
+      throw new BadRequestException('Email or phone not match with username');
+    if (user.phone !== phone.split(' ').join(''))
+      throw new BadRequestException('Email or phone not match with username');
+
+    delete user.password;
+    return user;
   }
 }
