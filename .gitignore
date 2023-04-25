@@ -41,3 +41,7 @@ prisma/*.svg
 raw-data.json
 
 **/mail/templates/*.json
+
+package-lock.json
+yarn.lock
+
