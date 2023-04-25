@@ -129,7 +129,8 @@ export class UserService {
 
   async changePassword(id: number, data: ChangePasswordDto): Promise<string> {
     const { password, newPassword, cfPassword } = data;
-    const user = await this.getUserInfoById(id);
+    const user = await this.findById(id);
+    if (!user) throw new NotFoundException('User not found');
     if (newPassword !== cfPassword)
       throw new BadRequestException('Password not match');
     if (!(await comparePassword(password, user.password)))
