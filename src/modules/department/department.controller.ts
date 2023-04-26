@@ -34,8 +34,9 @@ export class DepartmentController {
     return await this.departmentService.findAll();
   }
 
+  @UseGuards(JwtGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<Department> {
     return this.departmentService.findOne(+id);
   }
 

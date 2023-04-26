@@ -16,8 +16,8 @@ export class DepartmentService {
     return await this.prisma.department.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} department`;
+  async findOne(id: number): Promise<Department> {
+    return await this.prisma.department.findUnique({ where: { id } });
   }
 
   update(id: number, updateDepartmentDto: UpdateDepartmentDto) {
