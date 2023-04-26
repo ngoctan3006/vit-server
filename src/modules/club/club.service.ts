@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Club } from '@prisma/client';
+import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from './../prisma/prisma.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
@@ -7,8 +9,8 @@ import { UpdateClubDto } from './dto/update-club.dto';
 export class ClubService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(data: CreateClubDto) {
-    return 'This action adds a new club';
+  async create(data: CreateClubDto): Promise<ResponseDto<Club>> {
+    return { data: await this.prisma.club.create({ data }) };
   }
 
   findAll() {

@@ -8,6 +8,9 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Club, Position } from '@prisma/client';
+import { Roles } from 'src/shares/decorators/roles.decorator';
+import { ResponseDto } from 'src/shares/dto/response.dto';
 import { ClubService } from './club.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
@@ -18,9 +21,10 @@ import { UpdateClubDto } from './dto/update-club.dto';
 export class ClubController {
   constructor(private readonly clubService: ClubService) {}
 
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Post()
-  create(@Body() data: CreateClubDto) {
-    return this.clubService.create(data);
+  async create(@Body() data: CreateClubDto): Promise<ResponseDto<Club>> {
+    return await this.clubService.create(data);
   }
 
   @Get()
