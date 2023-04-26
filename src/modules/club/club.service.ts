@@ -33,6 +33,29 @@ export class ClubService {
     };
   }
 
+  async findAllDeleted(
+    page: number,
+    limit: number
+  ): Promise<ResponseDto<Club[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
+    return {
+      data: await this.prisma.club.findMany({
+        where: { deleted_at: { not: null } },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      metadata: {
+        totalPage: Math.ceil(
+          (await this.prisma.club.count({
+            where: { deleted_at: { not: null } },
+          })) / limit
+        ),
+      },
+    };
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} club`;
   }

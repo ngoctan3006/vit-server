@@ -39,6 +39,14 @@ export class ClubController {
     return await this.clubService.findAll(page, limit);
   }
 
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
+  @Get('trash')
+  async findAllDeleted(
+    @Query() { page, limit }: PaginationDto
+  ): Promise<ResponseDto<Club[]>> {
+    return await this.clubService.findAllDeleted(page, limit);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.clubService.findOne(id);
