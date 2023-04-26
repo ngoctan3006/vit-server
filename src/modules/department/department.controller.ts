@@ -76,4 +76,10 @@ export class DepartmentController {
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.departmentService.softRemove(id);
   }
+
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
+  @Put('restore/:id')
+  async restore(@Param('id') id: number): Promise<ResponseDto<Department>> {
+    return await this.departmentService.restore(id);
+  }
 }

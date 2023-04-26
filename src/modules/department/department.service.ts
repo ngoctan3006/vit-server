@@ -96,4 +96,14 @@ export class DepartmentService {
       data: { message: 'Department has been deleted' },
     };
   }
+
+  async restore(id: number): Promise<ResponseDto<Department>> {
+    await this.findOneDeleted(id);
+    await this.prisma.department.update({
+      where: { id },
+      data: { deleted_at: null },
+    });
+
+    return await this.findOne(id);
+  }
 }
