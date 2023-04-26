@@ -63,6 +63,17 @@ export class GroupController {
     return await this.groupService.findOne(id);
   }
 
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Get('trash/:id')
+  async findOneDeleted(@Param('id') id: number): Promise<ResponseDto<Group>> {
+    return await this.groupService.findOneDeleted(id);
+  }
+
   @Put(':id')
   update(@Param('id') id: number, @Body() data: UpdateGroupDto) {
     return this.groupService.update(id, data);

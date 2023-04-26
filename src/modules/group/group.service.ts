@@ -70,6 +70,16 @@ export class GroupService {
     return { data: group };
   }
 
+  async findOneDeleted(id: number): Promise<ResponseDto<Group>> {
+    const group = await this.prisma.group.findUnique({
+      where: { id },
+    });
+    if (!group || !group.deleted_at) {
+      throw new NotFoundException('Group not found');
+    }
+    return { data: group };
+  }
+
   update(id: number, data: UpdateGroupDto) {
     return `This action updates a #${id} group`;
   }
