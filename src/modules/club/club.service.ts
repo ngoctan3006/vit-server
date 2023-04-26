@@ -18,7 +18,7 @@ export class ClubService {
   ) {}
 
   async create(data: CreateClubDto): Promise<ResponseDto<Club>> {
-    await this.departmentService.findOne(data.deparment_id);
+    await this.departmentService.findOne(data.department_id);
     return { data: await this.prisma.club.create({ data }) };
   }
 
@@ -87,8 +87,8 @@ export class ClubService {
 
   async update(id: number, data: UpdateClubDto): Promise<ResponseDto<Club>> {
     await this.findOne(id);
-    if (data.deparment_id)
-      await this.departmentService.findOne(data.deparment_id);
+    if (data.department_id)
+      await this.departmentService.findOne(data.department_id);
     return { data: await this.prisma.club.update({ where: { id }, data }) };
   }
 

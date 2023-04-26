@@ -15,5 +15,5 @@ export class CreateClubDto {
   @ApiProperty()
   @IsNumberString()
   @IsNotEmpty()
-  deparment_id: number;
+  department_id: number;
 }
