@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DepartmentModule } from './modules/department/department.module';
 import { EventModule } from './modules/event/event.module';
 import { MailModule } from './modules/mail/mail.module';
 import { EmailProcessor } from './modules/mail/processors/email.processor';
@@ -14,6 +15,8 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
 import { EnvConstant } from './shares/constants/env.constant';
+import { ClubModule } from './modules/club/club.module';
+import { GroupModule } from './modules/group/group.module';
 
 @Module({
   imports: [
@@ -50,6 +53,9 @@ import { EnvConstant } from './shares/constants/env.constant';
     UploadModule,
     ActivityModule,
     EventModule,
+    DepartmentModule,
+    ClubModule,
+    GroupModule,
   ],
   controllers: [AppController],
   providers: [AppService, EmailProcessor],
