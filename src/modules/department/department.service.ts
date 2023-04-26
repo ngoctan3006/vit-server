@@ -88,6 +88,7 @@ export class DepartmentService {
   }
 
   async softRemove(id: number): Promise<ResponseDto<{ message: string }>> {
+    await this.findOne(id);
     await this.prisma.department.update({
       where: { id },
       data: { deleted_at: new Date() },

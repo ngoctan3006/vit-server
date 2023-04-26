@@ -84,7 +84,14 @@ export class ClubService {
     return { data: await this.prisma.club.update({ where: { id }, data }) };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} club`;
+  async softRemove(id: number): Promise<ResponseDto<{ message: string }>> {
+    await this.findOne(id);
+    await this.prisma.club.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+    return {
+      data: { message: 'Club has been deleted' },
+    };
   }
 }

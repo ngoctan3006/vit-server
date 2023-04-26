@@ -65,8 +65,11 @@ export class ClubController {
     return await this.clubService.update(id, data);
   }
 
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.clubService.remove(id);
+  async softDelete(
+    @Param('id') id: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.clubService.softRemove(id);
   }
 }
