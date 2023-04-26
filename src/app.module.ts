@@ -15,6 +15,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
 import { EnvConstant } from './shares/constants/env.constant';
+import { ClubModule } from './modules/club/club.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { EnvConstant } from './shares/constants/env.constant';
     ActivityModule,
     EventModule,
     DepartmentModule,
+    ClubModule,
   ],
   controllers: [AppController],
   providers: [AppService, EmailProcessor],
