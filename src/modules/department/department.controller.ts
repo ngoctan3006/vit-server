@@ -22,7 +22,7 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
 
-  @Roles(Position.ADMIN, Position.DOI_PHO, Position.TRUONG_HANH_CHINH)
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Post()
   async create(@Body() data: CreateDepartmentDto): Promise<Department> {
     return await this.departmentService.create(data);
@@ -40,7 +40,7 @@ export class DepartmentController {
     return this.departmentService.findOne(+id);
   }
 
-  @Roles(Position.ADMIN, Position.DOI_PHO, Position.TRUONG_HANH_CHINH)
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Put(':id')
   async update(@Param('id') id: string, @Body() data: UpdateDepartmentDto) {
     return await this.departmentService.update(+id, data);
