@@ -6,10 +6,12 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Department, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -26,9 +28,10 @@ export class DepartmentController {
     return await this.departmentService.create(data);
   }
 
+  @UseGuards(JwtGuard)
   @Get()
-  findAll() {
-    return this.departmentService.findAll();
+  async findAll(): Promise<Department[]> {
+    return await this.departmentService.findAll();
   }
 
   @Get(':id')

@@ -12,8 +12,8 @@ export class DepartmentService {
     return await this.prisma.department.create({ data });
   }
 
-  findAll() {
-    return `This action returns all department`;
+  async findAll(): Promise<Department[]> {
+    return await this.prisma.department.findMany();
   }
 
   findOne(id: number) {
