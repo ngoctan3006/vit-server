@@ -90,7 +90,14 @@ export class GroupService {
     return await this.prisma.group.update({ where: { id }, data });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} group`;
+  async softRemove(id: number): Promise<ResponseDto<{ message: string }>> {
+    await this.findOne(id);
+    await this.prisma.group.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+    return {
+      data: { message: 'Group has been deleted' },
+    };
   }
 }

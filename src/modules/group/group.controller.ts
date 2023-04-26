@@ -85,8 +85,16 @@ export class GroupController {
     return await this.groupService.update(id, data);
   }
 
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.groupService.remove(id);
+  async softDelete(
+    @Param('id') id: number
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.groupService.softRemove(id);
   }
 }
