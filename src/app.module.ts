@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DepartmentModule } from './modules/department/department.module';
 import { EventModule } from './modules/event/event.module';
 import { MailModule } from './modules/mail/mail.module';
 import { EmailProcessor } from './modules/mail/processors/email.processor';
@@ -50,6 +51,7 @@ import { EnvConstant } from './shares/constants/env.constant';
     UploadModule,
     ActivityModule,
     EventModule,
+    DepartmentModule,
   ],
   controllers: [AppController],
   providers: [AppService, EmailProcessor],
