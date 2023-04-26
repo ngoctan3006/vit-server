@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -40,12 +40,10 @@ export class DepartmentController {
     return this.departmentService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateDepartmentDto: UpdateDepartmentDto
-  ) {
-    return this.departmentService.update(+id, updateDepartmentDto);
+  @Roles(Position.ADMIN, Position.DOI_PHO, Position.TRUONG_HANH_CHINH)
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() data: UpdateDepartmentDto) {
+    return await this.departmentService.update(+id, data);
   }
 
   @Delete(':id')
