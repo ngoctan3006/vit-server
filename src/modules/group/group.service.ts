@@ -6,12 +6,16 @@ import {
 import { Group } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { EventService } from './../event/event.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 
 @Injectable()
 export class GroupService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventService: EventService
+  ) {}
 
   async create(data: CreateGroupDto): Promise<ResponseDto<Group>> {
     return { data: await this.prisma.group.create({ data }) };
@@ -80,8 +84,10 @@ export class GroupService {
     return { data: group };
   }
 
-  update(id: number, data: UpdateGroupDto) {
-    return `This action updates a #${id} group`;
+  async update(id: number, data: UpdateGroupDto): Promise<Group> {
+    await this.findOne(id);
+    if (data.event_id) await this.eventService.findOne(data.event_id);
+    return await this.prisma.group.update({ where: { id }, data });
   }
 
   remove(id: number) {
