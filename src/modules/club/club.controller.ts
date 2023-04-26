@@ -53,6 +53,12 @@ export class ClubController {
     return await this.clubService.findOne(id);
   }
 
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
+  @Get('trash/:id')
+  async findOneDeleted(@Param('id') id: number): Promise<ResponseDto<Club>> {
+    return await this.clubService.findOneDeleted(id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: number, @Body() data: UpdateClubDto) {
     return this.clubService.update(id, data);

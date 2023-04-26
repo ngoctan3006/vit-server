@@ -70,6 +70,16 @@ export class ClubService {
     return { data: club };
   }
 
+  async findOneDeleted(id: number): Promise<ResponseDto<Club>> {
+    const club = await this.prisma.club.findUnique({
+      where: { id },
+    });
+    if (!club || !club.deleted_at) {
+      throw new NotFoundException('Club not found');
+    }
+    return { data: club };
+  }
+
   update(id: number, data: UpdateClubDto) {
     return `This action updates a #${id} club`;
   }
