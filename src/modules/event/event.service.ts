@@ -7,9 +7,9 @@ import { Event, UserActivityStatus } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
+import { ApproveDto } from './dto/approve.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { ApproveDto } from './dto/approve.dto';
 
 @Injectable()
 export class EventService {
@@ -42,7 +42,10 @@ export class EventService {
         take: limit,
       }),
       metadata: {
-        totalPage: Math.ceil((await this.prisma.event.count()) / limit),
+        totalPage: Math.ceil(
+          (await this.prisma.event.count({ where: { deleted_at: null } })) /
+            limit
+        ),
       },
     };
   }
@@ -57,15 +60,19 @@ export class EventService {
     return {
       data: await this.prisma.event.findMany({
         where: {
-          NOT: {
-            deleted_at: null,
-          },
+          deleted_at: { not: null },
         },
         skip: (page - 1) * limit,
         take: limit,
       }),
       metadata: {
-        totalPage: Math.ceil((await this.prisma.event.count()) / limit),
+        totalPage: Math.ceil(
+          (await this.prisma.event.count({
+            where: {
+              deleted_at: { not: null },
+            },
+          })) / limit
+        ),
       },
     };
   }
@@ -85,6 +92,7 @@ export class EventService {
   }
 
   async update(id: number, data: UpdateEventDto): Promise<ResponseDto<Event>> {
+    await this.findOne(id);
     const { start_date, end_date, ...rest } = data;
     const { data: event } = await this.findOne(id);
 
