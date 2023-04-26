@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumberString, IsString } from 'class-validator';
 
-export class CreateClubDto {
+export class CreateGroupDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
@@ -15,5 +15,5 @@ export class CreateClubDto {
   @ApiProperty()
   @IsNumberString()
   @IsNotEmpty()
-  department_id: number;
+  event_id: number;
 }

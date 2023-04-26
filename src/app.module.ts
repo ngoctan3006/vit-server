@@ -16,6 +16,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
 import { EnvConstant } from './shares/constants/env.constant';
 import { ClubModule } from './modules/club/club.module';
+import { GroupModule } from './modules/group/group.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { ClubModule } from './modules/club/club.module';
     EventModule,
     DepartmentModule,
     ClubModule,
+    GroupModule,
   ],
   controllers: [AppController],
   providers: [AppService, EmailProcessor],

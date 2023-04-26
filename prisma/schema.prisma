@@ -16,12 +16,12 @@ datasource db {
 }
 
 model User {
-  id          Int             @id @default(autoincrement())
-  username    String          @unique
+  id          Int              @id @default(autoincrement())
+  username    String           @unique
   password    String
   fullname    String
-  email       String          @unique
-  phone       String          @unique
+  email       String           @unique
+  phone       String           @unique
   bio         String?
   avatar      String?
   birthday    DateTime?
@@ -34,17 +34,17 @@ model User {
   date_join   DateTime?
   date_out    DateTime?
   last_login  DateTime?
-  gender      Gender          @default(OTHER)
-  status      Status          @default(ACTIVE)
-  position    Position        @default(MEMBER)
+  gender      Gender           @default(OTHER)
+  status      Status           @default(ACTIVE)
+  position    Position         @default(MEMBER)
   social      UserSocial[]
   activities  UserActivity[]
   groups      GroupUser[]
-  departments DeparmentUser[]
+  departments DepartmentUser[]
   clubs       ClubUser[]
   events      UserEvent[]
-  created_at  DateTime        @default(now())
-  updated_at  DateTime        @updatedAt
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt
 }
 
 model Social {
@@ -149,17 +149,17 @@ model GroupUser {
 }
 
 model Department {
-  id          Int             @id @default(autoincrement())
+  id          Int              @id @default(autoincrement())
   name        String
   description String
-  users       DeparmentUser[]
+  users       DepartmentUser[]
   clubs       Club[]
-  created_at  DateTime        @default(now())
-  updated_at  DateTime        @updatedAt
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt
   deleted_at  DateTime?
 }
 
-model DeparmentUser {
+model DepartmentUser {
   id            Int        @id @default(autoincrement())
   department_id Int
   department    Department @relation(fields: [department_id], references: [id], onDelete: Cascade)
@@ -174,15 +174,15 @@ model DeparmentUser {
 }
 
 model Club {
-  id           Int        @id @default(autoincrement())
-  name         String
-  description  String
-  deparment_id Int
-  deparment    Department @relation(fields: [deparment_id], references: [id], onDelete: Cascade)
-  users        ClubUser[]
-  created_at   DateTime   @default(now())
-  updated_at   DateTime   @updatedAt
-  deleted_at   DateTime?
+  id            Int        @id @default(autoincrement())
+  name          String
+  description   String
+  department_id Int
+  department    Department @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  users         ClubUser[]
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  deleted_at    DateTime?
 }
 
 model ClubUser {
