@@ -51,29 +51,29 @@ export class DepartmentController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ResponseDto<Department>> {
-    return this.departmentService.findOne(+id);
+  async findOne(@Param('id') id: number): Promise<ResponseDto<Department>> {
+    return this.departmentService.findOne(id);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Get('trash/:id')
   async findOneDeleted(
-    @Param('id') id: string
+    @Param('id') id: number
   ): Promise<ResponseDto<Department>> {
-    return this.departmentService.findOneDeleted(+id);
+    return this.departmentService.findOneDeleted(id);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Put(':id')
-  async update(@Param('id') id: string, @Body() data: UpdateDepartmentDto) {
-    return await this.departmentService.update(+id, data);
+  async update(@Param('id') id: number, @Body() data: UpdateDepartmentDto) {
+    return await this.departmentService.update(id, data);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Delete(':id')
   async softDelete(
-    @Param('id') id: string
+    @Param('id') id: number
   ): Promise<ResponseDto<{ message: string }>> {
-    return await this.departmentService.softRemove(+id);
+    return await this.departmentService.softRemove(id);
   }
 }
