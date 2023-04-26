@@ -57,9 +57,10 @@ export class GroupController {
     return await this.groupService.findAllDeleted(page, limit);
   }
 
+  @UseGuards(JwtGuard)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.groupService.findOne(id);
+  async findOne(@Param('id') id: number): Promise<ResponseDto<Group>> {
+    return await this.groupService.findOne(id);
   }
 
   @Put(':id')

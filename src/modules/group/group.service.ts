@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Group } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -56,8 +60,14 @@ export class GroupService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} group`;
+  async findOne(id: number): Promise<ResponseDto<Group>> {
+    const group = await this.prisma.group.findUnique({
+      where: { id },
+    });
+    if (!group || group.deleted_at) {
+      throw new NotFoundException('Group not found');
+    }
+    return { data: group };
   }
 
   update(id: number, data: UpdateGroupDto) {
