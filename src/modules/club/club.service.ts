@@ -5,15 +5,20 @@ import {
 } from '@nestjs/common';
 import { Club } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
+import { DepartmentService } from './../department/department.service';
 import { PrismaService } from './../prisma/prisma.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
 
 @Injectable()
 export class ClubService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly departmentService: DepartmentService
+  ) {}
 
   async create(data: CreateClubDto): Promise<ResponseDto<Club>> {
+    await this.departmentService.findOne(data.deparment_id);
     return { data: await this.prisma.club.create({ data }) };
   }
 
