@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { Club } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from './../prisma/prisma.service';
@@ -13,8 +13,24 @@ export class ClubService {
     return { data: await this.prisma.club.create({ data }) };
   }
 
-  findAll() {
-    return `This action returns all club`;
+  async findAll(page: number, limit: number): Promise<ResponseDto<Club[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
+    return {
+      data: await this.prisma.club.findMany({
+        where: { deleted_at: null },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      metadata: {
+        totalPage: Math.ceil(
+          (await this.prisma.club.count({
+            where: { deleted_at: null },
+          })) / limit
+        ),
+      },
+    };
   }
 
   findOne(id: number) {

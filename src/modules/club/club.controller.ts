@@ -6,11 +6,15 @@ import {
   Param,
   Patch,
   Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Club, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
+import { PaginationDto } from 'src/shares/dto/pagination.dto';
 import { ResponseDto } from 'src/shares/dto/response.dto';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ClubService } from './club.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
@@ -27,9 +31,12 @@ export class ClubController {
     return await this.clubService.create(data);
   }
 
+  @UseGuards(JwtGuard)
   @Get()
-  findAll() {
-    return this.clubService.findAll();
+  async findAll(
+    @Query() { page, limit }: PaginationDto
+  ): Promise<ResponseDto<Club[]>> {
+    return await this.clubService.findAll(page, limit);
   }
 
   @Get(':id')
