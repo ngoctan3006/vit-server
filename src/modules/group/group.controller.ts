@@ -6,11 +6,15 @@ import {
   Param,
   Post,
   Put,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Group, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
+import { PaginationDto } from 'src/shares/dto/pagination.dto';
 import { ResponseDto } from 'src/shares/dto/response.dto';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { GroupService } from './group.service';
@@ -32,9 +36,12 @@ export class GroupController {
     return await this.groupService.create(data);
   }
 
+  @UseGuards(JwtGuard)
   @Get()
-  findAll() {
-    return this.groupService.findAll();
+  async findAll(
+    @Query() { page, limit }: PaginationDto
+  ): Promise<ResponseDto<Group[]>> {
+    return await this.groupService.findAll(page, limit);
   }
 
   @Get(':id')

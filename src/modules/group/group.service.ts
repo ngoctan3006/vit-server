@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Group } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,8 +13,24 @@ export class GroupService {
     return { data: await this.prisma.group.create({ data }) };
   }
 
-  findAll() {
-    return `This action returns all group`;
+  async findAll(page: number, limit: number): Promise<ResponseDto<Group[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
+    return {
+      data: await this.prisma.group.findMany({
+        where: { deleted_at: null },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      metadata: {
+        totalPage: Math.ceil(
+          (await this.prisma.group.count({
+            where: { deleted_at: null },
+          })) / limit
+        ),
+      },
+    };
   }
 
   findOne(id: number) {
