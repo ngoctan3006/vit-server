@@ -94,4 +94,14 @@ export class ClubService {
       data: { message: 'Club has been deleted' },
     };
   }
+
+  async restore(id: number): Promise<ResponseDto<Club>> {
+    await this.findOneDeleted(id);
+    await this.prisma.club.update({
+      where: { id },
+      data: { deleted_at: null },
+    });
+
+    return await this.findOne(id);
+  }
 }

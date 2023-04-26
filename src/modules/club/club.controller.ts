@@ -72,4 +72,10 @@ export class ClubController {
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.clubService.softRemove(id);
   }
+
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
+  @Put('restore/:id')
+  async restore(@Param('id') id: number): Promise<ResponseDto<Club>> {
+    return await this.clubService.restore(id);
+  }
 }
