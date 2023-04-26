@@ -47,9 +47,10 @@ export class ClubController {
     return await this.clubService.findAllDeleted(page, limit);
   }
 
+  @UseGuards(JwtGuard)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.clubService.findOne(id);
+  async findOne(@Param('id') id: number): Promise<ResponseDto<Club>> {
+    return await this.clubService.findOne(id);
   }
 
   @Patch(':id')
