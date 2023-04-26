@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Department } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -7,8 +8,8 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 export class DepartmentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createDepartmentDto: CreateDepartmentDto) {
-    return 'This action adds a new department';
+  async create(data: CreateDepartmentDto): Promise<Department> {
+    return await this.prisma.department.create({ data });
   }
 
   findAll() {

@@ -7,19 +7,23 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Department, Position } from '@prisma/client';
+import { Roles } from 'src/shares/decorators/roles.decorator';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 
 @Controller('department')
 @ApiTags('department')
+@ApiBearerAuth()
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
 
+  @Roles(Position.ADMIN, Position.DOI_PHO, Position.TRUONG_HANH_CHINH)
   @Post()
-  create(@Body() createDepartmentDto: CreateDepartmentDto) {
-    return this.departmentService.create(createDepartmentDto);
+  async create(@Body() data: CreateDepartmentDto): Promise<Department> {
+    return await this.departmentService.create(data);
   }
 
   @Get()
