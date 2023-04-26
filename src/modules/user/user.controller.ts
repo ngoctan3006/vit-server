@@ -13,9 +13,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/shares/decorators/get-user.decorator';
+import { FileUploadDto } from '../auth/dto/file-upload.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -48,6 +49,11 @@ export class UserController {
   @UseGuards(JwtGuard)
   @Put('avatar')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Avatar image file (jpg, jpeg, png, gif)',
+    type: FileUploadDto,
+  })
   async changeAvatar(
     @GetUser('id') id: number,
     @UploadedFile(
