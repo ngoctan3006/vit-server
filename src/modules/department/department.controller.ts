@@ -37,10 +37,24 @@ export class DepartmentController {
     return await this.departmentService.findAll();
   }
 
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
+  @Get('trash')
+  async findAllDeleted(): Promise<ResponseDto<Department[]>> {
+    return await this.departmentService.findAllDeleted();
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ResponseDto<Department>> {
     return this.departmentService.findOne(+id);
+  }
+
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
+  @Get('trash/:id')
+  async findOneDeleted(
+    @Param('id') id: string
+  ): Promise<ResponseDto<Department>> {
+    return this.departmentService.findOneDeleted(+id);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)

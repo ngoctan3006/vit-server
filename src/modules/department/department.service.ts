@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Department } from '@prisma/client';
+import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
-import { ResponseDto } from 'src/shares/dto/response.dto';
 
 @Injectable()
 export class DepartmentService {
@@ -21,11 +21,29 @@ export class DepartmentService {
     };
   }
 
+  async findAllDeleted(): Promise<ResponseDto<Department[]>> {
+    return {
+      data: await this.prisma.department.findMany({
+        where: { deleted_at: { not: null } },
+      }),
+    };
+  }
+
   async findOne(id: number): Promise<ResponseDto<Department>> {
     const department = await this.prisma.department.findUnique({
       where: { id },
     });
     if (!department || department.deleted_at) {
+      throw new NotFoundException('Department not found');
+    }
+    return { data: department };
+  }
+
+  async findOneDeleted(id: number): Promise<ResponseDto<Department>> {
+    const department = await this.prisma.department.findUnique({
+      where: { id },
+    });
+    if (!department || !department.deleted_at) {
       throw new NotFoundException('Department not found');
     }
     return { data: department };
