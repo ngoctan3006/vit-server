@@ -100,4 +100,13 @@ export class GroupService {
       data: { message: 'Group has been deleted' },
     };
   }
+
+  async restore(id: number): Promise<ResponseDto<Group>> {
+    await this.findOneDeleted(id);
+    await this.prisma.group.update({
+      where: { id },
+      data: { deleted_at: null },
+    });
+    return await this.findOne(id);
+  }
 }

@@ -109,7 +109,6 @@ export class ClubService {
       where: { id },
       data: { deleted_at: null },
     });
-
     return await this.findOne(id);
   }
 }

@@ -97,4 +97,15 @@ export class GroupController {
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.groupService.softRemove(id);
   }
+
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Put('restore/:id')
+  async restore(@Param('id') id: number): Promise<ResponseDto<Group>> {
+    return await this.groupService.restore(id);
+  }
 }
