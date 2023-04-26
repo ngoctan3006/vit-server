@@ -80,8 +80,8 @@ export class ClubService {
     return { data: club };
   }
 
-  update(id: number, data: UpdateClubDto) {
-    return `This action updates a #${id} club`;
+  async update(id: number, data: UpdateClubDto): Promise<ResponseDto<Club>> {
+    return { data: await this.prisma.club.update({ where: { id }, data }) };
   }
 
   remove(id: number) {

@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -59,9 +59,10 @@ export class ClubController {
     return await this.clubService.findOneDeleted(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: number, @Body() data: UpdateClubDto) {
-    return this.clubService.update(id, data);
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() data: UpdateClubDto) {
+    return await this.clubService.update(id, data);
   }
 
   @Delete(':id')
