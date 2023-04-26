@@ -84,6 +84,7 @@ export class DepartmentService {
   }
 
   async update(id: number, data: UpdateDepartmentDto): Promise<Department> {
+    await this.findOne(id);
     return await this.prisma.department.update({ where: { id }, data });
   }
 

@@ -86,6 +86,9 @@ export class ClubService {
   }
 
   async update(id: number, data: UpdateClubDto): Promise<ResponseDto<Club>> {
+    await this.findOne(id);
+    if (data.deparment_id)
+      await this.departmentService.findOne(data.deparment_id);
     return { data: await this.prisma.club.update({ where: { id }, data }) };
   }
 
