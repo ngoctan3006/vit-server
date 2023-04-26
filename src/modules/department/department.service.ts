@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Department } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,19 +17,49 @@ export class DepartmentService {
     return { data: await this.prisma.department.create({ data }) };
   }
 
-  async findAll(): Promise<ResponseDto<Department[]>> {
+  async findAll(
+    page: number,
+    limit: number
+  ): Promise<ResponseDto<Department[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
     return {
       data: await this.prisma.department.findMany({
         where: { deleted_at: null },
+        skip: (page - 1) * limit,
+        take: limit,
       }),
+      metadata: {
+        totalPage: Math.ceil(
+          (await this.prisma.department.count({
+            where: { deleted_at: null },
+          })) / limit
+        ),
+      },
     };
   }
 
-  async findAllDeleted(): Promise<ResponseDto<Department[]>> {
+  async findAllDeleted(
+    page: number,
+    limit: number
+  ): Promise<ResponseDto<Department[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
     return {
       data: await this.prisma.department.findMany({
         where: { deleted_at: { not: null } },
+        skip: (page - 1) * limit,
+        take: limit,
       }),
+      metadata: {
+        totalPage: Math.ceil(
+          (await this.prisma.department.count({
+            where: { deleted_at: { not: null } },
+          })) / limit
+        ),
+      },
     };
   }
 

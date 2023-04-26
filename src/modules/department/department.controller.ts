@@ -6,11 +6,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Department, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
+import { PaginationDto } from 'src/shares/dto/pagination.dto';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { DepartmentService } from './department.service';
@@ -33,14 +35,18 @@ export class DepartmentController {
 
   @UseGuards(JwtGuard)
   @Get()
-  async findAll(): Promise<ResponseDto<Department[]>> {
-    return await this.departmentService.findAll();
+  async findAll(
+    @Query() { page, limit }: PaginationDto
+  ): Promise<ResponseDto<Department[]>> {
+    return await this.departmentService.findAll(page, limit);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Get('trash')
-  async findAllDeleted(): Promise<ResponseDto<Department[]>> {
-    return await this.departmentService.findAllDeleted();
+  async findAllDeleted(
+    @Query() { page, limit }: PaginationDto
+  ): Promise<ResponseDto<Department[]>> {
+    return await this.departmentService.findAllDeleted(page, limit);
   }
 
   @UseGuards(JwtGuard)

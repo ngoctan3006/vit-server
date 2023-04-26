@@ -14,7 +14,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix(prefix);
   app.enableCors({ origin: '*' });
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const config = new DocumentBuilder()
     .setTitle(configService.get<string>(EnvConstant.APP_NAME))
