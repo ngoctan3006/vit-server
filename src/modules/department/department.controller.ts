@@ -11,6 +11,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Department, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
+import { ResponseDto } from 'src/shares/dto/response.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
@@ -24,19 +25,21 @@ export class DepartmentController {
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Post()
-  async create(@Body() data: CreateDepartmentDto): Promise<Department> {
+  async create(
+    @Body() data: CreateDepartmentDto
+  ): Promise<ResponseDto<Department>> {
     return await this.departmentService.create(data);
   }
 
   @UseGuards(JwtGuard)
   @Get()
-  async findAll(): Promise<Department[]> {
+  async findAll(): Promise<ResponseDto<Department[]>> {
     return await this.departmentService.findAll();
   }
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Department> {
+  async findOne(@Param('id') id: string): Promise<ResponseDto<Department>> {
     return this.departmentService.findOne(+id);
   }
 
@@ -46,8 +49,11 @@ export class DepartmentController {
     return await this.departmentService.update(+id, data);
   }
 
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.departmentService.remove(+id);
+  async softDelete(
+    @Param('id') id: string
+  ): Promise<ResponseDto<{ message: string }>> {
+    return await this.departmentService.softRemove(+id);
   }
 }
