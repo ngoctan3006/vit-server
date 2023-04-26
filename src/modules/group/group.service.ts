@@ -33,6 +33,29 @@ export class GroupService {
     };
   }
 
+  async findAllDeleted(
+    page: number,
+    limit: number
+  ): Promise<ResponseDto<Group[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new BadRequestException('Invalid query params');
+
+    return {
+      data: await this.prisma.group.findMany({
+        where: { deleted_at: { not: null } },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      metadata: {
+        totalPage: Math.ceil(
+          (await this.prisma.group.count({
+            where: { deleted_at: { not: null } },
+          })) / limit
+        ),
+      },
+    };
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} group`;
   }

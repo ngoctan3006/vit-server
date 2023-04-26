@@ -44,6 +44,19 @@ export class GroupController {
     return await this.groupService.findAll(page, limit);
   }
 
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Get('trash')
+  async findAllDeleted(
+    @Query() { page, limit }: PaginationDto
+  ): Promise<ResponseDto<Group[]>> {
+    return await this.groupService.findAllDeleted(page, limit);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.groupService.findOne(id);
