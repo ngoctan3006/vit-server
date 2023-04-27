@@ -8,12 +8,14 @@ import { Queue } from 'bull';
 import { Cache } from 'cache-manager';
 import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants/env.constant';
+import { generatePassword } from 'src/shares/utils/generate-password.util';
 import { generateUsername } from 'src/shares/utils/generate-username.util';
 import { getGender } from 'src/shares/utils/get-gender.util';
 import { getPosition } from 'src/shares/utils/get-position.util';
 import { comparePassword } from 'src/shares/utils/password.util';
 import { read, utils } from 'xlsx';
 import { UserService } from '../user/user.service';
+import { ResponseDto } from './../../shares/dto/response.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResponseLoginDto } from './dto/response-login.dto';
@@ -31,28 +33,35 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  async signup(signupData: SignupDto): Promise<ResponseLoginDto> {
-    const { email, phone, username } = signupData;
+  async signup(signupData: SignupDto): Promise<ResponseDto<User>> {
+    const { email, phone, fullname } = signupData;
 
     const isExists = await this.userService.checkUserExists({
-      username,
       email,
       phone,
     });
     if (isExists) {
       throw new BadRequestException(isExists);
     }
-    const newUser = await this.userService.create(signupData);
-    const { accessToken, refreshToken } = await this.generateToken(newUser);
-    delete newUser.password;
-    return {
-      accessToken,
-      refreshToken,
-      user: newUser,
-    };
+    const usernameList = (await this.userService.getAllUsername()).map(
+      (item) => item.username
+    );
+    let username = generateUsername(fullname);
+    const usernameCount = usernameList.filter(
+      (item) => item.replace(/\d/g, '') === username
+    ).length;
+    if (usernameCount > 0) {
+      username = `${username}${usernameCount + 1}`;
+    }
+    const newUser = await this.userService.create({
+      ...signupData,
+      username,
+      password: generatePassword(),
+    });
+    return { data: newUser };
   }
 
-  async signin(signinData: SigninDto): Promise<ResponseLoginDto> {
+  async signin(signinData: SigninDto): Promise<ResponseDto<ResponseLoginDto>> {
     const { username, password } = signinData;
     const user = await this.userService.findByUsername(username);
     if (!user) {
@@ -65,9 +74,11 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.generateToken(user);
     delete user.password;
     return {
-      accessToken,
-      refreshToken,
-      user,
+      data: {
+        accessToken,
+        refreshToken,
+        user,
+      },
     };
   }
 
@@ -91,7 +102,7 @@ export class AuthService {
 
       return {
         username,
-        password: Math.random().toString(36).slice(-8),
+        password: generatePassword(),
         fullname: user.Fullname,
         phone: user.Phone?.split(' ').join(''),
         email: user.Email?.toLowerCase(),
@@ -137,9 +148,9 @@ export class AuthService {
     };
   }
 
-  async refreshToken(refreshToken: string): Promise<{
-    accessToken: string;
-  }> {
+  async refreshToken(
+    refreshToken: string
+  ): Promise<ResponseDto<{ accessToken: string }>> {
     try {
       const payload = await this.jwtService.verifyAsync(refreshToken, {
         secret: this.configService.get<string>(
@@ -155,10 +166,8 @@ export class AuthService {
       delete payload.iat;
       delete payload.exp;
 
-      const newAccessToken = await this.jwtService.signAsync(payload);
-      return {
-        accessToken: newAccessToken,
-      };
+      const accessToken = await this.jwtService.signAsync(payload);
+      return { data: { accessToken } };
     } catch (error) {
       console.log(error);
       throw new BadRequestException('refresh token is expired');
@@ -167,7 +176,7 @@ export class AuthService {
 
   async requestResetPassword(
     data: RequestResetPasswordDto
-  ): Promise<{ message: string }> {
+  ): Promise<ResponseDto<{ message: string }>> {
     const user = await this.userService.checkUserMailAndPhone(data);
     const enc = AES.encrypt(
       JSON.stringify(data),
@@ -193,7 +202,7 @@ export class AuthService {
     );
 
     return {
-      message: 'Link reset password has been sent to your email',
+      data: { message: 'Link reset password has been sent to your email' },
     };
   }
 
@@ -221,7 +230,9 @@ export class AuthService {
     }
   }
 
-  async resetPassword(data: ResetPasswordDto): Promise<{ message: string }> {
+  async resetPassword(
+    data: ResetPasswordDto
+  ): Promise<ResponseDto<{ message: string }>> {
     const { token, password, cfPassword } = data;
 
     try {
@@ -231,7 +242,7 @@ export class AuthService {
         cfPassword,
       });
       await this.cacheManager.del(user.username);
-      return { message };
+      return { data: { message } };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(

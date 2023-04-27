@@ -5,18 +5,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as redisStore from 'cache-manager-redis-store';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { bullConfig } from './config/bull.config';
+import { cacheConfig } from './config/cache.config';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ClubModule } from './modules/club/club.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { EventModule } from './modules/event/event.module';
+import { GroupModule } from './modules/group/group.module';
 import { MailModule } from './modules/mail/mail.module';
 import { EmailProcessor } from './modules/mail/processors/email.processor';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
-import { EnvConstant } from './shares/constants/env.constant';
-import { ClubModule } from './modules/club/club.module';
-import { GroupModule } from './modules/group/group.module';
 
 @Module({
   imports: [
@@ -31,25 +32,11 @@ import { GroupModule } from './modules/group/group.module';
       isGlobal: true,
       useFactory: (configService: ConfigService) => ({
         store: redisStore,
-        host: configService.get<string>(EnvConstant.REDIS_HOST),
-        port: configService.get<number>(EnvConstant.REDIS_PORT),
-        username: configService.get<string>(EnvConstant.REDIS_USERNAME),
-        password: configService.get<string>(EnvConstant.REDIS_PASSWORD),
-        ttl: configService.get<number>(EnvConstant.CACHE_TTL),
+        ...cacheConfig(configService),
       }),
       inject: [ConfigService],
     }),
-    BullModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        redis: {
-          host: configService.get<string>(EnvConstant.REDIS_HOST),
-          port: configService.get<number>(EnvConstant.REDIS_PORT),
-          username: configService.get<string>(EnvConstant.REDIS_USERNAME),
-          password: configService.get<string>(EnvConstant.REDIS_PASSWORD),
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    BullModule.forRootAsync(bullConfig),
     UploadModule,
     ActivityModule,
     EventModule,
