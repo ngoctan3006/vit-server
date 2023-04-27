@@ -1,26 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender, Position } from '@prisma/client';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class SignupDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   fullname: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(6)
-  @MaxLength(32)
-  password: string;
 
   @ApiProperty()
   @IsNotEmpty()

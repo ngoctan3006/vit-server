@@ -8,6 +8,7 @@ import { Queue } from 'bull';
 import { Cache } from 'cache-manager';
 import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants/env.constant';
+import { generatePassword } from 'src/shares/utils/generate-password.util';
 import { generateUsername } from 'src/shares/utils/generate-username.util';
 import { getGender } from 'src/shares/utils/get-gender.util';
 import { getPosition } from 'src/shares/utils/get-position.util';
@@ -55,8 +56,8 @@ export class AuthService {
     const newUser = await this.userService.create({
       ...signupData,
       username,
+      password: generatePassword(),
     });
-    delete newUser.password;
     return { data: newUser };
   }
 
@@ -99,7 +100,7 @@ export class AuthService {
 
       return {
         username,
-        password: Math.random().toString(36).slice(-8),
+        password: generatePassword(),
         fullname: user.Fullname,
         phone: user.Phone?.split(' ').join(''),
         email: user.Email?.toLowerCase(),

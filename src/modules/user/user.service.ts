@@ -14,8 +14,8 @@ import { UploadService } from '../upload/upload.service';
 import { comparePassword } from './../../shares/utils/password.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -54,6 +54,7 @@ export class UserService {
       }
     );
 
+    delete user.password;
     return user;
   }
 
