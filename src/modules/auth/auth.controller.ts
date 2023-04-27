@@ -7,8 +7,9 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { Position } from '@prisma/client';
+import { Position, User } from '@prisma/client';
 import { Roles } from 'src/shares/decorators/roles.decorator';
+import { ResponseDto } from 'src/shares/dto/response.dto';
 import { AuthService } from './auth.service';
 import { CheckTokenDto } from './dto/check-token.dto';
 import { FileUploadDto } from './dto/file-upload.dto';
@@ -25,7 +26,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signin')
-  async signin(@Body() signinData: SigninDto): Promise<ResponseLoginDto> {
+  async signin(
+    @Body() signinData: SigninDto
+  ): Promise<ResponseDto<ResponseLoginDto>> {
     return await this.authService.signin(signinData);
   }
 
@@ -37,7 +40,7 @@ export class AuthController {
   )
   @ApiBearerAuth()
   @Post('signup')
-  async signup(@Body() signupData: SignupDto): Promise<ResponseLoginDto> {
+  async signup(@Body() signupData: SignupDto): Promise<ResponseDto<User>> {
     return await this.authService.signup(signupData);
   }
 
@@ -60,29 +63,31 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    return await this.authService.refreshToken(refreshTokenDto.refreshToken);
+  async refreshToken(
+    @Body() { refreshToken }: RefreshTokenDto
+  ): Promise<ResponseDto<{ accessToken: string }>> {
+    return await this.authService.refreshToken(refreshToken);
   }
 
   @Post('request-reset-password')
   async requestResetPassword(
     @Body() data: RequestResetPasswordDto
-  ): Promise<{ message: string }> {
+  ): Promise<ResponseDto<{ message: string }>> {
     return await this.authService.requestResetPassword(data);
   }
 
   @Post('token')
   async checkTokenResetPassword(
     @Body() { token }: CheckTokenDto
-  ): Promise<true> {
+  ): Promise<ResponseDto<true>> {
     await this.authService.checkTokenResetPassword(token);
-    return true;
+    return { data: true };
   }
 
   @Post('reset-password')
   async resetPassword(
     @Body() data: ResetPasswordDto
-  ): Promise<{ message: string }> {
+  ): Promise<ResponseDto<{ message: string }>> {
     return await this.authService.resetPassword(data);
   }
 }
