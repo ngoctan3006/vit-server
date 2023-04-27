@@ -61,7 +61,7 @@ export class AuthService {
     return { data: newUser };
   }
 
-  async signin(signinData: SigninDto): Promise<ResponseLoginDto> {
+  async signin(signinData: SigninDto): Promise<ResponseDto<ResponseLoginDto>> {
     const { username, password } = signinData;
     const user = await this.userService.findByUsername(username);
     if (!user) {
@@ -74,9 +74,11 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.generateToken(user);
     delete user.password;
     return {
-      accessToken,
-      refreshToken,
-      user,
+      data: {
+        accessToken,
+        refreshToken,
+        user,
+      },
     };
   }
 
@@ -146,9 +148,9 @@ export class AuthService {
     };
   }
 
-  async refreshToken(refreshToken: string): Promise<{
-    accessToken: string;
-  }> {
+  async refreshToken(
+    refreshToken: string
+  ): Promise<ResponseDto<{ accessToken: string }>> {
     try {
       const payload = await this.jwtService.verifyAsync(refreshToken, {
         secret: this.configService.get<string>(
@@ -164,10 +166,8 @@ export class AuthService {
       delete payload.iat;
       delete payload.exp;
 
-      const newAccessToken = await this.jwtService.signAsync(payload);
-      return {
-        accessToken: newAccessToken,
-      };
+      const accessToken = await this.jwtService.signAsync(payload);
+      return { data: { accessToken } };
     } catch (error) {
       console.log(error);
       throw new BadRequestException('refresh token is expired');
@@ -176,7 +176,7 @@ export class AuthService {
 
   async requestResetPassword(
     data: RequestResetPasswordDto
-  ): Promise<{ message: string }> {
+  ): Promise<ResponseDto<{ message: string }>> {
     const user = await this.userService.checkUserMailAndPhone(data);
     const enc = AES.encrypt(
       JSON.stringify(data),
@@ -202,7 +202,7 @@ export class AuthService {
     );
 
     return {
-      message: 'Link reset password has been sent to your email',
+      data: { message: 'Link reset password has been sent to your email' },
     };
   }
 
@@ -230,7 +230,9 @@ export class AuthService {
     }
   }
 
-  async resetPassword(data: ResetPasswordDto): Promise<{ message: string }> {
+  async resetPassword(
+    data: ResetPasswordDto
+  ): Promise<ResponseDto<{ message: string }>> {
     const { token, password, cfPassword } = data;
 
     try {
@@ -240,7 +242,7 @@ export class AuthService {
         cfPassword,
       });
       await this.cacheManager.del(user.username);
-      return { message };
+      return { data: { message } };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(

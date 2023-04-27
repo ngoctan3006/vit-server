@@ -26,7 +26,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signin')
-  async signin(@Body() signinData: SigninDto): Promise<ResponseLoginDto> {
+  async signin(
+    @Body() signinData: SigninDto
+  ): Promise<ResponseDto<ResponseLoginDto>> {
     return await this.authService.signin(signinData);
   }
 
@@ -61,29 +63,31 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    return await this.authService.refreshToken(refreshTokenDto.refreshToken);
+  async refreshToken(
+    @Body() { refreshToken }: RefreshTokenDto
+  ): Promise<ResponseDto<{ accessToken: string }>> {
+    return await this.authService.refreshToken(refreshToken);
   }
 
   @Post('request-reset-password')
   async requestResetPassword(
     @Body() data: RequestResetPasswordDto
-  ): Promise<{ message: string }> {
+  ): Promise<ResponseDto<{ message: string }>> {
     return await this.authService.requestResetPassword(data);
   }
 
   @Post('token')
   async checkTokenResetPassword(
     @Body() { token }: CheckTokenDto
-  ): Promise<true> {
+  ): Promise<ResponseDto<true>> {
     await this.authService.checkTokenResetPassword(token);
-    return true;
+    return { data: true };
   }
 
   @Post('reset-password')
   async resetPassword(
     @Body() data: ResetPasswordDto
-  ): Promise<{ message: string }> {
+  ): Promise<ResponseDto<{ message: string }>> {
     return await this.authService.resetPassword(data);
   }
 }
