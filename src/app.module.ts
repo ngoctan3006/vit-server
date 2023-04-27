@@ -3,8 +3,6 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as redisStore from 'cache-manager-redis-store';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { bullConfig } from './config/bull.config';
 import { cacheConfig } from './config/cache.config';
 import { ActivityModule } from './modules/activity/activity.module';
@@ -44,7 +42,7 @@ import { UserModule } from './modules/user/user.module';
     ClubModule,
     GroupModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, EmailProcessor],
+  controllers: [],
+  providers: [EmailProcessor],
 })
 export class AppModule {}
