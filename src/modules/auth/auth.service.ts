@@ -14,6 +14,7 @@ import { getPosition } from 'src/shares/utils/get-position.util';
 import { comparePassword } from 'src/shares/utils/password.util';
 import { read, utils } from 'xlsx';
 import { UserService } from '../user/user.service';
+import { ResponseDto } from './../../shares/dto/response.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResponseLoginDto } from './dto/response-login.dto';
@@ -31,25 +32,32 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  async signup(signupData: SignupDto): Promise<ResponseLoginDto> {
-    const { email, phone, username } = signupData;
+  async signup(signupData: SignupDto): Promise<ResponseDto<User>> {
+    const { email, phone, fullname } = signupData;
 
     const isExists = await this.userService.checkUserExists({
-      username,
       email,
       phone,
     });
     if (isExists) {
       throw new BadRequestException(isExists);
     }
-    const newUser = await this.userService.create(signupData);
-    const { accessToken, refreshToken } = await this.generateToken(newUser);
+    const usernameList = (await this.userService.getAllUsername()).map(
+      (item) => item.username
+    );
+    let username = generateUsername(fullname);
+    const usernameCount = usernameList.filter(
+      (item) => item.replace(/\d/g, '') === username
+    ).length;
+    if (usernameCount > 0) {
+      username = `${username}${usernameCount + 1}`;
+    }
+    const newUser = await this.userService.create({
+      ...signupData,
+      username,
+    });
     delete newUser.password;
-    return {
-      accessToken,
-      refreshToken,
-      user: newUser,
-    };
+    return { data: newUser };
   }
 
   async signin(signinData: SigninDto): Promise<ResponseLoginDto> {
