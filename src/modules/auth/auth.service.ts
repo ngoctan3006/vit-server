@@ -33,6 +33,11 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
+  async getMe(userId: number): Promise<ResponseDto<User>> {
+    const user = await this.userService.getUserInfoById(userId);
+    return { data: user };
+  }
+
   async signup(signupData: SignupDto): Promise<ResponseDto<User>> {
     const { email, phone, fullname } = signupData;
 
