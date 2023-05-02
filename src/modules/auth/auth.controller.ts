@@ -1,13 +1,16 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Position, User } from '@prisma/client';
+import { GetUser } from 'src/shares/decorators/get-user.decorator';
 import { Roles } from 'src/shares/decorators/roles.decorator';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { AuthService } from './auth.service';
@@ -19,11 +22,19 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResponseLoginDto } from './dto/response-login.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
+import { JwtGuard } from './guards/jwt.guard';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth()
+  @Get('me')
+  async getMe(@GetUser('id') userId: number): Promise<ResponseDto<User>> {
+    return await this.authService.getMe(userId);
+  }
 
   @Post('signin')
   async signin(
