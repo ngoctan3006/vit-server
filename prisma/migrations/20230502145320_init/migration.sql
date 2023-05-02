@@ -109,7 +109,7 @@ CREATE TABLE "UserEvent" (
     "user_id" INTEGER NOT NULL,
     "event_id" INTEGER NOT NULL,
     "position" "Position" NOT NULL DEFAULT 'MEMBER',
-    "status" "Status" NOT NULL DEFAULT 'ACTIVE',
+    "status" "UserActivityStatus" NOT NULL DEFAULT 'REGISTERED',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -155,7 +155,7 @@ CREATE TABLE "Department" (
 );
 
 -- CreateTable
-CREATE TABLE "DeparmentUser" (
+CREATE TABLE "DepartmentUser" (
     "id" SERIAL NOT NULL,
     "department_id" INTEGER NOT NULL,
     "user_id" INTEGER NOT NULL,
@@ -164,7 +164,7 @@ CREATE TABLE "DeparmentUser" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "DeparmentUser_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "DepartmentUser_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -172,7 +172,7 @@ CREATE TABLE "Club" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "deparment_id" INTEGER NOT NULL,
+    "department_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -215,7 +215,7 @@ CREATE UNIQUE INDEX "UserEvent_user_id_event_id_key" ON "UserEvent"("user_id", "
 CREATE UNIQUE INDEX "GroupUser_group_id_user_id_key" ON "GroupUser"("group_id", "user_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "DeparmentUser_department_id_user_id_key" ON "DeparmentUser"("department_id", "user_id");
+CREATE UNIQUE INDEX "DepartmentUser_department_id_user_id_key" ON "DepartmentUser"("department_id", "user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ClubUser_club_id_user_id_key" ON "ClubUser"("club_id", "user_id");
@@ -251,13 +251,13 @@ ALTER TABLE "GroupUser" ADD CONSTRAINT "GroupUser_group_id_fkey" FOREIGN KEY ("g
 ALTER TABLE "GroupUser" ADD CONSTRAINT "GroupUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DeparmentUser" ADD CONSTRAINT "DeparmentUser_department_id_fkey" FOREIGN KEY ("department_id") REFERENCES "Department"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DepartmentUser" ADD CONSTRAINT "DepartmentUser_department_id_fkey" FOREIGN KEY ("department_id") REFERENCES "Department"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DeparmentUser" ADD CONSTRAINT "DeparmentUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DepartmentUser" ADD CONSTRAINT "DepartmentUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Club" ADD CONSTRAINT "Club_deparment_id_fkey" FOREIGN KEY ("deparment_id") REFERENCES "Department"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Club" ADD CONSTRAINT "Club_department_id_fkey" FOREIGN KEY ("department_id") REFERENCES "Department"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClubUser" ADD CONSTRAINT "ClubUser_club_id_fkey" FOREIGN KEY ("club_id") REFERENCES "Club"("id") ON DELETE CASCADE ON UPDATE CASCADE;
