@@ -1,10 +1,8 @@
-import { InjectQueue } from '@nestjs/bull';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { Queue } from 'bull';
 import { Cache } from 'cache-manager';
 import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants/env.constant';
@@ -14,6 +12,7 @@ import { getGender } from 'src/shares/utils/get-gender.util';
 import { getPosition } from 'src/shares/utils/get-position.util';
 import { comparePassword } from 'src/shares/utils/password.util';
 import { read, utils } from 'xlsx';
+import { MailQueueService } from '../mail/services/mail-queue.service';
 import { UserService } from '../user/user.service';
 import { ResponseDto } from './../../shares/dto/response.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
@@ -29,7 +28,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-    @InjectQueue('send-mail') private readonly sendMail: Queue,
+    private readonly mailQueueService: MailQueueService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -192,19 +191,13 @@ export class AuthService {
       enc,
       this.configService.get<number>(EnvConstant.CACHE_TTL)
     );
-    await this.sendMail.add(
-      'reset-password',
-      {
-        ...data,
-        name: user.fullname,
-        resetPasswordUrl: `${this.configService.get<string>(
-          EnvConstant.CLIENT_URL
-        )}/reset-password?token=${enc}`,
-      },
-      {
-        removeOnComplete: true,
-      }
-    );
+    await this.mailQueueService.addResetPasswordMail({
+      ...data,
+      name: user.fullname,
+      resetPasswordUrl: `${this.configService.get<string>(
+        EnvConstant.CLIENT_URL
+      )}/reset-password?token=${enc}`,
+    });
 
     return {
       data: { message: 'Link reset password has been sent to your email' },

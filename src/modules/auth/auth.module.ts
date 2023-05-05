@@ -1,4 +1,3 @@
-import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -22,9 +21,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       inject: [ConfigService],
     }),
     UserModule,
-    BullModule.registerQueue({
-      name: 'send-mail',
-    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

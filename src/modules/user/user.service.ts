@@ -1,14 +1,13 @@
-import { InjectQueue } from '@nestjs/bull';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { Queue } from 'bull';
 import { getKeyS3 } from 'src/shares/utils/get-key-s3.util';
 import { hashPassword } from 'src/shares/utils/password.util';
 import { RequestResetPasswordDto } from '../auth/dto/request-reset-password.dto';
+import { MailQueueService } from '../mail/services/mail-queue.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
 import { comparePassword } from './../../shares/utils/password.util';
@@ -21,7 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    @InjectQueue('send-mail') private readonly sendMail: Queue,
+    private readonly mailQueueService: MailQueueService,
     private readonly uploadService: UploadService
   ) {}
 
@@ -41,18 +40,12 @@ export class UserService {
       },
     });
 
-    await this.sendMail.add(
-      'welcome',
-      {
-        email: user.email,
-        name: user.fullname,
-        username: user.username,
-        password,
-      },
-      {
-        removeOnComplete: true,
-      }
-    );
+    await this.mailQueueService.addWelcomeMail({
+      email: user.email,
+      name: user.fullname,
+      username: user.username,
+      password,
+    });
 
     delete user.password;
     return user;
@@ -85,18 +78,12 @@ export class UserService {
     });
 
     for (const user of createUserDtos) {
-      await this.sendMail.add(
-        'welcome',
-        {
-          email: user.email?.toLowerCase(),
-          name: user.fullname,
-          username: user.username,
-          password: user.password,
-        },
-        {
-          removeOnComplete: true,
-        }
-      );
+      await this.mailQueueService.addWelcomeMail({
+        email: user.email?.toLowerCase(),
+        name: user.fullname,
+        username: user.username,
+        password: user.password,
+      });
     }
 
     return res;
