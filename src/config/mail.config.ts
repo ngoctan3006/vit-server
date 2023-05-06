@@ -15,9 +15,9 @@ export const mailConfig: MailerAsyncOptions = {
       },
     },
     defaults: {
-      from: `${configService.get<string>(
+      from: `"${configService.get<string>(
         EnvConstant.MAIL_FROM_NAME
-      )} <${configService.get<string>(EnvConstant.MAIL_FROM_ADDRESS)}>`,
+      )}" <${configService.get<string>(EnvConstant.MAIL_FROM_ADDRESS)}>`,
     },
     template: {
       dir: join(__dirname + '/../modules/mail/templates'),
