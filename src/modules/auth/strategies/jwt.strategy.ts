@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Status } from '@prisma/client';
@@ -28,7 +32,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found');
     }
     if (user.status === Status.BLOCKED) {
-      throw new UnauthorizedException('Your account has been blocked');
+      throw new ForbiddenException('Your account has been blocked');
+    }
+    if (user.status === Status.INACTIVE) {
+      throw new ForbiddenException('Your account has been inactive');
     }
     delete user.password;
     return user;

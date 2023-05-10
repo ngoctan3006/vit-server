@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -14,6 +15,7 @@ import { GetUser } from 'src/shares/decorators/get-user.decorator';
 import { Roles } from 'src/shares/decorators/roles.decorator';
 import { ResponseDto } from 'src/shares/dto/response.dto';
 import { AuthService } from './auth.service';
+import { ChangePasswordFirstLoginDto } from './dto/change-password-first-login.dto';
 import { CheckTokenDto } from './dto/check-token.dto';
 import { FileUploadDto } from './dto/file-upload.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -22,6 +24,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResponseLoginDto } from './dto/response-login.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
+import { FirstLoginGuard } from './guards/first-login.guard';
 import { JwtGuard } from './guards/jwt.guard';
 
 @Controller('auth')
@@ -100,5 +103,15 @@ export class AuthController {
     @Body() data: ResetPasswordDto
   ): Promise<ResponseDto<{ message: string }>> {
     return await this.authService.resetPassword(data);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(FirstLoginGuard)
+  @Put('first-login')
+  async firstLogin(
+    @GetUser('id') id: number,
+    @Body() data: ChangePasswordFirstLoginDto
+  ): Promise<{ message: string }> {
+    return await this.authService.changePasswordInFirstLogin(id, data);
   }
 }
