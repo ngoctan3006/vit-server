@@ -35,7 +35,7 @@ model User {
   date_out    DateTime?
   last_login  DateTime?
   gender      Gender           @default(OTHER)
-  status      Status           @default(ACTIVE)
+  status      Status           @default(INACTIVE)
   position    Position         @default(MEMBER)
   social      UserSocial[]
   activities  UserActivity[]
