@@ -1,9 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Status, User } from '@prisma/client';
+import { httpErrors } from 'src/shares/exception';
 import { getKeyS3, hashPassword } from 'src/shares/utils';
 import {
   ChangePasswordFirstLoginDto,
@@ -95,7 +92,8 @@ export class UserService {
 
   async getUserInfoById(id: number): Promise<User | null> {
     const user = await this.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     delete user.password;
     return user;
   }
@@ -123,9 +121,15 @@ export class UserService {
     const { password, newPassword, cfPassword } = data;
     const user = await this.getUserInfoById(id);
     if (newPassword !== cfPassword)
-      throw new BadRequestException('Password not match');
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
     if (!(await comparePassword(password, user.password)))
-      throw new BadRequestException('Password wrong');
+      throw new HttpException(
+        httpErrors.PASSWORD_WRONG,
+        HttpStatus.BAD_REQUEST
+      );
 
     await this.prisma.user.update({
       where: {
@@ -145,7 +149,10 @@ export class UserService {
     const { password, cfPassword } = data;
     await this.getUserInfoById(id);
     if (password !== cfPassword)
-      throw new BadRequestException('Password not match');
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
 
     await this.prisma.user.update({
       where: {
@@ -163,7 +170,10 @@ export class UserService {
     const { password, cfPassword } = data;
     await this.getUserInfoById(id);
     if (password !== cfPassword)
-      throw new BadRequestException('Password not match');
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
 
     await this.prisma.user.update({
       where: {
@@ -183,7 +193,8 @@ export class UserService {
       email,
       phone,
     });
-    if (checkUserExists) throw new BadRequestException(checkUserExists);
+    if (checkUserExists)
+      throw new HttpException(checkUserExists, HttpStatus.BAD_REQUEST);
 
     await this.prisma.user.update({
       where: {
@@ -220,7 +231,13 @@ export class UserService {
     username?: string;
     email?: string;
     phone?: string;
-  }): Promise<string | false> {
+  }): Promise<
+    | {
+        message: string;
+        code: string;
+      }
+    | false
+  > {
     const { username, email, phone } = data;
     if (username) {
       const usernameExist = await this.prisma.user.count({
@@ -228,7 +245,7 @@ export class UserService {
           username,
         },
       });
-      if (usernameExist > 0) return 'Username already exists';
+      if (usernameExist > 0) return httpErrors.USERNAME_EXISTED;
     }
     if (email) {
       const emailExist = await this.prisma.user.count({
@@ -236,7 +253,7 @@ export class UserService {
           email: email.toLowerCase(),
         },
       });
-      if (emailExist > 0) return 'Email already exists';
+      if (emailExist > 0) return httpErrors.EMAIL_EXISTED;
     }
     if (phone) {
       const phoneExist = await this.prisma.user.count({
@@ -244,7 +261,7 @@ export class UserService {
           phone: phone.split(' ').join(''),
         },
       });
-      if (phoneExist > 0) return 'Phone already exists';
+      if (phoneExist > 0) return httpErrors.PHONE_EXISTED;
     }
     return false;
   }
@@ -260,11 +277,18 @@ export class UserService {
   async checkUserMailAndPhone(data: RequestResetPasswordDto): Promise<User> {
     const { username, email, phone } = data;
     const user = await this.findByUsername(username);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     if (user.email !== email.toLowerCase())
-      throw new BadRequestException('Email or phone not match with username');
+      throw new HttpException(
+        httpErrors.EMAIL_PHONE_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
     if (user.phone !== phone.split(' ').join(''))
-      throw new BadRequestException('Email or phone not match with username');
+      throw new HttpException(
+        httpErrors.EMAIL_PHONE_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
 
     delete user.password;
     return user;

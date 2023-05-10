@@ -1,10 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Department } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
 
@@ -21,7 +18,7 @@ export class DepartmentService {
     limit: number
   ): Promise<ResponseDto<Department[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.department.findMany({
@@ -44,7 +41,7 @@ export class DepartmentService {
     limit: number
   ): Promise<ResponseDto<Department[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.department.findMany({
@@ -67,7 +64,10 @@ export class DepartmentService {
       where: { id },
     });
     if (!department || department.deleted_at) {
-      throw new NotFoundException('Department not found');
+      throw new HttpException(
+        httpErrors.DEPARTMENT_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
     }
     return { data: department };
   }
@@ -77,7 +77,10 @@ export class DepartmentService {
       where: { id },
     });
     if (!department || !department.deleted_at) {
-      throw new NotFoundException('Department not found');
+      throw new HttpException(
+        httpErrors.DEPARTMENT_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
     }
     return { data: department };
   }

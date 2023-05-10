@@ -25,8 +25,7 @@ import {
   SigninDto,
   SignupDto,
 } from './dto';
-import { FirstLoginGuard } from './guards';
-import { JwtGuard } from './guards';
+import { FirstLoginGuard, JwtGuard } from './guards';
 
 @Controller('auth')
 @ApiTags('auth')
