@@ -15,6 +15,7 @@ import { read, utils } from 'xlsx';
 import { MailQueueService } from '../mail/services/mail-queue.service';
 import { UserService } from '../user/user.service';
 import { ResponseDto } from './../../shares/dto/response.dto';
+import { ChangePasswordFirstLoginDto } from './dto/change-password-first-login.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResponseLoginDto } from './dto/response-login.dto';
@@ -247,5 +248,14 @@ export class AuthService {
         error?.response?.message || 'token is invalid'
       );
     }
+  }
+
+  async changePasswordInFirstLogin(
+    id: number,
+    data: ChangePasswordFirstLoginDto
+  ): Promise<{ message: string }> {
+    return {
+      message: await this.userService.changePasswordInFirstLogin(id, data),
+    };
   }
 }

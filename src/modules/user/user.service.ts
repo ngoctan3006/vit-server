@@ -3,9 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Status, User } from '@prisma/client';
 import { getKeyS3 } from 'src/shares/utils/get-key-s3.util';
 import { hashPassword } from 'src/shares/utils/password.util';
+import { ChangePasswordFirstLoginDto } from '../auth/dto/change-password-first-login.dto';
 import { RequestResetPasswordDto } from '../auth/dto/request-reset-password.dto';
 import { MailQueueService } from '../mail/services/mail-queue.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -117,8 +118,7 @@ export class UserService {
 
   async changePassword(id: number, data: ChangePasswordDto): Promise<string> {
     const { password, newPassword, cfPassword } = data;
-    const user = await this.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    const user = await this.getUserInfoById(id);
     if (newPassword !== cfPassword)
       throw new BadRequestException('Password not match');
     if (!(await comparePassword(password, user.password)))
@@ -130,6 +130,27 @@ export class UserService {
       },
       data: {
         password: await hashPassword(newPassword),
+      },
+    });
+    return 'Change password successfully';
+  }
+
+  async changePasswordInFirstLogin(
+    id: number,
+    data: ChangePasswordFirstLoginDto
+  ): Promise<string> {
+    const { password, cfPassword } = data;
+    await this.getUserInfoById(id);
+    if (password !== cfPassword)
+      throw new BadRequestException('Password not match');
+
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: await hashPassword(password),
+        status: Status.ACTIVE,
       },
     });
     return 'Change password successfully';
