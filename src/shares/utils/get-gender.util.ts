@@ -1,5 +1,5 @@
 import { Gender } from '@prisma/client';
-import { removeAccents } from './remove-accents.util';
+import { removeAccents } from './';
 
 export const getGender = (gender?: string): Gender => {
   if (!gender) return Gender.OTHER;

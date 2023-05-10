@@ -5,23 +5,27 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { AES, enc } from 'crypto-js';
-import { EnvConstant } from 'src/shares/constants/env.constant';
-import { generatePassword } from 'src/shares/utils/generate-password.util';
-import { generateUsername } from 'src/shares/utils/generate-username.util';
-import { getGender } from 'src/shares/utils/get-gender.util';
-import { getPosition } from 'src/shares/utils/get-position.util';
-import { comparePassword } from 'src/shares/utils/password.util';
+import { EnvConstant } from 'src/shares/constants';
+import {
+  comparePassword,
+  generatePassword,
+  generateUsername,
+  getGender,
+  getPosition,
+} from 'src/shares/utils';
 import { read, utils } from 'xlsx';
-import { MailQueueService } from '../mail/services/mail-queue.service';
+import { MailQueueService } from '../mail/services';
 import { UserService } from '../user/user.service';
-import { ResponseDto } from './../../shares/dto/response.dto';
-import { ChangePasswordFirstLoginDto } from './dto/change-password-first-login.dto';
-import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ResponseLoginDto } from './dto/response-login.dto';
-import { SigninDto } from './dto/signin.dto';
-import { SignupDto } from './dto/signup.dto';
-import { JwtPayload } from './strategies/jwt.payload';
+import { ResponseDto } from './../../shares/dto';
+import {
+  ChangePasswordFirstLoginDto,
+  RequestResetPasswordDto,
+  ResetPasswordDto,
+  ResponseLoginDto,
+  SigninDto,
+  SignupDto,
+} from './dto';
+import { JwtPayload } from './strategies';
 
 @Injectable()
 export class AuthService {

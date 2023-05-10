@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3 } from 'aws-sdk';
 import { extname } from 'path';
-import { EnvConstant } from 'src/shares/constants/env.constant';
+import { EnvConstant } from 'src/shares/constants';
 require('aws-sdk/lib/maintenance_mode_message').suppress = true; // Fix: The AWS SDK for JavaScript (v2) will be put into maintenance mode in 2023. Please upgrade to v3.
 
 @Injectable()

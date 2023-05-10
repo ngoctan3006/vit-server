@@ -4,11 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Group } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { ResponseDto } from 'src/shares/dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventService } from './../event/event.service';
-import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
+import { CreateGroupDto, UpdateGroupDto } from './dto';
 
 @Injectable()
 export class GroupService {

@@ -4,12 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Event, UserActivityStatus } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { ResponseDto } from 'src/shares/dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
-import { ApproveDto } from './dto/approve.dto';
-import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+import { ApproveDto, CreateEventDto, UpdateEventDto } from './dto';
 
 @Injectable()
 export class EventService {

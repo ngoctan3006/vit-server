@@ -1,15 +1,13 @@
-import { UserService } from './../user/user.service';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { Activity, UserActivityStatus } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { ResponseDto } from 'src/shares/dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateActivityDto } from './dto/create-activity.dto';
-import { UpdateActivityDto } from './dto/update-activity.dto';
-import { ApproveDto } from './dto/approve.dto';
+import { UserService } from './../user/user.service';
+import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
 
 @Injectable()
 export class ActivityService {

@@ -4,18 +4,21 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Status, User } from '@prisma/client';
-import { getKeyS3 } from 'src/shares/utils/get-key-s3.util';
-import { hashPassword } from 'src/shares/utils/password.util';
-import { ChangePasswordFirstLoginDto } from '../auth/dto/change-password-first-login.dto';
-import { RequestResetPasswordDto } from '../auth/dto/request-reset-password.dto';
-import { MailQueueService } from '../mail/services/mail-queue.service';
+import { getKeyS3, hashPassword } from 'src/shares/utils';
+import {
+  ChangePasswordFirstLoginDto,
+  RequestResetPasswordDto,
+} from '../auth/dto';
+import { MailQueueService } from '../mail/services';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
-import { comparePassword } from './../../shares/utils/password.util';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { comparePassword } from './../../shares/utils';
+import {
+  ChangePasswordDto,
+  CreateUserDto,
+  ResetPasswordDto,
+  UpdateUserDto,
+} from './dto';
 
 @Injectable()
 export class UserService {

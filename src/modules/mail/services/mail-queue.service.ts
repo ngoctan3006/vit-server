@@ -1,8 +1,7 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
-import { WelcomeDto } from '../dto/welcome.dto';
-import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { ResetPasswordDto, WelcomeDto } from '../dto';
 
 @Injectable()
 export class MailQueueService {
