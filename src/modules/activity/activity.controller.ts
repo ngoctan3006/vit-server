@@ -11,15 +11,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Activity, Position } from '@prisma/client';
-import { GetUser } from 'src/shares/decorators/get-user.decorator';
-import { Roles } from 'src/shares/decorators/roles.decorator';
-import { PaginationDto } from 'src/shares/dto/pagination.dto';
-import { ResponseDto } from 'src/shares/dto/response.dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
+import { GetUser, Roles } from 'src/shares/decorators';
+import { PaginationDto, ResponseDto } from 'src/shares/dto';
+import { JwtGuard } from '../auth/guards';
 import { ActivityService } from './activity.service';
-import { ApproveDto } from './dto/approve.dto';
-import { CreateActivityDto } from './dto/create-activity.dto';
-import { UpdateActivityDto } from './dto/update-activity.dto';
+import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
 
 @Controller('activity')
 @ApiTags('activity')

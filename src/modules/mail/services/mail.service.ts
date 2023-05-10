@@ -1,9 +1,8 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EnvConstant } from 'src/shares/constants/env.constant';
-import { ResetPasswordDto } from '../dto/reset-password.dto';
-import { WelcomeDto } from '../dto/welcome.dto';
+import { EnvConstant } from 'src/shares/constants';
+import { ResetPasswordDto, WelcomeDto } from '../dto';
 
 @Injectable()
 export class MailService {

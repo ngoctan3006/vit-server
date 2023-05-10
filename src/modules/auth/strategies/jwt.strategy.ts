@@ -8,7 +8,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Status } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from 'src/modules/user/user.service';
-import { EnvConstant } from 'src/shares/constants/env.constant';
+import { EnvConstant } from 'src/shares/constants';
 import { JwtPayload } from './jwt.payload';
 
 @Injectable()

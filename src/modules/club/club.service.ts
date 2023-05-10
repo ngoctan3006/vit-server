@@ -4,11 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Club } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { ResponseDto } from 'src/shares/dto';
 import { DepartmentService } from './../department/department.service';
 import { PrismaService } from './../prisma/prisma.service';
-import { CreateClubDto } from './dto/create-club.dto';
-import { UpdateClubDto } from './dto/update-club.dto';
+import { CreateClubDto, UpdateClubDto } from './dto';
 
 @Injectable()
 export class ClubService {

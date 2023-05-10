@@ -11,13 +11,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Department, Position } from '@prisma/client';
-import { Roles } from 'src/shares/decorators/roles.decorator';
-import { PaginationDto } from 'src/shares/dto/pagination.dto';
-import { ResponseDto } from 'src/shares/dto/response.dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
+import { Roles } from 'src/shares/decorators';
+import { PaginationDto, ResponseDto } from 'src/shares/dto';
+import { JwtGuard } from '../auth/guards';
 import { DepartmentService } from './department.service';
-import { CreateDepartmentDto } from './dto/create-department.dto';
-import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
 
 @Controller('department')
 @ApiTags('department')

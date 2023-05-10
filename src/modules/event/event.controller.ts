@@ -11,14 +11,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Event, Position } from '@prisma/client';
-import { GetUser } from 'src/shares/decorators/get-user.decorator';
-import { Roles } from 'src/shares/decorators/roles.decorator';
-import { PaginationDto } from 'src/shares/dto/pagination.dto';
-import { ResponseDto } from 'src/shares/dto/response.dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
-import { ApproveDto } from './dto/approve.dto';
-import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+import { GetUser, Roles } from 'src/shares/decorators';
+import { PaginationDto, ResponseDto } from 'src/shares/dto';
+import { JwtGuard } from '../auth/guards';
+import { ApproveDto, CreateEventDto, UpdateEventDto } from './dto';
 import { EventService } from './event.service';
 
 @Controller('event')
