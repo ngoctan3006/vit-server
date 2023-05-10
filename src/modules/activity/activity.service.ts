@@ -1,10 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Activity, UserActivityStatus } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from './../user/user.service';
 import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
@@ -31,7 +28,7 @@ export class ActivityService {
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Activity[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.activity.findMany({
@@ -50,7 +47,7 @@ export class ActivityService {
     limit: number
   ): Promise<ResponseDto<Activity[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.activity.findMany({
@@ -71,14 +68,20 @@ export class ActivityService {
   async findOne(id: number): Promise<ResponseDto<Activity>> {
     const activity = await this.prisma.activity.findUnique({ where: { id } });
     if (!activity || activity.deleted_at)
-      throw new NotFoundException('Activity not found');
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
     return { data: activity };
   }
 
   async findOneDeleted(id: number): Promise<ResponseDto<Activity>> {
     const activity = await this.prisma.activity.findUnique({ where: { id } });
     if (!activity || !activity.deleted_at)
-      throw new NotFoundException('Activity not found');
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
     return { data: activity };
   }
 
@@ -144,7 +147,10 @@ export class ActivityService {
         isRegistered.status === UserActivityStatus.REGISTERED ||
         isRegistered.status === UserActivityStatus.ACCEPTED
       )
-        throw new BadRequestException('You already registered');
+        throw new HttpException(
+          httpErrors.ACTIVITY_REGISTERED,
+          HttpStatus.BAD_REQUEST
+        );
       else
         await this.prisma.userActivity.update({
           where: {
@@ -187,7 +193,10 @@ export class ActivityService {
       },
     });
     if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-      throw new BadRequestException('You have not registered yet');
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
     await this.prisma.userActivity.update({
       where: {
         user_id_activity_id: {
@@ -220,9 +229,15 @@ export class ActivityService {
       },
     });
     if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-      throw new BadRequestException('User have not registered yet');
+      throw new HttpException(
+        httpErrors.ACTIVITY_USER_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
     else if (isRegistered.status === UserActivityStatus.ACCEPTED)
-      throw new BadRequestException('User already accepted');
+      throw new HttpException(
+        httpErrors.ACTIVITY_ACCEPTED,
+        HttpStatus.BAD_REQUEST
+      );
     await this.prisma.userActivity.update({
       where: {
         user_id_activity_id: {

@@ -1,10 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Group } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventService } from './../event/event.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
@@ -22,7 +19,7 @@ export class GroupService {
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Group[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.group.findMany({
@@ -45,7 +42,7 @@ export class GroupService {
     limit: number
   ): Promise<ResponseDto<Group[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.group.findMany({
@@ -68,7 +65,7 @@ export class GroupService {
       where: { id },
     });
     if (!group || group.deleted_at) {
-      throw new NotFoundException('Group not found');
+      throw new HttpException(httpErrors.GROUP_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     return { data: group };
   }
@@ -78,7 +75,7 @@ export class GroupService {
       where: { id },
     });
     if (!group || !group.deleted_at) {
-      throw new NotFoundException('Group not found');
+      throw new HttpException(httpErrors.GROUP_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     return { data: group };
   }

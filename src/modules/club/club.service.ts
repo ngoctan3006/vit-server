@@ -1,10 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Club } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
 import { DepartmentService } from './../department/department.service';
 import { PrismaService } from './../prisma/prisma.service';
 import { CreateClubDto, UpdateClubDto } from './dto';
@@ -23,7 +20,7 @@ export class ClubService {
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Club[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.club.findMany({
@@ -46,7 +43,7 @@ export class ClubService {
     limit: number
   ): Promise<ResponseDto<Club[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.club.findMany({
@@ -69,7 +66,7 @@ export class ClubService {
       where: { id },
     });
     if (!club || club.deleted_at) {
-      throw new NotFoundException('Club not found');
+      throw new HttpException(httpErrors.CLUB_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     return { data: club };
   }
@@ -79,7 +76,7 @@ export class ClubService {
       where: { id },
     });
     if (!club || !club.deleted_at) {
-      throw new NotFoundException('Club not found');
+      throw new HttpException(httpErrors.CLUB_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     return { data: club };
   }

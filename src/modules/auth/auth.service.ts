@@ -1,11 +1,18 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants';
+import { httpErrors } from 'src/shares/exception';
 import {
   comparePassword,
   generatePassword,
@@ -74,11 +81,11 @@ export class AuthService {
     const { username, password } = signinData;
     const user = await this.userService.findByUsername(username);
     if (!user) {
-      throw new BadRequestException('Username or password is incorrect');
+      throw new HttpException(httpErrors.LOGIN_WRONG, HttpStatus.BAD_REQUEST);
     }
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
-      throw new BadRequestException('Username or password is incorrect');
+      throw new HttpException(httpErrors.LOGIN_WRONG, HttpStatus.BAD_REQUEST);
     }
     const { accessToken, refreshToken } = await this.generateToken(user);
     delete user.password;
@@ -169,7 +176,10 @@ export class AuthService {
 
       const user = await this.userService.findById(payload.id);
       if (!user) {
-        throw new BadRequestException('refresh token is invalid');
+        throw new HttpException(
+          httpErrors.REFRESH_TOKEN_INVALID,
+          HttpStatus.BAD_REQUEST
+        );
       }
 
       delete payload.iat;
@@ -178,8 +188,10 @@ export class AuthService {
       const accessToken = await this.jwtService.signAsync(payload);
       return { data: { accessToken } };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException('refresh token is expired');
+      throw new HttpException(
+        httpErrors.REFRESH_TOKEN_EXPIRED,
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 
@@ -219,17 +231,20 @@ export class AuthService {
       );
       const cache = await this.cacheManager.get<string>(data.username);
       if (!cache) {
-        throw new BadRequestException('token is expired');
+        throw new HttpException(
+          httpErrors.TOKEN_EXPIRED,
+          HttpStatus.BAD_REQUEST
+        );
       }
       if (cache !== token) {
-        throw new BadRequestException('token is invalid');
+        throw new HttpException(
+          httpErrors.TOKEN_INVALID,
+          HttpStatus.BAD_REQUEST
+        );
       }
       return await this.userService.checkUserMailAndPhone(data);
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        error?.response?.message || 'token is invalid'
-      );
+      throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -247,10 +262,7 @@ export class AuthService {
       await this.cacheManager.del(user.username);
       return { data: { message } };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        error?.response?.message || 'token is invalid'
-      );
+      throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
     }
   }
 

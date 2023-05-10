@@ -1,10 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Event, UserActivityStatus } from '@prisma/client';
 import { ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { ApproveDto, CreateEventDto, UpdateEventDto } from './dto';
@@ -31,7 +28,7 @@ export class EventService {
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Event[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.event.findMany({
@@ -53,7 +50,7 @@ export class EventService {
     limit: number
   ): Promise<ResponseDto<Event[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.event.findMany({
@@ -78,14 +75,14 @@ export class EventService {
   async findOne(id: number): Promise<ResponseDto<Event>> {
     const event = await this.prisma.event.findUnique({ where: { id } });
     if (!event || event.deleted_at)
-      throw new NotFoundException('Event not found');
+      throw new HttpException(httpErrors.EVENT_NOT_FOUND, HttpStatus.NOT_FOUND);
     return { data: event };
   }
 
   async findOneDeleted(id: number): Promise<ResponseDto<Event>> {
     const event = await this.prisma.event.findUnique({ where: { id } });
     if (!event || !event.deleted_at)
-      throw new NotFoundException('Event not found');
+      throw new HttpException(httpErrors.EVENT_NOT_FOUND, HttpStatus.NOT_FOUND);
     return { data: event };
   }
 
@@ -157,7 +154,11 @@ export class EventService {
             status: UserActivityStatus.REGISTERED,
           },
         });
-      else throw new BadRequestException('You already registered');
+      else
+        throw new HttpException(
+          httpErrors.EVENT_REGISTERED,
+          HttpStatus.BAD_REQUEST
+        );
     } else
       await this.prisma.userEvent.create({
         data: {
@@ -188,7 +189,10 @@ export class EventService {
       },
     });
     if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-      throw new BadRequestException('You have not registered yet');
+      throw new HttpException(
+        httpErrors.EVENT_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
     await this.prisma.userEvent.update({
       where: {
         user_id_event_id: {
@@ -221,9 +225,15 @@ export class EventService {
       },
     });
     if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-      throw new BadRequestException('User have not registered yet');
+      throw new HttpException(
+        httpErrors.EVENT_USER_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
     else if (isRegistered.status === UserActivityStatus.ACCEPTED)
-      throw new BadRequestException('User already accepted');
+      throw new HttpException(
+        httpErrors.EVENT_ACCEPTED,
+        HttpStatus.BAD_REQUEST
+      );
     await this.prisma.userEvent.update({
       where: {
         user_id_event_id: {
