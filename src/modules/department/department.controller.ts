@@ -12,7 +12,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Department, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators';
-import { PaginationDto, ResponseDto } from 'src/shares/dto';
+import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
@@ -69,9 +69,7 @@ export class DepartmentController {
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Delete(':id')
-  async softDelete(
-    @Param('id') id: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  async softDelete(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
     return await this.departmentService.softRemove(id);
   }
 

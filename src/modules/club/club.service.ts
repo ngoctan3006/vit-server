@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Club } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { DepartmentService } from './../department/department.service';
 import { PrismaService } from './../prisma/prisma.service';
 import { CreateClubDto, UpdateClubDto } from './dto';
@@ -88,15 +89,13 @@ export class ClubService {
     return { data: await this.prisma.club.update({ where: { id }, data }) };
   }
 
-  async softRemove(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softRemove(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);
     await this.prisma.club.update({
       where: { id },
       data: { deleted_at: new Date() },
     });
-    return {
-      data: { message: 'Club has been deleted' },
-    };
+    return { data: messageSuccess.CLUB_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Club>> {

@@ -1,6 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Status, User } from '@prisma/client';
+import { MessageDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { getKeyS3, hashPassword } from 'src/shares/utils';
 import {
   ChangePasswordFirstLoginDto,
@@ -74,9 +76,7 @@ export class UserService {
         })
       )
     );
-    const res = await this.prisma.user.createMany({
-      data,
-    });
+    const res = await this.prisma.user.createMany({ data });
 
     for (const user of createUserDtos) {
       await this.mailQueueService.addWelcomeMail({
@@ -106,12 +106,8 @@ export class UserService {
     if (key) await this.uploadService.deleteFileS3(key);
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        avatar: url,
-      },
+      where: { id },
+      data: { avatar: url },
     });
 
     return await this.getUserInfoById(id);
@@ -132,12 +128,8 @@ export class UserService {
       );
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        password: await hashPassword(newPassword),
-      },
+      where: { id },
+      data: { password: await hashPassword(newPassword) },
     });
     return 'Change password successfully';
   }
@@ -145,7 +137,7 @@ export class UserService {
   async changePasswordInFirstLogin(
     id: number,
     data: ChangePasswordFirstLoginDto
-  ): Promise<string> {
+  ): Promise<MessageDto> {
     const { password, cfPassword } = data;
     await this.getUserInfoById(id);
     if (password !== cfPassword)
@@ -155,18 +147,16 @@ export class UserService {
       );
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: {
         password: await hashPassword(password),
         status: Status.ACTIVE,
       },
     });
-    return 'Change password successfully';
+    return messageSuccess.USER_CHANGE_PASSWORD;
   }
 
-  async resetPassword(id: number, data: ResetPasswordDto): Promise<string> {
+  async resetPassword(id: number, data: ResetPasswordDto): Promise<MessageDto> {
     const { password, cfPassword } = data;
     await this.getUserInfoById(id);
     if (password !== cfPassword)
@@ -176,14 +166,10 @@ export class UserService {
       );
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        password: await hashPassword(password),
-      },
+      where: { id },
+      data: { password: await hashPassword(password) },
     });
-    return 'Reset password successfully';
+    return messageSuccess.USER_RESET_PASSWORD;
   }
 
   async update(id: number, data: UpdateUserDto): Promise<User> {
@@ -197,9 +183,7 @@ export class UserService {
       throw new HttpException(checkUserExists, HttpStatus.BAD_REQUEST);
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: {
         ...userData,
         email: email?.toLowerCase(),
@@ -213,17 +197,13 @@ export class UserService {
 
   async findByUsername(username: string): Promise<User | null> {
     return this.prisma.user.findUnique({
-      where: {
-        username,
-      },
+      where: { username },
     });
   }
 
   async findById(id: number): Promise<User | null> {
     return this.prisma.user.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
     });
   }
 
@@ -231,19 +211,11 @@ export class UserService {
     username?: string;
     email?: string;
     phone?: string;
-  }): Promise<
-    | {
-        message: string;
-        code: string;
-      }
-    | false
-  > {
+  }): Promise<MessageDto | false> {
     const { username, email, phone } = data;
     if (username) {
       const usernameExist = await this.prisma.user.count({
-        where: {
-          username,
-        },
+        where: { username },
       });
       if (usernameExist > 0) return httpErrors.USERNAME_EXISTED;
     }
@@ -268,9 +240,7 @@ export class UserService {
 
   async getAllUsername() {
     return await this.prisma.user.findMany({
-      select: {
-        username: true,
-      },
+      select: { username: true },
     });
   }
 

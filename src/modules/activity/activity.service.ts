@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Activity, UserActivityStatus } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from './../user/user.service';
 import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
@@ -115,18 +116,14 @@ export class ActivityService {
     return await this.findOne(id);
   }
 
-  async softDelete(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softDelete(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);
     await this.prisma.activity.update({
       where: { id },
       data: { deleted_at: new Date() },
     });
 
-    return {
-      data: {
-        message: 'Delete activity successfully',
-      },
-    };
+    return { data: messageSuccess.ACTIVITY_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Activity>> {
@@ -142,7 +139,7 @@ export class ActivityService {
   async register(
     userId: number,
     activityId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     await this.findOne(activityId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userActivity.findUnique({
@@ -170,9 +167,7 @@ export class ActivityService {
               activity_id: activityId,
             },
           },
-          data: {
-            status: UserActivityStatus.REGISTERED,
-          },
+          data: { status: UserActivityStatus.REGISTERED },
         });
     } else
       await this.prisma.userActivity.create({
@@ -182,17 +177,13 @@ export class ActivityService {
         },
       });
 
-    return {
-      data: {
-        message: 'Register activity successfully',
-      },
-    };
+    return { data: messageSuccess.ACTIVITY_REGISTER };
   }
 
   async cancelRegister(
     userId: number,
     activityId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     await this.findOne(activityId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userActivity.findUnique({
@@ -215,19 +206,13 @@ export class ActivityService {
           activity_id: activityId,
         },
       },
-      data: {
-        status: UserActivityStatus.CANCLED,
-      },
+      data: { status: UserActivityStatus.CANCLED },
     });
 
-    return {
-      data: {
-        message: 'Cancel register activity successfully',
-      },
-    };
+    return { data: messageSuccess.ACTIVITY_CANCEL };
   }
 
-  async approve(data: ApproveDto): Promise<ResponseDto<{ message: string }>> {
+  async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
     const { activityId, userId } = data;
     await this.findOne(activityId);
     await this.userService.getUserInfoById(userId);
@@ -256,15 +241,9 @@ export class ActivityService {
           activity_id: activityId,
         },
       },
-      data: {
-        status: UserActivityStatus.ACCEPTED,
-      },
+      data: { status: UserActivityStatus.ACCEPTED },
     });
 
-    return {
-      data: {
-        message: 'Accept register activity successfully',
-      },
-    };
+    return { data: messageSuccess.ACTIVITY_APPROVE };
   }
 }

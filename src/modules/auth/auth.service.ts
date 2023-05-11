@@ -12,7 +12,9 @@ import { User } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import {
   comparePassword,
   generatePassword,
@@ -23,7 +25,6 @@ import {
 import { read, utils } from 'xlsx';
 import { MailQueueService } from '../mail/services';
 import { UserService } from '../user/user.service';
-import { ResponseDto } from './../../shares/dto';
 import {
   ChangePasswordFirstLoginDto,
   RequestResetPasswordDto,
@@ -197,7 +198,7 @@ export class AuthService {
 
   async requestResetPassword(
     data: RequestResetPasswordDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     const user = await this.userService.checkUserMailAndPhone(data);
     const enc = AES.encrypt(
       JSON.stringify(data),
@@ -216,9 +217,7 @@ export class AuthService {
       )}/reset-password?token=${enc}`,
     });
 
-    return {
-      data: { message: 'Link reset password has been sent to your email' },
-    };
+    return { data: messageSuccess.USER_REQUEST_RESET_PASSWORD };
   }
 
   async checkTokenResetPassword(token: string): Promise<User> {
@@ -250,7 +249,7 @@ export class AuthService {
 
   async resetPassword(
     data: ResetPasswordDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     const { token, password, cfPassword } = data;
 
     try {
@@ -260,7 +259,7 @@ export class AuthService {
         cfPassword,
       });
       await this.cacheManager.del(user.username);
-      return { data: { message } };
+      return { data: message };
     } catch (error) {
       throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
     }
@@ -269,9 +268,7 @@ export class AuthService {
   async changePasswordInFirstLogin(
     id: number,
     data: ChangePasswordFirstLoginDto
-  ): Promise<{ message: string }> {
-    return {
-      message: await this.userService.changePasswordInFirstLogin(id, data),
-    };
+  ): Promise<MessageDto> {
+    return await this.userService.changePasswordInFirstLogin(id, data);
   }
 }

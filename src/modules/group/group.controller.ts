@@ -12,7 +12,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Group, Position } from '@prisma/client';
 import { Roles } from 'src/shares/decorators';
-import { PaginationDto, ResponseDto } from 'src/shares/dto';
+import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
 import { GroupService } from './group.service';
@@ -90,9 +90,7 @@ export class GroupController {
     Position.TRUONG_HANH_CHINH
   )
   @Delete(':id')
-  async softDelete(
-    @Param('id') id: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  async softDelete(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
     return await this.groupService.softRemove(id);
   }
 
