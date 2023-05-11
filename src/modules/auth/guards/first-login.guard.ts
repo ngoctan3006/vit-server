@@ -6,12 +6,17 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Status } from '@prisma/client';
 import { Request } from 'express';
 import { httpErrors } from 'src/shares/exception';
+import { UserService } from './../../user/user.service';
 
 @Injectable()
 export class FirstLoginGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
@@ -24,7 +29,11 @@ export class FirstLoginGuard implements CanActivate {
     }
 
     try {
-      req['user'] = await this.jwtService.verifyAsync(token);
+      const payload = await this.jwtService.verifyAsync(token);
+      const user = await this.userService.getUserInfoById(payload.id);
+      if (user.status === Status.BLOCKED)
+        throw new HttpException(httpErrors.BLOCKED_USER, HttpStatus.FORBIDDEN);
+      req['user'] = user;
       return true;
     } catch (error) {
       throw new HttpException(
