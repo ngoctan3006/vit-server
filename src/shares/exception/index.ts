@@ -66,6 +66,10 @@ export const httpErrors = {
     message: 'Mật khẩu chưa chính xác',
     code: 'USER_0015',
   },
+  ACTIVE_USER: {
+    message: 'Tài khoản đã được kích hoạt',
+    code: 'USER_0016',
+  },
 
   // activity
   ACTIVITY_NOT_FOUND: {

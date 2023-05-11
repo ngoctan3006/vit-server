@@ -111,7 +111,9 @@ export class AuthController {
   async firstLogin(
     @GetUser('id') id: number,
     @Body() data: ChangePasswordFirstLoginDto
-  ): Promise<MessageDto> {
-    return await this.authService.changePasswordInFirstLogin(id, data);
+  ): Promise<ResponseDto<MessageDto>> {
+    return {
+      data: await this.authService.changePasswordInFirstLogin(id, data),
+    };
   }
 }
