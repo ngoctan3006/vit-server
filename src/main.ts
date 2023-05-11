@@ -10,7 +10,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const prefix = configService.get<string>(EnvConstant.PREFIX);
-  const port = configService.get(EnvConstant.PORT);
+  const port = configService.get<number>(EnvConstant.PORT);
 
   app.setGlobalPrefix(prefix);
   app.enableCors({ origin: '*' });
