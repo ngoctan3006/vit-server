@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Event, UserActivityStatus } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
@@ -103,7 +103,7 @@ export class EventService {
     return await this.findOne(id);
   }
 
-  async softDelete(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softDelete(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);
     await this.prisma.event.update({
       where: { id },
@@ -130,7 +130,7 @@ export class EventService {
   async register(
     userId: number,
     eventId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userEvent.findUnique({
@@ -177,7 +177,7 @@ export class EventService {
   async cancelRegister(
     userId: number,
     eventId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userEvent.findUnique({
@@ -212,7 +212,7 @@ export class EventService {
     };
   }
 
-  async approve(data: ApproveDto): Promise<ResponseDto<{ message: string }>> {
+  async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
     const { eventId, userId } = data;
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);

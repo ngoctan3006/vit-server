@@ -12,7 +12,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Activity, Position } from '@prisma/client';
 import { GetUser, Roles } from 'src/shares/decorators';
-import { PaginationDto, ResponseDto } from 'src/shares/dto';
+import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
 import { ActivityService } from './activity.service';
 import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
@@ -78,9 +78,7 @@ export class ActivityController {
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Delete(':id')
-  async softDelete(
-    @Param('id') id: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  async softDelete(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
     return await this.activityService.softDelete(+id);
   }
 
@@ -95,7 +93,7 @@ export class ActivityController {
   async register(
     @GetUser('id') userId: number,
     @Param('id') activityId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.activityService.register(userId, +activityId);
   }
 
@@ -104,7 +102,7 @@ export class ActivityController {
   async cancelRegister(
     @GetUser('id') userId: number,
     @Param('id') activityId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.activityService.cancelRegister(userId, +activityId);
   }
 
@@ -112,7 +110,7 @@ export class ActivityController {
   @Post('approve')
   async approveUser(
     @Body() data: ApproveDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.activityService.approve(data);
   }
 }

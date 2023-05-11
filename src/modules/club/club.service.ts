@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Club } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { DepartmentService } from './../department/department.service';
 import { PrismaService } from './../prisma/prisma.service';
@@ -88,7 +88,7 @@ export class ClubService {
     return { data: await this.prisma.club.update({ where: { id }, data }) };
   }
 
-  async softRemove(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softRemove(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);
     await this.prisma.club.update({
       where: { id },

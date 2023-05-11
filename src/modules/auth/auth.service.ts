@@ -12,6 +12,7 @@ import { User } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import {
   comparePassword,
@@ -23,7 +24,6 @@ import {
 import { read, utils } from 'xlsx';
 import { MailQueueService } from '../mail/services';
 import { UserService } from '../user/user.service';
-import { ResponseDto } from './../../shares/dto';
 import {
   ChangePasswordFirstLoginDto,
   RequestResetPasswordDto,
@@ -197,7 +197,7 @@ export class AuthService {
 
   async requestResetPassword(
     data: RequestResetPasswordDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     const user = await this.userService.checkUserMailAndPhone(data);
     const enc = AES.encrypt(
       JSON.stringify(data),
@@ -250,7 +250,7 @@ export class AuthService {
 
   async resetPassword(
     data: ResetPasswordDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     const { token, password, cfPassword } = data;
 
     try {
@@ -269,7 +269,7 @@ export class AuthService {
   async changePasswordInFirstLogin(
     id: number,
     data: ChangePasswordFirstLoginDto
-  ): Promise<{ message: string }> {
+  ): Promise<MessageDto> {
     return {
       message: await this.userService.changePasswordInFirstLogin(id, data),
     };

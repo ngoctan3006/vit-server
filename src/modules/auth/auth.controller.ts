@@ -12,7 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Position, User } from '@prisma/client';
 import { GetUser, Roles } from 'src/shares/decorators';
-import { ResponseDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordFirstLoginDto,
@@ -86,7 +86,7 @@ export class AuthController {
   @Post('request-reset-password')
   async requestResetPassword(
     @Body() data: RequestResetPasswordDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.authService.requestResetPassword(data);
   }
 
@@ -101,7 +101,7 @@ export class AuthController {
   @Post('reset-password')
   async resetPassword(
     @Body() data: ResetPasswordDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.authService.resetPassword(data);
   }
 
@@ -111,7 +111,7 @@ export class AuthController {
   async firstLogin(
     @GetUser('id') id: number,
     @Body() data: ChangePasswordFirstLoginDto
-  ): Promise<{ message: string }> {
+  ): Promise<MessageDto> {
     return await this.authService.changePasswordInFirstLogin(id, data);
   }
 }
