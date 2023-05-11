@@ -16,7 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/shares/decorators';
-import { MessageDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { FileUploadDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guards';
 import { ChangePasswordDto, UpdateUserDto } from './dto';
@@ -42,8 +42,8 @@ export class UserController {
   async changePassword(
     @GetUser('id') id: number,
     @Body() data: ChangePasswordDto
-  ): Promise<MessageDto> {
-    return { message: await this.userService.changePassword(id, data) };
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.userService.changePassword(id, data) };
   }
 
   @UseGuards(JwtGuard)
