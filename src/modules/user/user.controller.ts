@@ -33,8 +33,8 @@ export class UserController {
   @UseInterceptors(CacheInterceptor)
   async getUserById(
     @Param('id', new ParseIntPipe()) id: number
-  ): Promise<User> {
-    return await this.userService.getUserInfoById(id);
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.getUserInfoById(id) };
   }
 
   @UseGuards(JwtGuard)
@@ -66,8 +66,8 @@ export class UserController {
       })
     )
     file: Express.Multer.File
-  ): Promise<User> {
-    return await this.userService.changeAvatar(id, file);
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.changeAvatar(id, file) };
   }
 
   @UseGuards(JwtGuard)
@@ -75,7 +75,7 @@ export class UserController {
   async updateProfile(
     @GetUser('id') id: number,
     @Body() data: UpdateUserDto
-  ): Promise<User> {
-    return await this.userService.update(id, data);
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.update(id, data) };
   }
 }
