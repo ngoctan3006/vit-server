@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Event, UserActivityStatus } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { ApproveDto, CreateEventDto, UpdateEventDto } from './dto';
@@ -110,11 +111,7 @@ export class EventService {
       data: { deleted_at: new Date() },
     });
 
-    return {
-      data: {
-        message: 'Delete activity successfully',
-      },
-    };
+    return { data: messageSuccess.EVENT_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Event>> {
@@ -150,9 +147,7 @@ export class EventService {
               event_id: eventId,
             },
           },
-          data: {
-            status: UserActivityStatus.REGISTERED,
-          },
+          data: { status: UserActivityStatus.REGISTERED },
         });
       else
         throw new HttpException(
@@ -167,11 +162,7 @@ export class EventService {
         },
       });
 
-    return {
-      data: {
-        message: 'Register activity successfully',
-      },
-    };
+    return { data: messageSuccess.EVENT_REGISTER };
   }
 
   async cancelRegister(
@@ -200,16 +191,10 @@ export class EventService {
           event_id: eventId,
         },
       },
-      data: {
-        status: UserActivityStatus.CANCLED,
-      },
+      data: { status: UserActivityStatus.CANCLED },
     });
 
-    return {
-      data: {
-        message: 'Cancel register activity successfully',
-      },
-    };
+    return { data: messageSuccess.EVENT_CANCEL };
   }
 
   async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
@@ -241,15 +226,9 @@ export class EventService {
           event_id: eventId,
         },
       },
-      data: {
-        status: UserActivityStatus.ACCEPTED,
-      },
+      data: { status: UserActivityStatus.ACCEPTED },
     });
 
-    return {
-      data: {
-        message: 'Accept register activity successfully',
-      },
-    };
+    return { data: messageSuccess.EVENT_APPROVE };
   }
 }

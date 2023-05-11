@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Department } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
 
@@ -96,9 +97,7 @@ export class DepartmentService {
       where: { id },
       data: { deleted_at: new Date() },
     });
-    return {
-      data: { message: 'Department has been deleted' },
-    };
+    return { data: messageSuccess.DEPARTMENT_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Department>> {

@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Group } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventService } from './../event/event.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
@@ -92,9 +93,7 @@ export class GroupService {
       where: { id },
       data: { deleted_at: new Date() },
     });
-    return {
-      data: { message: 'Group has been deleted' },
-    };
+    return { data: messageSuccess.GROUP_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Group>> {

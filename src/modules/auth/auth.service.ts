@@ -14,6 +14,7 @@ import { AES, enc } from 'crypto-js';
 import { EnvConstant } from 'src/shares/constants';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import {
   comparePassword,
   generatePassword,
@@ -216,9 +217,7 @@ export class AuthService {
       )}/reset-password?token=${enc}`,
     });
 
-    return {
-      data: { message: 'Link reset password has been sent to your email' },
-    };
+    return { data: messageSuccess.USER_REQUEST_RESET_PASSWORD };
   }
 
   async checkTokenResetPassword(token: string): Promise<User> {
@@ -260,7 +259,7 @@ export class AuthService {
         cfPassword,
       });
       await this.cacheManager.del(user.username);
-      return { data: { message } };
+      return { data: message };
     } catch (error) {
       throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
     }
@@ -270,8 +269,6 @@ export class AuthService {
     id: number,
     data: ChangePasswordFirstLoginDto
   ): Promise<MessageDto> {
-    return {
-      message: await this.userService.changePasswordInFirstLogin(id, data),
-    };
+    return await this.userService.changePasswordInFirstLogin(id, data);
   }
 }
