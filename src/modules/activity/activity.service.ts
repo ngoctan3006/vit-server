@@ -37,7 +37,10 @@ export class ActivityService {
         take: limit,
       }),
       metadata: {
-        totalPage: Math.ceil((await this.prisma.activity.count()) / limit),
+        totalPage: Math.ceil(
+          (await this.prisma.activity.count({ where: { deleted_at: null } })) /
+            limit
+        ),
       },
     };
   }
@@ -60,7 +63,15 @@ export class ActivityService {
         take: limit,
       }),
       metadata: {
-        totalPage: Math.ceil((await this.prisma.activity.count()) / limit),
+        totalPage: Math.ceil(
+          (await this.prisma.activity.count({
+            where: {
+              NOT: {
+                deleted_at: null,
+              },
+            },
+          })) / limit
+        ),
       },
     };
   }
