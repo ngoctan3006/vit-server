@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { EnvConstant } from 'src/shares/constants/env.constant';
+import { EnvConstant } from 'src/shares/constants';
 
 export const cacheConfig = (configService: ConfigService) => ({
   host: configService.get<string>(EnvConstant.REDIS_HOST),

@@ -1,13 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Department } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateDepartmentDto } from './dto/create-department.dto';
-import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
 
 @Injectable()
 export class DepartmentService {
@@ -22,7 +19,7 @@ export class DepartmentService {
     limit: number
   ): Promise<ResponseDto<Department[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.department.findMany({
@@ -45,7 +42,7 @@ export class DepartmentService {
     limit: number
   ): Promise<ResponseDto<Department[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.department.findMany({
@@ -68,7 +65,10 @@ export class DepartmentService {
       where: { id },
     });
     if (!department || department.deleted_at) {
-      throw new NotFoundException('Department not found');
+      throw new HttpException(
+        httpErrors.DEPARTMENT_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
     }
     return { data: department };
   }
@@ -78,7 +78,10 @@ export class DepartmentService {
       where: { id },
     });
     if (!department || !department.deleted_at) {
-      throw new NotFoundException('Department not found');
+      throw new HttpException(
+        httpErrors.DEPARTMENT_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
     }
     return { data: department };
   }
@@ -88,15 +91,13 @@ export class DepartmentService {
     return await this.prisma.department.update({ where: { id }, data });
   }
 
-  async softRemove(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softRemove(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);
     await this.prisma.department.update({
       where: { id },
       data: { deleted_at: new Date() },
     });
-    return {
-      data: { message: 'Department has been deleted' },
-    };
+    return { data: messageSuccess.DEPARTMENT_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Department>> {

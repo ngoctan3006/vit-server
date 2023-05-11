@@ -1,15 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Event, UserActivityStatus } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
-import { ApproveDto } from './dto/approve.dto';
-import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+import { ApproveDto, CreateEventDto, UpdateEventDto } from './dto';
 
 @Injectable()
 export class EventService {
@@ -33,7 +29,7 @@ export class EventService {
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Event[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.event.findMany({
@@ -55,7 +51,7 @@ export class EventService {
     limit: number
   ): Promise<ResponseDto<Event[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.event.findMany({
@@ -80,14 +76,14 @@ export class EventService {
   async findOne(id: number): Promise<ResponseDto<Event>> {
     const event = await this.prisma.event.findUnique({ where: { id } });
     if (!event || event.deleted_at)
-      throw new NotFoundException('Event not found');
+      throw new HttpException(httpErrors.EVENT_NOT_FOUND, HttpStatus.NOT_FOUND);
     return { data: event };
   }
 
   async findOneDeleted(id: number): Promise<ResponseDto<Event>> {
     const event = await this.prisma.event.findUnique({ where: { id } });
     if (!event || !event.deleted_at)
-      throw new NotFoundException('Event not found');
+      throw new HttpException(httpErrors.EVENT_NOT_FOUND, HttpStatus.NOT_FOUND);
     return { data: event };
   }
 
@@ -108,18 +104,14 @@ export class EventService {
     return await this.findOne(id);
   }
 
-  async softDelete(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softDelete(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);
     await this.prisma.event.update({
       where: { id },
       data: { deleted_at: new Date() },
     });
 
-    return {
-      data: {
-        message: 'Delete activity successfully',
-      },
-    };
+    return { data: messageSuccess.EVENT_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Event>> {
@@ -135,7 +127,7 @@ export class EventService {
   async register(
     userId: number,
     eventId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userEvent.findUnique({
@@ -155,11 +147,13 @@ export class EventService {
               event_id: eventId,
             },
           },
-          data: {
-            status: UserActivityStatus.REGISTERED,
-          },
+          data: { status: UserActivityStatus.REGISTERED },
         });
-      else throw new BadRequestException('You already registered');
+      else
+        throw new HttpException(
+          httpErrors.EVENT_REGISTERED,
+          HttpStatus.BAD_REQUEST
+        );
     } else
       await this.prisma.userEvent.create({
         data: {
@@ -168,17 +162,13 @@ export class EventService {
         },
       });
 
-    return {
-      data: {
-        message: 'Register activity successfully',
-      },
-    };
+    return { data: messageSuccess.EVENT_REGISTER };
   }
 
   async cancelRegister(
     userId: number,
     eventId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userEvent.findUnique({
@@ -190,7 +180,10 @@ export class EventService {
       },
     });
     if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-      throw new BadRequestException('You have not registered yet');
+      throw new HttpException(
+        httpErrors.EVENT_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
     await this.prisma.userEvent.update({
       where: {
         user_id_event_id: {
@@ -198,19 +191,13 @@ export class EventService {
           event_id: eventId,
         },
       },
-      data: {
-        status: UserActivityStatus.CANCLED,
-      },
+      data: { status: UserActivityStatus.CANCLED },
     });
 
-    return {
-      data: {
-        message: 'Cancel register activity successfully',
-      },
-    };
+    return { data: messageSuccess.EVENT_CANCEL };
   }
 
-  async approve(data: ApproveDto): Promise<ResponseDto<{ message: string }>> {
+  async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
     const { eventId, userId } = data;
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);
@@ -223,9 +210,15 @@ export class EventService {
       },
     });
     if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-      throw new BadRequestException('User have not registered yet');
+      throw new HttpException(
+        httpErrors.EVENT_USER_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
     else if (isRegistered.status === UserActivityStatus.ACCEPTED)
-      throw new BadRequestException('User already accepted');
+      throw new HttpException(
+        httpErrors.EVENT_ACCEPTED,
+        HttpStatus.BAD_REQUEST
+      );
     await this.prisma.userEvent.update({
       where: {
         user_id_event_id: {
@@ -233,15 +226,9 @@ export class EventService {
           event_id: eventId,
         },
       },
-      data: {
-        status: UserActivityStatus.ACCEPTED,
-      },
+      data: { status: UserActivityStatus.ACCEPTED },
     });
 
-    return {
-      data: {
-        message: 'Accept register activity successfully',
-      },
-    };
+    return { data: messageSuccess.EVENT_APPROVE };
   }
 }

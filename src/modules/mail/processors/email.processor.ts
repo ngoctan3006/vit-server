@@ -1,8 +1,7 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
-import { ResetPasswordDto } from '../dto/reset-password.dto';
-import { WelcomeDto } from '../dto/welcome.dto';
-import { MailService } from '../mail.service';
+import { ResetPasswordDto, WelcomeDto } from '../dto';
+import { MailService } from '../services';
 
 @Processor('send-mail')
 export class EmailProcessor {

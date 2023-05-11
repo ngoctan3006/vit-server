@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -10,19 +11,21 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Position, User } from '@prisma/client';
-import { GetUser } from 'src/shares/decorators/get-user.decorator';
-import { Roles } from 'src/shares/decorators/roles.decorator';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { GetUser, Roles } from 'src/shares/decorators';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { AuthService } from './auth.service';
-import { CheckTokenDto } from './dto/check-token.dto';
-import { FileUploadDto } from './dto/file-upload.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ResponseLoginDto } from './dto/response-login.dto';
-import { SigninDto } from './dto/signin.dto';
-import { SignupDto } from './dto/signup.dto';
-import { JwtGuard } from './guards/jwt.guard';
+import {
+  ChangePasswordFirstLoginDto,
+  CheckTokenDto,
+  FileUploadDto,
+  RefreshTokenDto,
+  RequestResetPasswordDto,
+  ResetPasswordDto,
+  ResponseLoginDto,
+  SigninDto,
+  SignupDto,
+} from './dto';
+import { FirstLoginGuard, JwtGuard } from './guards';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -83,7 +86,7 @@ export class AuthController {
   @Post('request-reset-password')
   async requestResetPassword(
     @Body() data: RequestResetPasswordDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.authService.requestResetPassword(data);
   }
 
@@ -98,7 +101,17 @@ export class AuthController {
   @Post('reset-password')
   async resetPassword(
     @Body() data: ResetPasswordDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.authService.resetPassword(data);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(FirstLoginGuard)
+  @Put('first-login')
+  async firstLogin(
+    @GetUser('id') id: number,
+    @Body() data: ChangePasswordFirstLoginDto
+  ): Promise<MessageDto> {
+    return await this.authService.changePasswordInFirstLogin(id, data);
   }
 }

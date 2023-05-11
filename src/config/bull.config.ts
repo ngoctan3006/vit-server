@@ -1,6 +1,6 @@
 import { SharedBullAsyncConfiguration } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
-import { EnvConstant } from './../shares/constants/env.constant';
+import { EnvConstant } from './../shares/constants';
 
 export const bullConfig: SharedBullAsyncConfiguration = {
   useFactory: (configService: ConfigService) => ({

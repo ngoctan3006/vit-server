@@ -15,11 +15,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { GetUser } from 'src/shares/decorators/get-user.decorator';
-import { FileUploadDto } from '../auth/dto/file-upload.dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { GetUser } from 'src/shares/decorators';
+import { MessageDto } from 'src/shares/dto';
+import { FileUploadDto } from '../auth/dto';
+import { JwtGuard } from '../auth/guards';
+import { ChangePasswordDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -42,7 +42,7 @@ export class UserController {
   async changePassword(
     @GetUser('id') id: number,
     @Body() data: ChangePasswordDto
-  ): Promise<{ message: string }> {
+  ): Promise<MessageDto> {
     return { message: await this.userService.changePassword(id, data) };
   }
 

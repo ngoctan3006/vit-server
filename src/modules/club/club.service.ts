@@ -1,14 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Club } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { DepartmentService } from './../department/department.service';
 import { PrismaService } from './../prisma/prisma.service';
-import { CreateClubDto } from './dto/create-club.dto';
-import { UpdateClubDto } from './dto/update-club.dto';
+import { CreateClubDto, UpdateClubDto } from './dto';
 
 @Injectable()
 export class ClubService {
@@ -24,7 +21,7 @@ export class ClubService {
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Club[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.club.findMany({
@@ -47,7 +44,7 @@ export class ClubService {
     limit: number
   ): Promise<ResponseDto<Club[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.club.findMany({
@@ -70,7 +67,7 @@ export class ClubService {
       where: { id },
     });
     if (!club || club.deleted_at) {
-      throw new NotFoundException('Club not found');
+      throw new HttpException(httpErrors.CLUB_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     return { data: club };
   }
@@ -80,7 +77,7 @@ export class ClubService {
       where: { id },
     });
     if (!club || !club.deleted_at) {
-      throw new NotFoundException('Club not found');
+      throw new HttpException(httpErrors.CLUB_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     return { data: club };
   }
@@ -92,15 +89,13 @@ export class ClubService {
     return { data: await this.prisma.club.update({ where: { id }, data }) };
   }
 
-  async softRemove(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softRemove(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);
     await this.prisma.club.update({
       where: { id },
       data: { deleted_at: new Date() },
     });
-    return {
-      data: { message: 'Club has been deleted' },
-    };
+    return { data: messageSuccess.CLUB_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Club>> {

@@ -1,27 +1,29 @@
-import { InjectQueue } from '@nestjs/bull';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Status, User } from '@prisma/client';
+import { MessageDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
+import { getKeyS3, hashPassword } from 'src/shares/utils';
 import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { User } from '@prisma/client';
-import { Queue } from 'bull';
-import { getKeyS3 } from 'src/shares/utils/get-key-s3.util';
-import { hashPassword } from 'src/shares/utils/password.util';
-import { RequestResetPasswordDto } from '../auth/dto/request-reset-password.dto';
+  ChangePasswordFirstLoginDto,
+  RequestResetPasswordDto,
+} from '../auth/dto';
+import { MailQueueService } from '../mail/services';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
-import { comparePassword } from './../../shares/utils/password.util';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { comparePassword } from './../../shares/utils';
+import {
+  ChangePasswordDto,
+  CreateUserDto,
+  ResetPasswordDto,
+  UpdateUserDto,
+} from './dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    @InjectQueue('send-mail') private readonly sendMail: Queue,
+    private readonly mailQueueService: MailQueueService,
     private readonly uploadService: UploadService
   ) {}
 
@@ -41,18 +43,12 @@ export class UserService {
       },
     });
 
-    await this.sendMail.add(
-      'welcome',
-      {
-        email: user.email,
-        name: user.fullname,
-        username: user.username,
-        password,
-      },
-      {
-        removeOnComplete: true,
-      }
-    );
+    await this.mailQueueService.addWelcomeMail({
+      email: user.email,
+      name: user.fullname,
+      username: user.username,
+      password,
+    });
 
     delete user.password;
     return user;
@@ -80,23 +76,15 @@ export class UserService {
         })
       )
     );
-    const res = await this.prisma.user.createMany({
-      data,
-    });
+    const res = await this.prisma.user.createMany({ data });
 
     for (const user of createUserDtos) {
-      await this.sendMail.add(
-        'welcome',
-        {
-          email: user.email?.toLowerCase(),
-          name: user.fullname,
-          username: user.username,
-          password: user.password,
-        },
-        {
-          removeOnComplete: true,
-        }
-      );
+      await this.mailQueueService.addWelcomeMail({
+        email: user.email?.toLowerCase(),
+        name: user.fullname,
+        username: user.username,
+        password: user.password,
+      });
     }
 
     return res;
@@ -104,7 +92,8 @@ export class UserService {
 
   async getUserInfoById(id: number): Promise<User | null> {
     const user = await this.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     delete user.password;
     return user;
   }
@@ -117,12 +106,8 @@ export class UserService {
     if (key) await this.uploadService.deleteFileS3(key);
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        avatar: url,
-      },
+      where: { id },
+      data: { avatar: url },
     });
 
     return await this.getUserInfoById(id);
@@ -130,39 +115,61 @@ export class UserService {
 
   async changePassword(id: number, data: ChangePasswordDto): Promise<string> {
     const { password, newPassword, cfPassword } = data;
-    const user = await this.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    const user = await this.getUserInfoById(id);
     if (newPassword !== cfPassword)
-      throw new BadRequestException('Password not match');
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
     if (!(await comparePassword(password, user.password)))
-      throw new BadRequestException('Password wrong');
+      throw new HttpException(
+        httpErrors.PASSWORD_WRONG,
+        HttpStatus.BAD_REQUEST
+      );
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        password: await hashPassword(newPassword),
-      },
+      where: { id },
+      data: { password: await hashPassword(newPassword) },
     });
     return 'Change password successfully';
   }
 
-  async resetPassword(id: number, data: ResetPasswordDto): Promise<string> {
+  async changePasswordInFirstLogin(
+    id: number,
+    data: ChangePasswordFirstLoginDto
+  ): Promise<MessageDto> {
     const { password, cfPassword } = data;
     await this.getUserInfoById(id);
     if (password !== cfPassword)
-      throw new BadRequestException('Password not match');
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: {
         password: await hashPassword(password),
+        status: Status.ACTIVE,
       },
     });
-    return 'Reset password successfully';
+    return messageSuccess.USER_CHANGE_PASSWORD;
+  }
+
+  async resetPassword(id: number, data: ResetPasswordDto): Promise<MessageDto> {
+    const { password, cfPassword } = data;
+    await this.getUserInfoById(id);
+    if (password !== cfPassword)
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
+
+    await this.prisma.user.update({
+      where: { id },
+      data: { password: await hashPassword(password) },
+    });
+    return messageSuccess.USER_RESET_PASSWORD;
   }
 
   async update(id: number, data: UpdateUserDto): Promise<User> {
@@ -172,12 +179,11 @@ export class UserService {
       email,
       phone,
     });
-    if (checkUserExists) throw new BadRequestException(checkUserExists);
+    if (checkUserExists)
+      throw new HttpException(checkUserExists, HttpStatus.BAD_REQUEST);
 
     await this.prisma.user.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: {
         ...userData,
         email: email?.toLowerCase(),
@@ -191,17 +197,13 @@ export class UserService {
 
   async findByUsername(username: string): Promise<User | null> {
     return this.prisma.user.findUnique({
-      where: {
-        username,
-      },
+      where: { username },
     });
   }
 
   async findById(id: number): Promise<User | null> {
     return this.prisma.user.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
     });
   }
 
@@ -209,15 +211,13 @@ export class UserService {
     username?: string;
     email?: string;
     phone?: string;
-  }): Promise<string | false> {
+  }): Promise<MessageDto | false> {
     const { username, email, phone } = data;
     if (username) {
       const usernameExist = await this.prisma.user.count({
-        where: {
-          username,
-        },
+        where: { username },
       });
-      if (usernameExist > 0) return 'Username already exists';
+      if (usernameExist > 0) return httpErrors.USERNAME_EXISTED;
     }
     if (email) {
       const emailExist = await this.prisma.user.count({
@@ -225,7 +225,7 @@ export class UserService {
           email: email.toLowerCase(),
         },
       });
-      if (emailExist > 0) return 'Email already exists';
+      if (emailExist > 0) return httpErrors.EMAIL_EXISTED;
     }
     if (phone) {
       const phoneExist = await this.prisma.user.count({
@@ -233,27 +233,32 @@ export class UserService {
           phone: phone.split(' ').join(''),
         },
       });
-      if (phoneExist > 0) return 'Phone already exists';
+      if (phoneExist > 0) return httpErrors.PHONE_EXISTED;
     }
     return false;
   }
 
   async getAllUsername() {
     return await this.prisma.user.findMany({
-      select: {
-        username: true,
-      },
+      select: { username: true },
     });
   }
 
   async checkUserMailAndPhone(data: RequestResetPasswordDto): Promise<User> {
     const { username, email, phone } = data;
     const user = await this.findByUsername(username);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     if (user.email !== email.toLowerCase())
-      throw new BadRequestException('Email or phone not match with username');
+      throw new HttpException(
+        httpErrors.EMAIL_PHONE_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
     if (user.phone !== phone.split(' ').join(''))
-      throw new BadRequestException('Email or phone not match with username');
+      throw new HttpException(
+        httpErrors.EMAIL_PHONE_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
 
     delete user.password;
     return user;

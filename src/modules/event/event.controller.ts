@@ -11,14 +11,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Event, Position } from '@prisma/client';
-import { GetUser } from 'src/shares/decorators/get-user.decorator';
-import { Roles } from 'src/shares/decorators/roles.decorator';
-import { PaginationDto } from 'src/shares/dto/pagination.dto';
-import { ResponseDto } from 'src/shares/dto/response.dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
-import { ApproveDto } from './dto/approve.dto';
-import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+import { GetUser, Roles } from 'src/shares/decorators';
+import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
+import { JwtGuard } from '../auth/guards';
+import { ApproveDto, CreateEventDto, UpdateEventDto } from './dto';
 import { EventService } from './event.service';
 
 @Controller('event')
@@ -97,9 +93,7 @@ export class EventController {
     Position.TRUONG_HANH_CHINH
   )
   @Delete(':id')
-  async softDelete(
-    @Param('id') id: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  async softDelete(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
     return await this.eventService.softDelete(+id);
   }
 
@@ -119,7 +113,7 @@ export class EventController {
   async register(
     @GetUser('id') userId: number,
     @Param('id') eventId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.eventService.register(userId, +eventId);
   }
 
@@ -128,7 +122,7 @@ export class EventController {
   async cancelRegister(
     @GetUser('id') userId: number,
     @Param('id') eventId: number
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.eventService.cancelRegister(userId, +eventId);
   }
 
@@ -141,7 +135,7 @@ export class EventController {
   @Post('approve')
   async approveUser(
     @Body() data: ApproveDto
-  ): Promise<ResponseDto<{ message: string }>> {
+  ): Promise<ResponseDto<MessageDto>> {
     return await this.eventService.approve(data);
   }
 }

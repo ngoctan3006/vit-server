@@ -1,9 +1,11 @@
 import {
   createParamDecorator,
   ExecutionContext,
-  UnauthorizedException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { httpErrors } from '../exception';
 
 export const GetUser = createParamDecorator(
   (data: string | undefined, ctx: ExecutionContext) => {
@@ -15,7 +17,10 @@ export const GetUser = createParamDecorator(
       if (token.startsWith('Bearer ')) token = token.slice(7);
       return new JwtService().verify(token);
     } catch (error) {
-      throw new UnauthorizedException('Invalid token');
+      throw new HttpException(
+        httpErrors.TOKEN_INVALID,
+        HttpStatus.UNAUTHORIZED
+      );
     }
   }
 );

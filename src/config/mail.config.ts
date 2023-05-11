@@ -2,7 +2,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { MailerAsyncOptions } from '@nestjs-modules/mailer/dist/interfaces/mailer-async-options.interface';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import { EnvConstant } from 'src/shares/constants/env.constant';
+import { EnvConstant } from 'src/shares/constants';
 
 export const mailConfig: MailerAsyncOptions = {
   useFactory: (configService: ConfigService) => ({
@@ -15,9 +15,9 @@ export const mailConfig: MailerAsyncOptions = {
       },
     },
     defaults: {
-      from: `${configService.get<string>(
+      from: `"${configService.get<string>(
         EnvConstant.MAIL_FROM_NAME
-      )} <${configService.get<string>(EnvConstant.MAIL_FROM_ADDRESS)}>`,
+      )}" <${configService.get<string>(EnvConstant.MAIL_FROM_ADDRESS)}>`,
     },
     template: {
       dir: join(__dirname + '/../modules/mail/templates'),

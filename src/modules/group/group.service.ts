@@ -1,14 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Group } from '@prisma/client';
-import { ResponseDto } from 'src/shares/dto/response.dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
+import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventService } from './../event/event.service';
-import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
+import { CreateGroupDto, UpdateGroupDto } from './dto';
 
 @Injectable()
 export class GroupService {
@@ -23,7 +20,7 @@ export class GroupService {
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Group[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.group.findMany({
@@ -46,7 +43,7 @@ export class GroupService {
     limit: number
   ): Promise<ResponseDto<Group[]>> {
     if (isNaN(page) || isNaN(limit))
-      throw new BadRequestException('Invalid query params');
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.group.findMany({
@@ -69,7 +66,7 @@ export class GroupService {
       where: { id },
     });
     if (!group || group.deleted_at) {
-      throw new NotFoundException('Group not found');
+      throw new HttpException(httpErrors.GROUP_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     return { data: group };
   }
@@ -79,7 +76,7 @@ export class GroupService {
       where: { id },
     });
     if (!group || !group.deleted_at) {
-      throw new NotFoundException('Group not found');
+      throw new HttpException(httpErrors.GROUP_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     return { data: group };
   }
@@ -90,15 +87,13 @@ export class GroupService {
     return await this.prisma.group.update({ where: { id }, data });
   }
 
-  async softRemove(id: number): Promise<ResponseDto<{ message: string }>> {
+  async softRemove(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);
     await this.prisma.group.update({
       where: { id },
       data: { deleted_at: new Date() },
     });
-    return {
-      data: { message: 'Group has been deleted' },
-    };
+    return { data: messageSuccess.GROUP_DELETE };
   }
 
   async restore(id: number): Promise<ResponseDto<Group>> {
