@@ -113,7 +113,10 @@ export class UserService {
     return await this.getUserInfoById(id);
   }
 
-  async changePassword(id: number, data: ChangePasswordDto): Promise<string> {
+  async changePassword(
+    id: number,
+    data: ChangePasswordDto
+  ): Promise<MessageDto> {
     const { password, newPassword, cfPassword } = data;
     const user = await this.getUserInfoById(id);
     if (newPassword !== cfPassword)
@@ -131,7 +134,7 @@ export class UserService {
       where: { id },
       data: { password: await hashPassword(newPassword) },
     });
-    return 'Change password successfully';
+    return messageSuccess.USER_CHANGE_PASSWORD;
   }
 
   async changePasswordInFirstLogin(

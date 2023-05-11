@@ -16,7 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/shares/decorators';
-import { MessageDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { FileUploadDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guards';
 import { ChangePasswordDto, UpdateUserDto } from './dto';
@@ -33,8 +33,8 @@ export class UserController {
   @UseInterceptors(CacheInterceptor)
   async getUserById(
     @Param('id', new ParseIntPipe()) id: number
-  ): Promise<User> {
-    return await this.userService.getUserInfoById(id);
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.getUserInfoById(id) };
   }
 
   @UseGuards(JwtGuard)
@@ -42,8 +42,8 @@ export class UserController {
   async changePassword(
     @GetUser('id') id: number,
     @Body() data: ChangePasswordDto
-  ): Promise<MessageDto> {
-    return { message: await this.userService.changePassword(id, data) };
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.userService.changePassword(id, data) };
   }
 
   @UseGuards(JwtGuard)
@@ -66,8 +66,8 @@ export class UserController {
       })
     )
     file: Express.Multer.File
-  ): Promise<User> {
-    return await this.userService.changeAvatar(id, file);
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.changeAvatar(id, file) };
   }
 
   @UseGuards(JwtGuard)
@@ -75,7 +75,7 @@ export class UserController {
   async updateProfile(
     @GetUser('id') id: number,
     @Body() data: UpdateUserDto
-  ): Promise<User> {
-    return await this.userService.update(id, data);
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.update(id, data) };
   }
 }
