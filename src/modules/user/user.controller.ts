@@ -1,4 +1,3 @@
-import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -30,7 +29,6 @@ export class UserController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  @UseInterceptors(CacheInterceptor)
   async getUserById(
     @Param('id', new ParseIntPipe()) id: number
   ): Promise<ResponseDto<User>> {
