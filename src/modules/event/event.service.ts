@@ -36,6 +36,9 @@ export class EventService {
         where: { deleted_at: null },
         skip: (page - 1) * limit,
         take: limit,
+        orderBy: {
+          start_date: 'desc',
+        },
       }),
       metadata: {
         totalPage: Math.ceil(
@@ -60,6 +63,9 @@ export class EventService {
         },
         skip: (page - 1) * limit,
         take: limit,
+        orderBy: {
+          deleted_at: 'desc',
+        },
       }),
       metadata: {
         totalPage: Math.ceil(

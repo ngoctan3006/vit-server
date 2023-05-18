@@ -100,6 +100,9 @@ export class UserService {
     const users = await this.prisma.user.findMany({
       skip: (page - 1) * limit,
       take: limit,
+      orderBy: {
+        date_join: 'desc',
+      },
     });
 
     const modifiedUsers = users.map((user) => {
