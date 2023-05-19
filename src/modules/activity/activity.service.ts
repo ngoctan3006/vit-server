@@ -3,6 +3,7 @@ import { Activity, UserActivityStatus } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
+import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from './../user/user.service';
 import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
@@ -11,15 +12,18 @@ import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
 export class ActivityService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly eventService: EventService
   ) {}
 
   async create(data: CreateActivityDto): Promise<ResponseDto<Activity>> {
-    const { start_date, end_date, ...rest } = data;
+    const { start_date, end_date, event_id, ...rest } = data;
+    await this.eventService.findOne(event_id);
     return {
       data: await this.prisma.activity.create({
         data: {
           ...rest,
+          event_id,
           start_date: new Date(start_date),
           end_date: new Date(end_date),
         },
