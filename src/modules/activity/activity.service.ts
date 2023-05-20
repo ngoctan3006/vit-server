@@ -16,19 +16,28 @@ export class ActivityService {
     private readonly eventService: EventService
   ) {}
 
-  async create(data: CreateActivityDto): Promise<ResponseDto<Activity>> {
-    const { start_date, end_date, event_id, ...rest } = data;
-    await this.eventService.findOne(event_id);
-    return {
-      data: await this.prisma.activity.create({
-        data: {
-          ...rest,
-          event_id,
-          start_date: new Date(start_date),
-          end_date: new Date(end_date),
+  async create(data: CreateActivityDto) {
+    const { times, deadline, ...rest } = data;
+    if (data.event_id) await this.eventService.findOne(data.event_id);
+    let activity_id: number;
+    await this.prisma.$transaction(async (transactionClient) => {
+      const activity = await transactionClient.activity.create({
+        data: { ...rest, deadline: new Date(deadline) },
+        select: {
+          id: true,
         },
-      }),
-    };
+      });
+      activity_id = activity.id;
+      await transactionClient.activityTime.createMany({
+        data: times.map(({ name, start_time, end_time }) => ({
+          activity_id: activity.id,
+          name,
+          start_time: new Date(start_time),
+          end_time: new Date(end_time),
+        })),
+      });
+    });
+    return await this.findOne(activity_id);
   }
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Activity[]>> {
@@ -40,9 +49,6 @@ export class ActivityService {
         where: { deleted_at: null },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: {
-          start_date: 'desc',
-        },
       }),
       metadata: {
         totalPage: Math.ceil(
@@ -111,17 +117,17 @@ export class ActivityService {
     id: number,
     data: UpdateActivityDto
   ): Promise<ResponseDto<Activity>> {
-    const { start_date, end_date, ...rest } = data;
+    const { times, ...rest } = data;
     const { data: activity } = await this.findOne(id);
 
-    await this.prisma.activity.update({
-      where: { id },
-      data: {
-        ...rest,
-        start_date: start_date ? new Date(start_date) : activity.start_date,
-        end_date: end_date ? new Date(end_date) : activity.end_date,
-      },
-    });
+    // await this.prisma.activity.update({
+    //   where: { id },
+    //   data: {
+    //     ...rest,
+    //     start_date: start_date ? new Date(start_date) : activity.start_date,
+    //     end_date: end_date ? new Date(end_date) : activity.end_date,
+    //   },
+    // });
 
     return await this.findOne(id);
   }
@@ -146,114 +152,114 @@ export class ActivityService {
     return await this.findOne(id);
   }
 
-  async register(
-    userId: number,
-    activityId: number
-  ): Promise<ResponseDto<MessageDto>> {
-    await this.findOne(activityId);
-    await this.userService.getUserInfoById(userId);
-    const isRegistered = await this.prisma.userActivity.findUnique({
-      where: {
-        user_id_activity_id: {
-          user_id: userId,
-          activity_id: activityId,
-        },
-      },
-    });
-    if (isRegistered) {
-      if (
-        isRegistered.status === UserActivityStatus.REGISTERED ||
-        isRegistered.status === UserActivityStatus.ACCEPTED
-      )
-        throw new HttpException(
-          httpErrors.ACTIVITY_REGISTERED,
-          HttpStatus.BAD_REQUEST
-        );
-      else
-        await this.prisma.userActivity.update({
-          where: {
-            user_id_activity_id: {
-              user_id: userId,
-              activity_id: activityId,
-            },
-          },
-          data: { status: UserActivityStatus.REGISTERED },
-        });
-    } else
-      await this.prisma.userActivity.create({
-        data: {
-          user_id: userId,
-          activity_id: activityId,
-        },
-      });
+  // async register(
+  //   userId: number,
+  //   activityId: number
+  // ): Promise<ResponseDto<MessageDto>> {
+  //   await this.findOne(activityId);
+  //   await this.userService.getUserInfoById(userId);
+  //   const isRegistered = await this.prisma.userActivity.findUnique({
+  //     where: {
+  //       user_id_activity_id: {
+  //         user_id: userId,
+  //         activity_id: activityId,
+  //       },
+  //     },
+  //   });
+  //   if (isRegistered) {
+  //     if (
+  //       isRegistered.status === UserActivityStatus.REGISTERED ||
+  //       isRegistered.status === UserActivityStatus.ACCEPTED
+  //     )
+  //       throw new HttpException(
+  //         httpErrors.ACTIVITY_REGISTERED,
+  //         HttpStatus.BAD_REQUEST
+  //       );
+  //     else
+  //       await this.prisma.userActivity.update({
+  //         where: {
+  //           user_id_activity_id: {
+  //             user_id: userId,
+  //             activity_id: activityId,
+  //           },
+  //         },
+  //         data: { status: UserActivityStatus.REGISTERED },
+  //       });
+  //   } else
+  //     await this.prisma.userActivity.create({
+  //       data: {
+  //         user_id: userId,
+  //         activity_id: activityId,
+  //       },
+  //     });
 
-    return { data: messageSuccess.ACTIVITY_REGISTER };
-  }
+  //   return { data: messageSuccess.ACTIVITY_REGISTER };
+  // }
 
-  async cancelRegister(
-    userId: number,
-    activityId: number
-  ): Promise<ResponseDto<MessageDto>> {
-    await this.findOne(activityId);
-    await this.userService.getUserInfoById(userId);
-    const isRegistered = await this.prisma.userActivity.findUnique({
-      where: {
-        user_id_activity_id: {
-          user_id: userId,
-          activity_id: activityId,
-        },
-      },
-    });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-      throw new HttpException(
-        httpErrors.ACTIVITY_NOT_REGISTERED,
-        HttpStatus.BAD_REQUEST
-      );
-    await this.prisma.userActivity.update({
-      where: {
-        user_id_activity_id: {
-          user_id: userId,
-          activity_id: activityId,
-        },
-      },
-      data: { status: UserActivityStatus.CANCLED },
-    });
+  // async cancelRegister(
+  //   userId: number,
+  //   activityId: number
+  // ): Promise<ResponseDto<MessageDto>> {
+  //   await this.findOne(activityId);
+  //   await this.userService.getUserInfoById(userId);
+  //   const isRegistered = await this.prisma.userActivity.findUnique({
+  //     where: {
+  //       user_id_activity_id: {
+  //         user_id: userId,
+  //         activity_id: activityId,
+  //       },
+  //     },
+  //   });
+  //   if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+  //     throw new HttpException(
+  //       httpErrors.ACTIVITY_NOT_REGISTERED,
+  //       HttpStatus.BAD_REQUEST
+  //     );
+  //   await this.prisma.userActivity.update({
+  //     where: {
+  //       user_id_activity_id: {
+  //         user_id: userId,
+  //         activity_id: activityId,
+  //       },
+  //     },
+  //     data: { status: UserActivityStatus.CANCLED },
+  //   });
 
-    return { data: messageSuccess.ACTIVITY_CANCEL };
-  }
+  //   return { data: messageSuccess.ACTIVITY_CANCEL };
+  // }
 
-  async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
-    const { activityId, userId } = data;
-    await this.findOne(activityId);
-    await this.userService.getUserInfoById(userId);
-    const isRegistered = await this.prisma.userActivity.findUnique({
-      where: {
-        user_id_activity_id: {
-          user_id: userId,
-          activity_id: activityId,
-        },
-      },
-    });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-      throw new HttpException(
-        httpErrors.ACTIVITY_USER_NOT_REGISTERED,
-        HttpStatus.BAD_REQUEST
-      );
-    else if (isRegistered.status === UserActivityStatus.ACCEPTED)
-      throw new HttpException(
-        httpErrors.ACTIVITY_ACCEPTED,
-        HttpStatus.BAD_REQUEST
-      );
-    await this.prisma.userActivity.update({
-      where: {
-        user_id_activity_id: {
-          user_id: userId,
-          activity_id: activityId,
-        },
-      },
-      data: { status: UserActivityStatus.ACCEPTED },
-    });
+  // async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+  //   const { activityId, userId } = data;
+  //   await this.findOne(activityId);
+  //   await this.userService.getUserInfoById(userId);
+  //   const isRegistered = await this.prisma.userActivity.findUnique({
+  //     where: {
+  //       user_id_activity_id: {
+  //         user_id: userId,
+  //         activity_id: activityId,
+  //       },
+  //     },
+  //   });
+  //   if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+  //     throw new HttpException(
+  //       httpErrors.ACTIVITY_USER_NOT_REGISTERED,
+  //       HttpStatus.BAD_REQUEST
+  //     );
+  //   else if (isRegistered.status === UserActivityStatus.ACCEPTED)
+  //     throw new HttpException(
+  //       httpErrors.ACTIVITY_ACCEPTED,
+  //       HttpStatus.BAD_REQUEST
+  //     );
+  //   await this.prisma.userActivity.update({
+  //     where: {
+  //       user_id_activity_id: {
+  //         user_id: userId,
+  //         activity_id: activityId,
+  //       },
+  //     },
+  //     data: { status: UserActivityStatus.ACCEPTED },
+  //   });
 
-    return { data: messageSuccess.ACTIVITY_APPROVE };
-  }
+  //   return { data: messageSuccess.ACTIVITY_APPROVE };
+  // }
 }

@@ -61,9 +61,7 @@ export class ActivityController {
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Post()
-  async create(
-    @Body() data: CreateActivityDto
-  ): Promise<ResponseDto<Activity>> {
+  async create(@Body() data: CreateActivityDto) {
     return await this.activityService.create(data);
   }
 
@@ -88,29 +86,29 @@ export class ActivityController {
     return await this.activityService.restore(+id);
   }
 
-  @UseGuards(JwtGuard)
-  @Put('register/:id')
-  async register(
-    @GetUser('id') userId: number,
-    @Param('id') activityId: number
-  ): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.register(userId, +activityId);
-  }
+  // @UseGuards(JwtGuard)
+  // @Put('register/:id')
+  // async register(
+  //   @GetUser('id') userId: number,
+  //   @Param('id') activityId: number
+  // ): Promise<ResponseDto<MessageDto>> {
+  //   return await this.activityService.register(userId, +activityId);
+  // }
 
-  @UseGuards(JwtGuard)
-  @Put('cancel/:id')
-  async cancelRegister(
-    @GetUser('id') userId: number,
-    @Param('id') activityId: number
-  ): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.cancelRegister(userId, +activityId);
-  }
+  // @UseGuards(JwtGuard)
+  // @Put('cancel/:id')
+  // async cancelRegister(
+  //   @GetUser('id') userId: number,
+  //   @Param('id') activityId: number
+  // ): Promise<ResponseDto<MessageDto>> {
+  //   return await this.activityService.cancelRegister(userId, +activityId);
+  // }
 
-  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
-  @Post('approve')
-  async approveUser(
-    @Body() data: ApproveDto
-  ): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.approve(data);
-  }
+  // @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  // @Post('approve')
+  // async approveUser(
+  //   @Body() data: ApproveDto
+  // ): Promise<ResponseDto<MessageDto>> {
+  //   return await this.activityService.approve(data);
+  // }
 }
