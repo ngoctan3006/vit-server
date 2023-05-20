@@ -49,6 +49,12 @@ export class ActivityService {
         where: { deleted_at: null },
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          times: true,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
       }),
       metadata: {
         totalPage: Math.ceil(
@@ -75,6 +81,9 @@ export class ActivityService {
         },
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          times: true,
+        },
         orderBy: {
           deleted_at: 'desc',
         },
@@ -94,7 +103,12 @@ export class ActivityService {
   }
 
   async findOne(id: number): Promise<ResponseDto<Activity>> {
-    const activity = await this.prisma.activity.findUnique({ where: { id } });
+    const activity = await this.prisma.activity.findUnique({
+      where: { id },
+      include: {
+        times: true,
+      },
+    });
     if (!activity || activity.deleted_at)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_FOUND,
@@ -104,7 +118,12 @@ export class ActivityService {
   }
 
   async findOneDeleted(id: number): Promise<ResponseDto<Activity>> {
-    const activity = await this.prisma.activity.findUnique({ where: { id } });
+    const activity = await this.prisma.activity.findUnique({
+      where: { id },
+      include: {
+        times: true,
+      },
+    });
     if (!activity || !activity.deleted_at)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_FOUND,
