@@ -1,19 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
 
 export class ActivityTimeDto {
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   name: string;
 
   @ApiProperty()
-  @IsDateString()
   @IsNotEmpty()
-  start_time: string;
+  @IsDateString()
+  @Transform(({ value }) => new Date(value))
+  start_time: Date;
 
   @ApiProperty()
-  @IsDateString()
   @IsNotEmpty()
-  end_time: string;
+  @IsDateString()
+  @Transform(({ value }) => new Date(value))
+  end_time: Date;
 }

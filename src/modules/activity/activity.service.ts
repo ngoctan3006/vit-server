@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Activity, UserActivityStatus } from '@prisma/client';
+import { Activity } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from './../user/user.service';
-import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
+import { CreateActivityDto, UpdateActivityDto } from './dto';
 
 @Injectable()
 export class ActivityService {
@@ -16,24 +16,23 @@ export class ActivityService {
     private readonly eventService: EventService
   ) {}
 
-  async create(data: CreateActivityDto) {
-    const { times, deadline, ...rest } = data;
-    if (data.event_id) await this.eventService.findOne(data.event_id);
+  async create(createActivityDto: CreateActivityDto) {
+    const { times, ...data } = createActivityDto;
+    if (createActivityDto.event_id)
+      await this.eventService.findOne(createActivityDto.event_id);
     let activity_id: number;
     await this.prisma.$transaction(async (transactionClient) => {
       const activity = await transactionClient.activity.create({
-        data: { ...rest, deadline: new Date(deadline) },
+        data,
         select: {
           id: true,
         },
       });
       activity_id = activity.id;
       await transactionClient.activityTime.createMany({
-        data: times.map(({ name, start_time, end_time }) => ({
+        data: times.map((time) => ({
           activity_id: activity.id,
-          name,
-          start_time: new Date(start_time),
-          end_time: new Date(end_time),
+          ...time,
         })),
       });
     });
@@ -136,17 +135,26 @@ export class ActivityService {
     id: number,
     data: UpdateActivityDto
   ): Promise<ResponseDto<Activity>> {
-    const { times, ...rest } = data;
+    const { times, deadline, ...rest } = data;
     const { data: activity } = await this.findOne(id);
-
-    // await this.prisma.activity.update({
-    //   where: { id },
-    //   data: {
-    //     ...rest,
-    //     start_date: start_date ? new Date(start_date) : activity.start_date,
-    //     end_date: end_date ? new Date(end_date) : activity.end_date,
-    //   },
-    // });
+    await this.prisma.$transaction(async (transactionClient) => {
+      await transactionClient.activity.update({
+        where: { id },
+        data: {
+          ...rest,
+          deadline: deadline ? new Date(deadline) : activity.deadline,
+        },
+      });
+      if (times && times.length) {
+        for (const time of times) {
+          const { id, ...data } = time;
+          await transactionClient.activityTime.update({
+            where: { id },
+            data,
+          });
+        }
+      }
+    });
 
     return await this.findOne(id);
   }
