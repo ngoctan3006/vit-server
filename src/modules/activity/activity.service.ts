@@ -49,7 +49,11 @@ export class ActivityService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          times: true,
+          times: {
+            orderBy: {
+              start_time: 'asc',
+            },
+          },
         },
         orderBy: {
           created_at: 'desc',
@@ -81,7 +85,11 @@ export class ActivityService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          times: true,
+          times: {
+            orderBy: {
+              start_time: 'asc',
+            },
+          },
         },
         orderBy: {
           deleted_at: 'desc',
@@ -105,7 +113,11 @@ export class ActivityService {
     const activity = await this.prisma.activity.findUnique({
       where: { id },
       include: {
-        times: true,
+        times: {
+          orderBy: {
+            start_time: 'asc',
+          },
+        },
       },
     });
     if (!activity || activity.deleted_at)
@@ -120,7 +132,11 @@ export class ActivityService {
     const activity = await this.prisma.activity.findUnique({
       where: { id },
       include: {
-        times: true,
+        times: {
+          orderBy: {
+            start_time: 'asc',
+          },
+        },
       },
     });
     if (!activity || !activity.deleted_at)
