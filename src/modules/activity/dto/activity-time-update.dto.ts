@@ -14,21 +14,4 @@ export class ActivityTimeUpdateDto extends PartialType(ActivityTimeDto) {
   @IsNotEmpty()
   @IsNumber()
   id: number;
-
-  // @ApiProperty()
-  // @IsOptional()
-  // @IsString()
-  // name: string;
-
-  // @ApiProperty()
-  // @IsOptional()
-  // @IsDateString()
-  // @Transform(({ value }) => new Date(value))
-  // start_time: Date;
-
-  // @ApiProperty()
-  // @IsOptional()
-  // @IsDateString()
-  // @Transform(({ value }) => new Date(value))
-  // end_time: Date;
 }

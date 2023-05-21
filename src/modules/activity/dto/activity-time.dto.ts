@@ -10,13 +10,13 @@ export class ActivityTimeDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsDateString()
+  // @IsDateString()
   @Transform(({ value }) => new Date(value))
   start_time: Date;
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsDateString()
+  // @IsDateString()
   @Transform(({ value }) => new Date(value))
   end_time: Date;
 }
