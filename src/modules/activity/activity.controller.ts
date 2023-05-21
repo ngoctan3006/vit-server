@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Activity, Position } from '@prisma/client';
+import { Activity, ActivityTime, Position } from '@prisma/client';
 import { GetUser, Roles } from 'src/shares/decorators';
 import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
@@ -25,9 +25,15 @@ export class ActivityController {
 
   @UseGuards(JwtGuard)
   @Get()
-  async findAll(
-    @Query() pagination: PaginationDto
-  ): Promise<ResponseDto<Activity[]>> {
+  async findAll(@Query() pagination: PaginationDto): Promise<
+    ResponseDto<
+      Array<
+        Activity & {
+          times: Omit<ActivityTime, 'activity_id'>[];
+        }
+      >
+    >
+  > {
     return await this.activityService.findAll(
       pagination.page,
       pagination.limit
@@ -36,9 +42,15 @@ export class ActivityController {
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Get('trash')
-  async findAllDeleted(
-    @Query() pagination: PaginationDto
-  ): Promise<ResponseDto<Activity[]>> {
+  async findAllDeleted(@Query() pagination: PaginationDto): Promise<
+    ResponseDto<
+      Array<
+        Activity & {
+          times: Omit<ActivityTime, 'activity_id'>[];
+        }
+      >
+    >
+  > {
     return await this.activityService.findAllDeleted(
       pagination.page,
       pagination.limit
@@ -47,21 +59,37 @@ export class ActivityController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<ResponseDto<Activity>> {
+  async findOne(@Param('id') id: number): Promise<
+    ResponseDto<
+      Activity & {
+        times: Omit<ActivityTime, 'activity_id'>[];
+      }
+    >
+  > {
     return await this.activityService.findOne(+id);
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Get('trash/:id')
-  async findOneDeleted(
-    @Param('id') id: number
-  ): Promise<ResponseDto<Activity>> {
+  async findOneDeleted(@Param('id') id: number): Promise<
+    ResponseDto<
+      Activity & {
+        times: Omit<ActivityTime, 'activity_id'>[];
+      }
+    >
+  > {
     return await this.activityService.findOneDeleted(+id);
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Post()
-  async create(@Body() data: CreateActivityDto) {
+  async create(@Body() data: CreateActivityDto): Promise<
+    ResponseDto<
+      Activity & {
+        times: Omit<ActivityTime, 'activity_id'>[];
+      }
+    >
+  > {
     return await this.activityService.create(data);
   }
 
