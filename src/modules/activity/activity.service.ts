@@ -10,11 +10,25 @@ import { CreateActivityDto, UpdateActivityDto } from './dto';
 
 @Injectable()
 export class ActivityService {
+  private readonly selectTimes: {
+    id: boolean;
+    name: boolean;
+    start_time: boolean;
+    end_time: boolean;
+  };
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
     private readonly eventService: EventService
-  ) {}
+  ) {
+    this.selectTimes = {
+      id: true,
+      name: true,
+      start_time: true,
+      end_time: true,
+    };
+  }
 
   async create(createActivityDto: CreateActivityDto) {
     const { times, ...data } = createActivityDto;
@@ -31,7 +45,7 @@ export class ActivityService {
       activity_id = activity.id;
       await transactionClient.activityTime.createMany({
         data: times.map((time) => ({
-          activity_id: activity.id,
+          activity_id,
           ...time,
         })),
       });
@@ -50,6 +64,7 @@ export class ActivityService {
         take: limit,
         include: {
           times: {
+            select: this.selectTimes,
             orderBy: {
               start_time: 'asc',
             },
@@ -86,6 +101,7 @@ export class ActivityService {
         take: limit,
         include: {
           times: {
+            select: this.selectTimes,
             orderBy: {
               start_time: 'asc',
             },
@@ -114,6 +130,7 @@ export class ActivityService {
       where: { id },
       include: {
         times: {
+          select: this.selectTimes,
           orderBy: {
             start_time: 'asc',
           },
@@ -133,6 +150,7 @@ export class ActivityService {
       where: { id },
       include: {
         times: {
+          select: this.selectTimes,
           orderBy: {
             start_time: 'asc',
           },
