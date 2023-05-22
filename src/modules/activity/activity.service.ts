@@ -38,8 +38,7 @@ export class ActivityService {
     >
   > {
     const { times, ...data } = createActivityDto;
-    if (createActivityDto.event_id)
-      await this.eventService.findOne(createActivityDto.event_id);
+    if (data.event_id) await this.eventService.findOne(data.event_id);
     let activity_id: number;
     await this.prisma.$transaction(async (transactionClient) => {
       const activity = await transactionClient.activity.create({
@@ -208,7 +207,15 @@ export class ActivityService {
   ): Promise<ResponseDto<Activity>> {
     const { times, ...data } = updateActivityDto;
     const { data: activity } = await this.findOne(id);
-    // const times_id = activity.times;
+    const timesId = activity.times.map(({ id }) => id);
+    if (times && times.length) {
+      if (!times.every((item) => timesId.includes(item.id))) {
+        throw new HttpException(
+          httpErrors.ACTIVITY_TIME_NOT_VALID,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+    }
     await this.prisma.$transaction(async (transactionClient) => {
       await transactionClient.activity.update({
         where: { id },
