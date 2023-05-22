@@ -204,7 +204,13 @@ export class ActivityService {
   async update(
     id: number,
     updateActivityDto: UpdateActivityDto
-  ): Promise<ResponseDto<Activity>> {
+  ): Promise<
+    ResponseDto<
+      Activity & {
+        times: Omit<ActivityTime, 'activity_id'>[];
+      }
+    >
+  > {
     const { times, ...data } = updateActivityDto;
     const { data: activity } = await this.findOne(id);
     const timesId = activity.times.map(({ id }) => id);
@@ -245,7 +251,13 @@ export class ActivityService {
     return { data: messageSuccess.ACTIVITY_DELETE };
   }
 
-  async restore(id: number): Promise<ResponseDto<Activity>> {
+  async restore(id: number): Promise<
+    ResponseDto<
+      Activity & {
+        times: Omit<ActivityTime, 'activity_id'>[];
+      }
+    >
+  > {
     await this.findOneDeleted(id);
     await this.prisma.activity.update({
       where: { id },
