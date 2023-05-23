@@ -30,6 +30,35 @@ export class ActivityService {
     };
   }
 
+  async checkActivityNotDeleted(id: number): Promise<boolean> {
+    const count = await this.prisma.activity.count({
+      where: { id, deleted_at: null },
+    });
+    if (count === 0)
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
+    return true;
+  }
+
+  async checkActivityDeleted(id: number): Promise<boolean> {
+    const count = await this.prisma.activity.count({
+      where: {
+        id,
+        deleted_at: {
+          not: null,
+        },
+      },
+    });
+    if (count === 0)
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
+    return true;
+  }
+
   async create(createActivityDto: CreateActivityDto): Promise<
     ResponseDto<
       Activity & {
@@ -242,7 +271,7 @@ export class ActivityService {
   }
 
   async softDelete(id: number): Promise<ResponseDto<MessageDto>> {
-    await this.findOne(id);
+    await this.checkActivityNotDeleted(id);
     await this.prisma.activity.update({
       where: { id },
       data: { deleted_at: new Date() },
@@ -258,7 +287,7 @@ export class ActivityService {
       }
     >
   > {
-    await this.findOneDeleted(id);
+    await this.checkActivityDeleted(id);
     await this.prisma.activity.update({
       where: { id },
       data: { deleted_at: null },
@@ -270,45 +299,17 @@ export class ActivityService {
   // async register(
   //   userId: number,
   //   activityId: number
-  // ): Promise<ResponseDto<MessageDto>> {
+  // ): Promise<
+  //   ResponseDto<
+  //     Activity & {
+  //       times: Omit<ActivityTime, 'activity_id'>[];
+  //     }
+  //   >
+  // > {
   //   await this.findOne(activityId);
   //   await this.userService.getUserInfoById(userId);
-  //   const isRegistered = await this.prisma.userActivity.findUnique({
-  //     where: {
-  //       user_id_activity_id: {
-  //         user_id: userId,
-  //         activity_id: activityId,
-  //       },
-  //     },
-  //   });
-  //   if (isRegistered) {
-  //     if (
-  //       isRegistered.status === UserActivityStatus.REGISTERED ||
-  //       isRegistered.status === UserActivityStatus.ACCEPTED
-  //     )
-  //       throw new HttpException(
-  //         httpErrors.ACTIVITY_REGISTERED,
-  //         HttpStatus.BAD_REQUEST
-  //       );
-  //     else
-  //       await this.prisma.userActivity.update({
-  //         where: {
-  //           user_id_activity_id: {
-  //             user_id: userId,
-  //             activity_id: activityId,
-  //           },
-  //         },
-  //         data: { status: UserActivityStatus.REGISTERED },
-  //       });
-  //   } else
-  //     await this.prisma.userActivity.create({
-  //       data: {
-  //         user_id: userId,
-  //         activity_id: activityId,
-  //       },
-  //     });
 
-  //   return { data: messageSuccess.ACTIVITY_REGISTER };
+  //   return await this.findOne(activityId);
   // }
 
   // async cancelRegister(
