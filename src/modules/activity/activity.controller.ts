@@ -15,7 +15,12 @@ import { GetUser, Roles } from 'src/shares/decorators';
 import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
 import { ActivityService } from './activity.service';
-import { ApproveDto, CreateActivityDto, UpdateActivityDto } from './dto';
+import {
+  ApproveDto,
+  CreateActivityDto,
+  RegistryActivityDto,
+  UpdateActivityDto,
+} from './dto';
 
 @Controller('activity')
 @ApiTags('activity')
@@ -126,14 +131,21 @@ export class ActivityController {
     return await this.activityService.restore(+id);
   }
 
-  // @UseGuards(JwtGuard)
-  // @Put('register/:id')
-  // async register(
-  //   @GetUser('id') userId: number,
-  //   @Param('id') activityId: number
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   return await this.activityService.register(userId, +activityId);
-  // }
+  @UseGuards(JwtGuard)
+  @Put('register/:id')
+  async register(
+    @GetUser('id') userId: number,
+    @Param('id') activityId: number,
+    @Body() times: RegistryActivityDto
+  ): Promise<
+    ResponseDto<
+      Activity & {
+        times: Omit<ActivityTime, 'activity_id'>[];
+      }
+    >
+  > {
+    return await this.activityService.register(userId, +activityId, times);
+  }
 
   // @UseGuards(JwtGuard)
   // @Put('cancel/:id')

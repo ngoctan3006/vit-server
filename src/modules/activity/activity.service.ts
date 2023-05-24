@@ -6,7 +6,11 @@ import { messageSuccess } from 'src/shares/message';
 import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from './../user/user.service';
-import { CreateActivityDto, UpdateActivityDto } from './dto';
+import {
+  CreateActivityDto,
+  RegistryActivityDto,
+  UpdateActivityDto,
+} from './dto';
 
 @Injectable()
 export class ActivityService {
@@ -241,16 +245,10 @@ export class ActivityService {
     >
   > {
     const { times, ...data } = updateActivityDto;
-    const { data: activity } = await this.findOne(id);
-    const timesId = activity.times.map(({ id }) => id);
-    if (times && times.length) {
-      if (!times.every((item) => timesId.includes(item.id))) {
-        throw new HttpException(
-          httpErrors.ACTIVITY_TIME_NOT_VALID,
-          HttpStatus.BAD_REQUEST
-        );
-      }
-    }
+    await this.checkTimesInActivity(
+      id,
+      times ? times.map((item) => item.id) : []
+    );
     await this.prisma.$transaction(async (transactionClient) => {
       await transactionClient.activity.update({
         where: { id },
@@ -296,21 +294,41 @@ export class ActivityService {
     return await this.findOne(id);
   }
 
-  // async register(
-  //   userId: number,
-  //   activityId: number
-  // ): Promise<
-  //   ResponseDto<
-  //     Activity & {
-  //       times: Omit<ActivityTime, 'activity_id'>[];
-  //     }
-  //   >
-  // > {
-  //   await this.findOne(activityId);
-  //   await this.userService.getUserInfoById(userId);
+  async checkTimesInActivity(id: number, times: number[]): Promise<true> {
+    const { data: activity } = await this.findOne(id);
+    const timesId = activity.times.map(({ id }) => id);
 
-  //   return await this.findOne(activityId);
-  // }
+    if (times.length === 0 || !times.every((item) => timesId.includes(item))) {
+      throw new HttpException(
+        httpErrors.ACTIVITY_TIME_NOT_VALID,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    return true;
+  }
+
+  async register(
+    userId: number,
+    activityId: number,
+    times: RegistryActivityDto
+  ): Promise<
+    ResponseDto<
+      Activity & {
+        times: Omit<ActivityTime, 'activity_id'>[];
+      }
+    >
+  > {
+    await this.userService.checkUserExisted(userId);
+    await this.checkTimesInActivity(activityId, times.times);
+    await this.prisma.userActivity.createMany({
+      data: times.times.map((item) => ({
+        user_id: userId,
+        time_id: item,
+      })),
+      skipDuplicates: true,
+    });
+    return await this.findOne(activityId);
+  }
 
   // async cancelRegister(
   //   userId: number,
