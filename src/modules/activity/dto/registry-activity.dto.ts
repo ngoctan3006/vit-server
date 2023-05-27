@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class RegistryActivityDto {
   @ApiProperty()
-  @IsArray()
-  @ArrayNotEmpty()
-  // @ValidateNested({ each: true })
-  @Type(() => Number)
-  times: number[];
+  @IsNotEmpty()
+  @IsNumber()
+  timeId: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  activityId: number;
 }

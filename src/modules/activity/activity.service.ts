@@ -309,8 +309,7 @@ export class ActivityService {
 
   async register(
     userId: number,
-    activityId: number,
-    times: RegistryActivityDto
+    data: RegistryActivityDto
   ): Promise<
     ResponseDto<
       Activity & {
@@ -318,14 +317,16 @@ export class ActivityService {
       }
     >
   > {
+    const { timeId, activityId } = data;
     await this.userService.checkUserExisted(userId);
-    await this.checkTimesInActivity(activityId, times.times);
-    await this.prisma.userActivity.createMany({
-      data: times.times.map((item) => ({
-        user_id: userId,
-        time_id: item,
-      })),
-      skipDuplicates: true,
+    const activity = await this.prisma.activity.findFirst({
+      where: {
+        id: activityId,
+        deleted_at: null,
+      },
+      select: {
+        deadline: true,
+      },
     });
     return await this.findOne(activityId);
   }

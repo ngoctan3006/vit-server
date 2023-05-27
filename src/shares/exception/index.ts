@@ -96,6 +96,10 @@ export const httpErrors = {
     message: 'Một số kíp thời gian không tồn tại trong hoạt động này',
     code: 'ACTIVITY_0006',
   },
+  ACTIVITY_EXPIRED: {
+    message: 'Hoạt động này đã quá hạn đăng ký',
+    code: 'ACTIVITY_0007',
+  },
 
   // event
   EVENT_NOT_FOUND: {
