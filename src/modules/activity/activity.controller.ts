@@ -149,11 +149,11 @@ export class ActivityController {
     return await this.activityService.cancelRegister(userId, +timeId);
   }
 
-  // @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
-  // @Post('approve')
-  // async approveUser(
-  //   @Body() data: ApproveDto
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   return await this.activityService.approve(data);
-  // }
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Post('approve')
+  async approveUser(
+    @Body() data: ApproveDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return await this.activityService.approve(data);
+  }
 }

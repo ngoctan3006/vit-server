@@ -13,5 +13,5 @@ export class ApproveDto {
   @Transform(({ value }) => parseInt(value))
   @IsNotEmpty()
   @IsNumber()
-  activityId: number;
+  timeId: number;
 }

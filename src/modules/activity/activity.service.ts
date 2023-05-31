@@ -7,6 +7,7 @@ import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from './../user/user.service';
 import {
+  ApproveDto,
   CreateActivityDto,
   RegistryActivityDto,
   UpdateActivityDto,
@@ -396,38 +397,37 @@ export class ActivityService {
     return { data: messageSuccess.ACTIVITY_CANCEL };
   }
 
-  // async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
-  //   const { activityId, userId } = data;
-  //   await this.findOne(activityId);
-  //   await this.userService.getUserInfoById(userId);
-  //   const isRegistered = await this.prisma.userActivity.findUnique({
-  //     where: {
-  //       user_id_activity_id: {
-  //         user_id: userId,
-  //         activity_id: activityId,
-  //       },
-  //     },
-  //   });
-  //   if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-  //     throw new HttpException(
-  //       httpErrors.ACTIVITY_USER_NOT_REGISTERED,
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   else if (isRegistered.status === UserActivityStatus.ACCEPTED)
-  //     throw new HttpException(
-  //       httpErrors.ACTIVITY_ACCEPTED,
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   await this.prisma.userActivity.update({
-  //     where: {
-  //       user_id_activity_id: {
-  //         user_id: userId,
-  //         activity_id: activityId,
-  //       },
-  //     },
-  //     data: { status: UserActivityStatus.ACCEPTED },
-  //   });
+  async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+    const { timeId, userId } = data;
+    await this.userService.checkUserExisted(userId);
+    const isRegistered = await this.prisma.userActivity.findUnique({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_USER_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    else if (isRegistered.status === UserActivityStatus.ACCEPTED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_ACCEPTED,
+        HttpStatus.BAD_REQUEST
+      );
+    await this.prisma.userActivity.update({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+      data: { status: UserActivityStatus.ACCEPTED },
+    });
 
-  //   return { data: messageSuccess.ACTIVITY_APPROVE };
-  // }
+    return { data: messageSuccess.ACTIVITY_APPROVE };
+  }
 }
