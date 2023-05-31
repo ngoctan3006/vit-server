@@ -1,4 +1,4 @@
-import { removeAccents } from './';
+import { removeAccents } from '../../../shares/utils';
 
 export const generateUsername = (fullname: string): string => {
   const nameArray = removeAccents(fullname).toLowerCase().split(' ');

@@ -1,5 +1,5 @@
 import { Position } from '@prisma/client';
-import { removeAccents } from './';
+import { removeAccents } from '../../../shares/utils';
 
 export const getPosition = (position?: string): Position => {
   if (!position) return Position.MEMBER;
