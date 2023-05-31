@@ -154,7 +154,14 @@ export class UserService {
     data: ChangePasswordDto
   ): Promise<MessageDto> {
     const { password, newPassword, cfPassword } = data;
-    const user = await this.getUserInfoById(id);
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        password: true,
+      },
+    });
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     if (newPassword !== cfPassword)
       throw new HttpException(
         httpErrors.PASSWORD_NOT_MATCH,
