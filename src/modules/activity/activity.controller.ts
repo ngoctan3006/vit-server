@@ -132,19 +132,12 @@ export class ActivityController {
   }
 
   @UseGuards(JwtGuard)
-  @Put('register/:id')
+  @Post('register')
   async register(
     @GetUser('id') userId: number,
-    @Param('id') activityId: number,
-    @Body() times: RegistryActivityDto
-  ): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
-    return await this.activityService.register(userId, +activityId, times);
+    @Body() data: RegistryActivityDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return await this.activityService.register(userId, data);
   }
 
   // @UseGuards(JwtGuard)

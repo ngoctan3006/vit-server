@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Activity, ActivityTime } from '@prisma/client';
+import { Activity, ActivityTime, UserActivityStatus } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
@@ -310,25 +310,59 @@ export class ActivityService {
   async register(
     userId: number,
     data: RegistryActivityDto
-  ): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
+  ): Promise<ResponseDto<MessageDto>> {
     const { timeId, activityId } = data;
     await this.userService.checkUserExisted(userId);
-    const activity = await this.prisma.activity.findFirst({
+    const { data: activity } = await this.findOne(activityId);
+    if (Date.now() > new Date(activity.deadline).getTime())
+      throw new HttpException(
+        httpErrors.ACTIVITY_EXPIRED,
+        HttpStatus.BAD_REQUEST
+      );
+    if (!activity.times.some((item) => item.id === timeId))
+      throw new HttpException(
+        httpErrors.ACTIVITY_TIME_NOT_VALID,
+        HttpStatus.BAD_REQUEST
+      );
+    const registered = await this.prisma.userActivity.findUnique({
       where: {
-        id: activityId,
-        deleted_at: null,
-      },
-      select: {
-        deadline: true,
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
       },
     });
-    return await this.findOne(activityId);
+    if (registered) {
+      if (
+        registered.status === UserActivityStatus.REGISTERED ||
+        registered.status === UserActivityStatus.ACCEPTED
+      ) {
+        throw new HttpException(
+          httpErrors.ACTIVITY_REGISTERED,
+          HttpStatus.BAD_REQUEST
+        );
+      } else {
+        await this.prisma.userActivity.update({
+          where: {
+            user_id_time_id: {
+              user_id: userId,
+              time_id: timeId,
+            },
+          },
+          data: {
+            status: UserActivityStatus.REGISTERED,
+          },
+        });
+      }
+    } else {
+      await this.prisma.userActivity.create({
+        data: { user_id: userId, time_id: timeId },
+      });
+    }
+
+    return {
+      data: messageSuccess.ACTIVITY_REGISTER,
+    };
   }
 
   // async cancelRegister(
