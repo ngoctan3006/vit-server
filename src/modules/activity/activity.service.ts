@@ -365,37 +365,36 @@ export class ActivityService {
     };
   }
 
-  // async cancelRegister(
-  //   userId: number,
-  //   activityId: number
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   await this.findOne(activityId);
-  //   await this.userService.getUserInfoById(userId);
-  //   const isRegistered = await this.prisma.userActivity.findUnique({
-  //     where: {
-  //       user_id_activity_id: {
-  //         user_id: userId,
-  //         activity_id: activityId,
-  //       },
-  //     },
-  //   });
-  //   if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
-  //     throw new HttpException(
-  //       httpErrors.ACTIVITY_NOT_REGISTERED,
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   await this.prisma.userActivity.update({
-  //     where: {
-  //       user_id_activity_id: {
-  //         user_id: userId,
-  //         activity_id: activityId,
-  //       },
-  //     },
-  //     data: { status: UserActivityStatus.CANCLED },
-  //   });
+  async cancelRegister(
+    userId: number,
+    timeId: number
+  ): Promise<ResponseDto<MessageDto>> {
+    await this.userService.checkUserExisted(userId);
+    const isRegistered = await this.prisma.userActivity.findUnique({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    await this.prisma.userActivity.update({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+      data: { status: UserActivityStatus.CANCLED },
+    });
 
-  //   return { data: messageSuccess.ACTIVITY_CANCEL };
-  // }
+    return { data: messageSuccess.ACTIVITY_CANCEL };
+  }
 
   // async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
   //   const { activityId, userId } = data;

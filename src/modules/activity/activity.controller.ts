@@ -140,14 +140,14 @@ export class ActivityController {
     return await this.activityService.register(userId, data);
   }
 
-  // @UseGuards(JwtGuard)
-  // @Put('cancel/:id')
-  // async cancelRegister(
-  //   @GetUser('id') userId: number,
-  //   @Param('id') activityId: number
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   return await this.activityService.cancelRegister(userId, +activityId);
-  // }
+  @UseGuards(JwtGuard)
+  @Put('cancel/:id')
+  async cancelRegister(
+    @GetUser('id') userId: number,
+    @Param('id') timeId: number
+  ): Promise<ResponseDto<MessageDto>> {
+    return await this.activityService.cancelRegister(userId, +timeId);
+  }
 
   // @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   // @Post('approve')
