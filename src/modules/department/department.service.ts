@@ -26,6 +26,9 @@ export class DepartmentService {
         where: { deleted_at: null },
         skip: (page - 1) * limit,
         take: limit,
+        orderBy: {
+          created_at: 'desc',
+        },
       }),
       metadata: {
         totalPage: Math.ceil(
@@ -49,6 +52,9 @@ export class DepartmentService {
         where: { deleted_at: { not: null } },
         skip: (page - 1) * limit,
         take: limit,
+        orderBy: {
+          deleted_at: 'desc',
+        },
       }),
       metadata: {
         totalPage: Math.ceil(

@@ -21,55 +21,55 @@ export class SignupDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  birthday?: string;
+  birthday: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  hometown?: string;
+  hometown: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  address?: string;
+  address: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  school?: string;
+  school: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  student_id?: string;
+  student_id: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  class?: string;
+  class: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  cccd?: string;
+  cccd: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_join?: string | number;
+  date_join: string | number;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_out?: string | number;
+  date_out: string | number;
 
   @ApiProperty({ required: false, enum: Gender })
   @IsOptional()
   @IsString()
-  gender?: Gender;
+  gender: Gender;
 
   @ApiProperty({ required: false, enum: Position })
   @IsOptional()
   @IsString()
-  position?: Position;
+  position: Position;
 }

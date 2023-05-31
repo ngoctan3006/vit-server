@@ -14,18 +14,18 @@ export class EventService {
     private readonly userService: UserService
   ) {}
 
-  async create(data: CreateEventDto): Promise<ResponseDto<Event>> {
-    const { start_date, end_date, ...rest } = data;
-    return {
-      data: await this.prisma.event.create({
-        data: {
-          ...rest,
-          start_date: new Date(start_date),
-          end_date: new Date(end_date),
-        },
-      }),
-    };
-  }
+  // async create(data: CreateEventDto): Promise<ResponseDto<Event>> {
+  //   const { start_date, end_date, ...rest } = data;
+  //   return {
+  //     data: await this.prisma.event.create({
+  //       data: {
+  //         ...rest,
+  //         start_date: new Date(start_date),
+  //         end_date: new Date(end_date),
+  //       },
+  //     }),
+  //   };
+  // }
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Event[]>> {
     if (isNaN(page) || isNaN(limit))
@@ -60,6 +60,9 @@ export class EventService {
         },
         skip: (page - 1) * limit,
         take: limit,
+        orderBy: {
+          deleted_at: 'desc',
+        },
       }),
       metadata: {
         totalPage: Math.ceil(
@@ -87,22 +90,22 @@ export class EventService {
     return { data: event };
   }
 
-  async update(id: number, data: UpdateEventDto): Promise<ResponseDto<Event>> {
-    await this.findOne(id);
-    const { start_date, end_date, ...rest } = data;
-    const { data: event } = await this.findOne(id);
+  // async update(id: number, data: UpdateEventDto): Promise<ResponseDto<Event>> {
+  //   await this.findOne(id);
+  //   const { start_date, end_date, ...rest } = data;
+  //   const { data: event } = await this.findOne(id);
 
-    await this.prisma.event.update({
-      where: { id },
-      data: {
-        ...rest,
-        start_date: start_date ? new Date(start_date) : event.start_date,
-        end_date: end_date ? new Date(end_date) : event.end_date,
-      },
-    });
+  //   await this.prisma.event.update({
+  //     where: { id },
+  //     data: {
+  //       ...rest,
+  //       start_date: start_date ? new Date(start_date) : event.start_date,
+  //       end_date: end_date ? new Date(end_date) : event.end_date,
+  //     },
+  //   });
 
-    return await this.findOne(id);
-  }
+  //   return await this.findOne(id);
+  // }
 
   async softDelete(id: number): Promise<ResponseDto<MessageDto>> {
     await this.findOne(id);

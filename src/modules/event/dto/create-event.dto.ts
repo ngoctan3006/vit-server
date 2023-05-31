@@ -15,12 +15,12 @@ export class CreateEventDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  start_date: string;
+  start_time: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  end_date: string;
+  end_time: string;
 
   @ApiProperty()
   @IsNotEmpty()

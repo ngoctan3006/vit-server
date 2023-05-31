@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Status, User } from '@prisma/client';
-import { MessageDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { getKeyS3, hashPassword } from 'src/shares/utils';
@@ -26,6 +26,14 @@ export class UserService {
     private readonly mailQueueService: MailQueueService,
     private readonly uploadService: UploadService
   ) {}
+
+  async checkUserExisted(id: number): Promise<boolean> {
+    const count = await this.prisma.user.count({ where: { id } });
+    if (count === 0) {
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return true;
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { password, birthday, date_join, date_out, ...userData } =
@@ -88,6 +96,34 @@ export class UserService {
     }
 
     return res;
+  }
+
+  async getAll(
+    page: number,
+    limit: number
+  ): Promise<ResponseDto<Omit<User, 'password'>[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
+
+    const users = await this.prisma.user.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        date_join: 'desc',
+      },
+    });
+
+    const modifiedUsers = users.map((user) => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+
+    return {
+      data: modifiedUsers,
+      metadata: {
+        totalPage: Math.ceil((await this.prisma.user.count()) / limit),
+      },
+    };
   }
 
   async getUserInfoById(id: number): Promise<User | null> {

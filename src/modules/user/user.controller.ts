@@ -1,4 +1,3 @@
-import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -8,6 +7,7 @@ import {
   ParseFilePipe,
   ParseIntPipe,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -16,7 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/shares/decorators';
-import { MessageDto, ResponseDto } from 'src/shares/dto';
+import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { FileUploadDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guards';
 import { ChangePasswordDto, UpdateUserDto } from './dto';
@@ -29,8 +29,15 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtGuard)
+  @Get('all')
+  async getAll(
+    @Query() { page, limit }: PaginationDto
+  ): Promise<ResponseDto<Omit<User, 'password'>[]>> {
+    return await this.userService.getAll(page, limit);
+  }
+
+  @UseGuards(JwtGuard)
   @Get(':id')
-  @UseInterceptors(CacheInterceptor)
   async getUserById(
     @Param('id', new ParseIntPipe()) id: number
   ): Promise<ResponseDto<User>> {

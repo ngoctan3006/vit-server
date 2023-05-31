@@ -92,6 +92,14 @@ export const httpErrors = {
     message: 'Tài khoản người dùng đã được chấp nhận vào hoạt động này',
     code: 'ACTIVITY_0005',
   },
+  ACTIVITY_TIME_NOT_VALID: {
+    message: 'Một số kíp thời gian không tồn tại trong hoạt động này',
+    code: 'ACTIVITY_0006',
+  },
+  ACTIVITY_EXPIRED: {
+    message: 'Hoạt động này đã quá hạn đăng ký',
+    code: 'ACTIVITY_0007',
+  },
 
   // event
   EVENT_NOT_FOUND: {
