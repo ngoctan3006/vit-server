@@ -31,7 +31,7 @@ CREATE TABLE "User" (
     "date_out" TIMESTAMP(3),
     "last_login" TIMESTAMP(3),
     "gender" "Gender" NOT NULL DEFAULT 'OTHER',
-    "status" "Status" NOT NULL DEFAULT 'ACTIVE',
+    "status" "Status" NOT NULL DEFAULT 'INACTIVE',
     "position" "Position" NOT NULL DEFAULT 'MEMBER',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -65,10 +65,9 @@ CREATE TABLE "Activity" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "start_date" TIMESTAMP(3) NOT NULL,
-    "end_date" TIMESTAMP(3) NOT NULL,
     "location" TEXT NOT NULL,
-    "event_id" INTEGER NOT NULL,
+    "deadline" TIMESTAMP(3) NOT NULL,
+    "event_id" INTEGER,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -77,10 +76,21 @@ CREATE TABLE "Activity" (
 );
 
 -- CreateTable
+CREATE TABLE "ActivityTime" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "start_time" TIMESTAMP(3) NOT NULL,
+    "end_time" TIMESTAMP(3) NOT NULL,
+    "activity_id" INTEGER NOT NULL,
+
+    CONSTRAINT "ActivityTime_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "UserActivity" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
-    "activity_id" INTEGER NOT NULL,
+    "time_id" INTEGER NOT NULL,
     "status" "UserActivityStatus" NOT NULL DEFAULT 'REGISTERED',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -93,8 +103,8 @@ CREATE TABLE "Event" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "start_date" TIMESTAMP(3) NOT NULL,
-    "end_date" TIMESTAMP(3) NOT NULL,
+    "start_time" TIMESTAMP(3) NOT NULL,
+    "end_time" TIMESTAMP(3) NOT NULL,
     "location" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -121,7 +131,7 @@ CREATE TABLE "Group" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "event_id" INTEGER NOT NULL,
+    "event_id" INTEGER,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -206,7 +216,7 @@ CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 CREATE UNIQUE INDEX "Social_type_key" ON "Social"("type");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "UserActivity_user_id_activity_id_key" ON "UserActivity"("user_id", "activity_id");
+CREATE UNIQUE INDEX "UserActivity_user_id_time_id_key" ON "UserActivity"("user_id", "time_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserEvent_user_id_event_id_key" ON "UserEvent"("user_id", "event_id");
@@ -230,10 +240,13 @@ ALTER TABLE "UserSocial" ADD CONSTRAINT "UserSocial_social_id_fkey" FOREIGN KEY 
 ALTER TABLE "Activity" ADD CONSTRAINT "Activity_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ActivityTime" ADD CONSTRAINT "ActivityTime_activity_id_fkey" FOREIGN KEY ("activity_id") REFERENCES "Activity"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "UserActivity" ADD CONSTRAINT "UserActivity_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserActivity" ADD CONSTRAINT "UserActivity_activity_id_fkey" FOREIGN KEY ("activity_id") REFERENCES "Activity"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserActivity" ADD CONSTRAINT "UserActivity_time_id_fkey" FOREIGN KEY ("time_id") REFERENCES "ActivityTime"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserEvent" ADD CONSTRAINT "UserEvent_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

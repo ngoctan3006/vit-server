@@ -27,6 +27,14 @@ export class UserService {
     private readonly uploadService: UploadService
   ) {}
 
+  async checkUserExisted(id: number): Promise<boolean> {
+    const count = await this.prisma.user.count({ where: { id } });
+    if (count === 0) {
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return true;
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { password, birthday, date_join, date_out, ...userData } =
       createUserDto;

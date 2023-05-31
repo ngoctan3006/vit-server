@@ -23,16 +23,16 @@ import { EventService } from './event.service';
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  @Roles(
-    Position.ADMIN,
-    Position.DOI_TRUONG,
-    Position.DOI_PHO,
-    Position.TRUONG_HANH_CHINH
-  )
-  @Post()
-  async create(@Body() data: CreateEventDto): Promise<ResponseDto<Event>> {
-    return await this.eventService.create(data);
-  }
+  // @Roles(
+  //   Position.ADMIN,
+  //   Position.DOI_TRUONG,
+  //   Position.DOI_PHO,
+  //   Position.TRUONG_HANH_CHINH
+  // )
+  // @Post()
+  // async create(@Body() data: CreateEventDto): Promise<ResponseDto<Event>> {
+  //   return await this.eventService.create(data);
+  // }
 
   @UseGuards(JwtGuard)
   @Get()
@@ -78,14 +78,13 @@ export class EventController {
     Position.DOI_PHO,
     Position.TRUONG_HANH_CHINH
   )
-  @Put(':id')
-  async update(
-    @Param('id') id: number,
-    @Body() data: UpdateEventDto
-  ): Promise<ResponseDto<Event>> {
-    return await this.eventService.update(+id, data);
-  }
-
+  // @Put(':id')
+  // async update(
+  //   @Param('id') id: number,
+  //   @Body() data: UpdateEventDto
+  // ): Promise<ResponseDto<Event>> {
+  //   return await this.eventService.update(+id, data);
+  // }
   @Roles(
     Position.ADMIN,
     Position.DOI_TRUONG,

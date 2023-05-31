@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { ActivityTimeDto } from './';
 
 export class CreateActivityDto {
   @ApiProperty()
@@ -15,20 +25,23 @@ export class CreateActivityDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  start_date: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  end_date: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
   location: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  // @IsDateString()
+  @Transform(({ value }) => new Date(value))
+  deadline: Date;
+
+  @ApiProperty()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => ActivityTimeDto)
+  times: ActivityTimeDto[];
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
-  event_id: number = 1;
+  event_id: number;
 }

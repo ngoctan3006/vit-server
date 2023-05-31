@@ -15,13 +15,7 @@ import { EnvConstant } from 'src/shares/constants';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
-import {
-  comparePassword,
-  generatePassword,
-  generateUsername,
-  getGender,
-  getPosition,
-} from 'src/shares/utils';
+import { comparePassword } from 'src/shares/utils';
 import { read, utils } from 'xlsx';
 import { MailQueueService } from '../mail/services';
 import { UserService } from '../user/user.service';
@@ -34,6 +28,12 @@ import {
   SignupDto,
 } from './dto';
 import { JwtPayload } from './strategies';
+import {
+  generatePassword,
+  generateUsername,
+  getGender,
+  getPosition,
+} from './utils';
 
 @Injectable()
 export class AuthService {
