@@ -16,6 +16,10 @@ export const messageSuccess = {
     message: 'Đã chấp nhận tài khoản người dùng thành công',
     code: 'ACTIVITY_1004',
   },
+  ACTIVITY_RESTORED: {
+    message: 'Đã khôi phục hoạt động thành công',
+    code: 'ACTIVITY_1005',
+  },
 
   // user
   USER_REQUEST_RESET_PASSWORD: {

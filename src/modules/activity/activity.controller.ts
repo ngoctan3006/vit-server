@@ -121,13 +121,7 @@ export class ActivityController {
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Put('restore/:id')
-  async restore(@Param('id') id: number): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
+  async restore(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
     return await this.activityService.restore(+id);
   }
 
