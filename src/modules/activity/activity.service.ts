@@ -279,20 +279,16 @@ export class ActivityService {
     return { data: messageSuccess.ACTIVITY_DELETE };
   }
 
-  async restore(id: number): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
+  async restore(id: number): Promise<ResponseDto<MessageDto>> {
     await this.checkActivityDeleted(id);
     await this.prisma.activity.update({
       where: { id },
       data: { deleted_at: null },
     });
 
-    return await this.findOne(id);
+    return {
+      data: messageSuccess.ACTIVITY_RESTORED,
+    };
   }
 
   async checkTimesInActivity(id: number, times: number[]): Promise<true> {
