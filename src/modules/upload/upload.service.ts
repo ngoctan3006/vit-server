@@ -56,7 +56,10 @@ export class UploadService {
     );
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<{
+  async uploadFile(
+    file: Express.Multer.File,
+    key?: string
+  ): Promise<{
     url: string;
     type: string;
     key: string;
@@ -66,11 +69,12 @@ export class UploadService {
       .upload({
         Bucket: this.bucketName,
         Body: file.buffer,
-        Key:
-          Date.now() +
-          '_' +
-          Math.round(Math.random() * 1e9) +
-          extname(file.originalname),
+        Key: key
+          ? `${key}${extname(file.originalname)}`
+          : ` ${Date.now()}_${Math.round(Math.random() * 1e9)}${extname(
+              file.originalname
+            )}`,
+        ContentType: file.mimetype,
         ACL: 'public-read',
       })
       .promise();
