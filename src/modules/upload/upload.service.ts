@@ -11,17 +11,23 @@ export class UploadService {
   private readonly bucketName: string;
   private readonly accessKeyId: string;
   private readonly secretAccessKey: string;
+  private readonly s3URL: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.region = this.configService.get(EnvConstant.AWS_REGION);
-    this.bucketName = this.configService.get(EnvConstant.AWS_BUCKET_NAME);
-    this.accessKeyId = this.configService.get(EnvConstant.AWS_ACCESS_KEY_ID);
+    this.region = this.configService.get(EnvConstant.AWS_S3_REGION);
+    this.bucketName = this.configService.get(EnvConstant.AWS_S3_BUCKET_NAME);
+    this.accessKeyId = this.configService.get(EnvConstant.AWS_S3_ACCESS_KEY_ID);
     this.secretAccessKey = this.configService.get(
-      EnvConstant.AWS_SECRET_ACCESS_KEY
+      EnvConstant.AWS_S3_SECRET_ACCESS_KEY
     );
+    this.s3URL = this.configService.get(EnvConstant.AWS_S3_URL);
   }
 
-  getSignedUrl(key: string) {
+  getKey(url: string): string {
+    return url.replace(this.s3URL, '');
+  }
+
+  getSignedUrl(key: string): string {
     const s3 = this.getS3();
     return s3.getSignedUrl('getObject', {
       Bucket: this.bucketName,
@@ -30,7 +36,7 @@ export class UploadService {
     });
   }
 
-  async updateACL(key: string) {
+  async updateACL(key: string): Promise<string> {
     const s3 = this.getS3();
     await s3
       .putObjectAcl({
@@ -50,7 +56,11 @@ export class UploadService {
     );
   }
 
-  async uploadFile(file: Express.Multer.File) {
+  async uploadFile(file: Express.Multer.File): Promise<{
+    url: string;
+    type: string;
+    key: string;
+  }> {
     const s3 = this.getS3();
     const { Location, Key } = await s3
       .upload({
@@ -72,8 +82,10 @@ export class UploadService {
     };
   }
 
-  async deleteFileS3(key: string) {
+  async deleteFileS3(url?: string): Promise<boolean> {
+    if (!url) return false;
     const s3 = this.getS3();
+    const key = this.getKey(url);
     await s3
       .deleteObject({
         Bucket: this.bucketName,

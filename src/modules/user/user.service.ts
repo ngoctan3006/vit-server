@@ -3,7 +3,7 @@ import { Status, User } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
-import { getKeyS3, hashPassword } from 'src/shares/utils';
+import { hashPassword } from 'src/shares/utils';
 import {
   ChangePasswordFirstLoginDto,
   RequestResetPasswordDto,
@@ -138,8 +138,7 @@ export class UserService {
     const user = await this.getUserInfoById(id);
 
     const { url } = await this.uploadService.uploadFile(file);
-    const key = getKeyS3(user.avatar);
-    if (key) await this.uploadService.deleteFileS3(key);
+    await this.uploadService.deleteFileS3(user.avatar);
 
     await this.prisma.user.update({
       where: { id },
