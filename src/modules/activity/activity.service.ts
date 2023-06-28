@@ -245,24 +245,40 @@ export class ActivityService {
       }
     >
   > {
+    const { data: activity } = await this.findOne(id);
+    const timesId = activity.times.map(({ id }) => id);
     const { times, ...data } = updateActivityDto;
+    const timesIdToUpdate = times.map(({ id }) => id);
+
     await this.checkTimesInActivity(
       id,
-      times ? times.map((item) => item.id) : []
+      timesIdToUpdate.filter((id) => id !== 0)
     );
     await this.prisma.$transaction(async (transactionClient) => {
       await transactionClient.activity.update({
         where: { id },
         data,
       });
-      if (times && times.length) {
-        for (const time of times) {
-          const { id, ...data } = time;
+      for (const time of times) {
+        const { id: timeId, ...data } = time;
+        if (timeId !== 0)
           await transactionClient.activityTime.update({
-            where: { id },
+            where: { id: timeId },
             data,
           });
-        }
+        else
+          await transactionClient.activityTime.create({
+            data: {
+              activity_id: id,
+              ...data,
+            },
+          });
+      }
+      for (const timeId of timesId) {
+        if (!timesIdToUpdate.includes(timeId))
+          await transactionClient.activityTime.delete({
+            where: { id: timeId },
+          });
       }
     });
 
