@@ -29,7 +29,6 @@ export class CreateActivityDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  // @IsDateString()
   @Transform(({ value }) => new Date(value))
   deadline: Date;
 
