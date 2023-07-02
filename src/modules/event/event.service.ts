@@ -142,7 +142,7 @@ export class EventService {
       },
     });
     if (isRegistered) {
-      if (isRegistered.status === UserActivityStatus.CANCLED)
+      if (isRegistered.status === UserActivityStatus.WITHDRAWN)
         await this.prisma.userEvent.update({
           where: {
             user_id_event_id: {
@@ -182,7 +182,7 @@ export class EventService {
         },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.EVENT_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
@@ -194,7 +194,7 @@ export class EventService {
           event_id: eventId,
         },
       },
-      data: { status: UserActivityStatus.CANCLED },
+      data: { status: UserActivityStatus.WITHDRAWN },
     });
 
     return { data: messageSuccess.EVENT_CANCEL };
@@ -212,7 +212,7 @@ export class EventService {
         },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.EVENT_USER_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST

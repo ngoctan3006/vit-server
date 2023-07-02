@@ -444,7 +444,7 @@ export class ActivityService {
         },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
@@ -456,7 +456,7 @@ export class ActivityService {
           time_id: timeId,
         },
       },
-      data: { status: UserActivityStatus.CANCLED },
+      data: { status: UserActivityStatus.WITHDRAWN },
     });
 
     return { data: messageSuccess.ACTIVITY_CANCEL };
@@ -473,7 +473,7 @@ export class ActivityService {
         },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_USER_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
