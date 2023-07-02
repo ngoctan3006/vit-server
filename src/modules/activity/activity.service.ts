@@ -1,10 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import {
-  Activity,
-  ActivityTime,
-  User,
-  UserActivityStatus,
-} from '@prisma/client';
+import { Activity, ActivityTime, UserActivityStatus } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
@@ -14,6 +9,7 @@ import { UserService } from './../user/user.service';
 import {
   ApproveDto,
   CreateActivityDto,
+  GetMemberResponseDto,
   RegistryActivityDto,
   UpdateActivityDto,
 } from './dto';
@@ -214,7 +210,7 @@ export class ActivityService {
     return { data: activity };
   }
 
-  async getMember(id: number) {
+  async getMember(id: number): Promise<ResponseDto<GetMemberResponseDto[]>> {
     const activity = await this.prisma.activity.findUnique({
       where: { id },
       include: {
@@ -232,7 +228,7 @@ export class ActivityService {
         HttpStatus.NOT_FOUND
       );
 
-    const activityMember = [];
+    const activityMember: GetMemberResponseDto[] = [];
     for (const time of activity.times) {
       const member = await this.prisma.userActivity.findMany({
         where: { time_id: time.id },
@@ -251,8 +247,8 @@ export class ActivityService {
         id: time.id,
         name: time.name,
         member: member.map((item) => ({
+          ...item.user,
           status: item.status,
-          user: item.user,
         })),
       });
     }

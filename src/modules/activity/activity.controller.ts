@@ -18,6 +18,7 @@ import { ActivityService } from './activity.service';
 import {
   ApproveDto,
   CreateActivityDto,
+  GetMemberResponseDto,
   RegistryActivityDto,
   UpdateActivityDto,
 } from './dto';
@@ -76,7 +77,9 @@ export class ActivityController {
 
   @UseGuards(JwtGuard)
   @Get('member/:id')
-  async getMember(@Param('id') id: number) {
+  async getMember(
+    @Param('id') id: number
+  ): Promise<ResponseDto<GetMemberResponseDto[]>> {
     return await this.activityService.getMember(+id);
   }
 
