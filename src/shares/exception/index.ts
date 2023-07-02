@@ -85,20 +85,24 @@ export const httpErrors = {
     code: 'ACTIVITY_0003',
   },
   ACTIVITY_USER_NOT_REGISTERED: {
-    message: 'Tài khoản người dùng chưa đăng ký hoạt động này',
+    message: 'Thành viên chưa đăng ký hoạt động này',
     code: 'ACTIVITY_0004',
   },
   ACTIVITY_ACCEPTED: {
-    message: 'Tài khoản người dùng đã được chấp nhận vào hoạt động này',
+    message: 'Thành viên đã được chấp nhận vào hoạt động này',
     code: 'ACTIVITY_0005',
+  },
+  ACTIVITY_REJECTED: {
+    message: 'Thành viên đã bị từ chối hoạt động này',
+    code: 'ACTIVITY_0006',
   },
   ACTIVITY_TIME_NOT_VALID: {
     message: 'Một số kíp thời gian không tồn tại trong hoạt động này',
-    code: 'ACTIVITY_0006',
+    code: 'ACTIVITY_0007',
   },
   ACTIVITY_EXPIRED: {
     message: 'Hoạt động này đã quá hạn đăng ký',
-    code: 'ACTIVITY_0007',
+    code: 'ACTIVITY_0008',
   },
 
   // event

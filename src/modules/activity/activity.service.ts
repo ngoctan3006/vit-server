@@ -495,4 +495,38 @@ export class ActivityService {
 
     return { data: messageSuccess.ACTIVITY_APPROVE };
   }
+
+  async reject(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+    const { timeId, userId } = data;
+    await this.userService.checkUserExisted(userId);
+    const isRegistered = await this.prisma.userActivity.findUnique({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
+      throw new HttpException(
+        httpErrors.ACTIVITY_USER_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    else if (isRegistered.status === UserActivityStatus.REJECTED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    await this.prisma.userActivity.update({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+      data: { status: UserActivityStatus.REJECTED },
+    });
+
+    return { data: messageSuccess.ACTIVITY_REJECT };
+  }
 }

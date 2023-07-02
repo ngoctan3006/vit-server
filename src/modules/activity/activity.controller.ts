@@ -156,4 +156,10 @@ export class ActivityController {
   ): Promise<ResponseDto<MessageDto>> {
     return await this.activityService.approve(data);
   }
+
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Post('reject')
+  async rejectUser(@Body() data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+    return await this.activityService.reject(data);
+  }
 }
