@@ -447,6 +447,11 @@ export class ActivityService {
         httpErrors.ACTIVITY_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
       );
+    if (isRegistered.status === UserActivityStatus.REJECTED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_REJECTED,
+        HttpStatus.BAD_REQUEST
+      );
     await this.prisma.userActivity.update({
       where: {
         user_id_time_id: {
