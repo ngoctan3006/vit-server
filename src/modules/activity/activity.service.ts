@@ -459,7 +459,7 @@ export class ActivityService {
       data: { status: UserActivityStatus.WITHDRAWN },
     });
 
-    return { data: messageSuccess.ACTIVITY_CANCEL };
+    return { data: messageSuccess.ACTIVITY_WITHDRAWN };
   }
 
   async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {

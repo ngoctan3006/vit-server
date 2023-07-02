@@ -4,7 +4,7 @@ export const messageSuccess = {
     message: 'Bạn đã đăng ký hoạt động thành công',
     code: 'ACTIVITY_1001',
   },
-  ACTIVITY_CANCEL: {
+  ACTIVITY_WITHDRAWN: {
     message: 'Bạn đã xin nghỉ hoạt động thành công',
     code: 'ACTIVITY_1002',
   },
