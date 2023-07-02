@@ -141,12 +141,12 @@ export class ActivityController {
   }
 
   @UseGuards(JwtGuard)
-  @Put('cancel/:id')
-  async cancelRegister(
+  @Put('withdrawn/:id')
+  async withdrawn(
     @GetUser('id') userId: number,
     @Param('id') timeId: number
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.cancelRegister(userId, +timeId);
+    return await this.activityService.withdrawn(userId, +timeId);
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)

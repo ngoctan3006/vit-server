@@ -250,12 +250,10 @@ export class ActivityService {
       activityMember.push({
         id: time.id,
         name: time.name,
-        member: member.map((item) => {
-          return {
-            status: item.status,
-            user: item.user,
-          };
-        }),
+        member: member.map((item) => ({
+          status: item.status,
+          user: item.user,
+        })),
       });
     }
 
@@ -431,7 +429,7 @@ export class ActivityService {
     };
   }
 
-  async cancelRegister(
+  async withdrawn(
     userId: number,
     timeId: number
   ): Promise<ResponseDto<MessageDto>> {
