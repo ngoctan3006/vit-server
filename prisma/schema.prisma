@@ -243,5 +243,6 @@ enum Status {
 enum UserActivityStatus {
   REGISTERED
   ACCEPTED
-  CANCLED
+  WITHDRAWN
+  REJECTED
 }

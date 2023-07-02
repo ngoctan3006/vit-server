@@ -4,7 +4,7 @@ export const messageSuccess = {
     message: 'Bạn đã đăng ký hoạt động thành công',
     code: 'ACTIVITY_1001',
   },
-  ACTIVITY_CANCEL: {
+  ACTIVITY_WITHDRAWN: {
     message: 'Bạn đã xin nghỉ hoạt động thành công',
     code: 'ACTIVITY_1002',
   },
@@ -13,12 +13,16 @@ export const messageSuccess = {
     code: 'ACTIVITY_1003',
   },
   ACTIVITY_APPROVE: {
-    message: 'Đã chấp nhận tài khoản người dùng thành công',
+    message: 'Đã chấp nhận thành viên tham gia hoạt động thành công',
     code: 'ACTIVITY_1004',
+  },
+  ACTIVITY_REJECT: {
+    message: 'Đã từ chối thành viên tham gia hoạt động này',
+    code: 'ACTIVITY_1005',
   },
   ACTIVITY_RESTORED: {
     message: 'Đã khôi phục hoạt động thành công',
-    code: 'ACTIVITY_1005',
+    code: 'ACTIVITY_1006',
   },
 
   // user

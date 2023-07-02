@@ -9,6 +9,7 @@ import { UserService } from './../user/user.service';
 import {
   ApproveDto,
   CreateActivityDto,
+  GetMemberResponseDto,
   RegistryActivityDto,
   UpdateActivityDto,
 } from './dto';
@@ -209,6 +210,52 @@ export class ActivityService {
     return { data: activity };
   }
 
+  async getMember(id: number): Promise<ResponseDto<GetMemberResponseDto[]>> {
+    const activity = await this.prisma.activity.findUnique({
+      where: { id },
+      include: {
+        times: {
+          select: this.selectTimes,
+          orderBy: {
+            start_time: 'asc',
+          },
+        },
+      },
+    });
+    if (!activity || activity.deleted_at)
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
+
+    const activityMember: GetMemberResponseDto[] = [];
+    for (const time of activity.times) {
+      const member = await this.prisma.userActivity.findMany({
+        where: { time_id: time.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              fullname: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+      activityMember.push({
+        id: time.id,
+        name: time.name,
+        member: member.map((item) => ({
+          ...item.user,
+          status: item.status,
+        })),
+      });
+    }
+
+    return { data: activityMember };
+  }
+
   async findOneDeleted(id: number): Promise<
     ResponseDto<
       Activity & {
@@ -378,7 +425,7 @@ export class ActivityService {
     };
   }
 
-  async cancelRegister(
+  async withdrawn(
     userId: number,
     timeId: number
   ): Promise<ResponseDto<MessageDto>> {
@@ -391,9 +438,14 @@ export class ActivityService {
         },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    if (isRegistered.status === UserActivityStatus.REJECTED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_REJECTED,
         HttpStatus.BAD_REQUEST
       );
     await this.prisma.userActivity.update({
@@ -403,10 +455,10 @@ export class ActivityService {
           time_id: timeId,
         },
       },
-      data: { status: UserActivityStatus.CANCLED },
+      data: { status: UserActivityStatus.WITHDRAWN },
     });
 
-    return { data: messageSuccess.ACTIVITY_CANCEL };
+    return { data: messageSuccess.ACTIVITY_WITHDRAWN };
   }
 
   async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
@@ -420,7 +472,7 @@ export class ActivityService {
         },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_USER_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
@@ -441,5 +493,39 @@ export class ActivityService {
     });
 
     return { data: messageSuccess.ACTIVITY_APPROVE };
+  }
+
+  async reject(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+    const { timeId, userId } = data;
+    await this.userService.checkUserExisted(userId);
+    const isRegistered = await this.prisma.userActivity.findUnique({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
+      throw new HttpException(
+        httpErrors.ACTIVITY_USER_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    else if (isRegistered.status === UserActivityStatus.REJECTED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    await this.prisma.userActivity.update({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+      data: { status: UserActivityStatus.REJECTED },
+    });
+
+    return { data: messageSuccess.ACTIVITY_REJECT };
   }
 }
