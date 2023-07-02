@@ -74,6 +74,12 @@ export class ActivityController {
     return await this.activityService.findOne(+id);
   }
 
+  @UseGuards(JwtGuard)
+  @Get('member/:id')
+  async getMember(@Param('id') id: number) {
+    return await this.activityService.getMember(+id);
+  }
+
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Get('trash/:id')
   async findOneDeleted(@Param('id') id: number): Promise<

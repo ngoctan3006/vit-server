@@ -1,5 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Activity, ActivityTime, UserActivityStatus } from '@prisma/client';
+import {
+  Activity,
+  ActivityTime,
+  User,
+  UserActivityStatus,
+} from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
@@ -207,6 +212,54 @@ export class ActivityService {
         HttpStatus.NOT_FOUND
       );
     return { data: activity };
+  }
+
+  async getMember(id: number) {
+    const activity = await this.prisma.activity.findUnique({
+      where: { id },
+      include: {
+        times: {
+          select: this.selectTimes,
+          orderBy: {
+            start_time: 'asc',
+          },
+        },
+      },
+    });
+    if (!activity || activity.deleted_at)
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
+
+    const activityMember = [];
+    for (const time of activity.times) {
+      const member = await this.prisma.userActivity.findMany({
+        where: { time_id: time.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              fullname: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+      activityMember.push({
+        id: time.id,
+        name: time.name,
+        member: member.map((item) => {
+          return {
+            status: item.status,
+            user: item.user,
+          };
+        }),
+      });
+    }
+
+    return { data: activityMember };
   }
 
   async findOneDeleted(id: number): Promise<
