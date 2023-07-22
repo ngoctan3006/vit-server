@@ -3,7 +3,7 @@ import { Status, User } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
-import { getKeyS3, hashPassword } from 'src/shares/utils';
+import { hashPassword } from 'src/shares/utils';
 import {
   ChangePasswordFirstLoginDto,
   RequestResetPasswordDto,
@@ -35,7 +35,10 @@ export class UserService {
     return true;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(
+    createUserDto: CreateUserDto,
+    isSendMail: boolean
+  ): Promise<User> {
     const { password, birthday, date_join, date_out, ...userData } =
       createUserDto;
 
@@ -51,18 +54,20 @@ export class UserService {
       },
     });
 
-    await this.mailQueueService.addWelcomeMail({
-      email: user.email,
-      name: user.fullname,
-      username: user.username,
-      password,
-    });
+    if (isSendMail) {
+      await this.mailQueueService.addWelcomeMail({
+        email: user.email,
+        name: user.fullname,
+        username: user.username,
+        password,
+      });
+    }
 
     delete user.password;
     return user;
   }
 
-  async createMany(createUserDtos: CreateUserDto[]) {
+  async createMany(createUserDtos: CreateUserDto[], isSendMail: boolean) {
     const data = await Promise.all(
       createUserDtos.map(
         async ({
@@ -86,13 +91,15 @@ export class UserService {
     );
     const res = await this.prisma.user.createMany({ data });
 
-    for (const user of createUserDtos) {
-      await this.mailQueueService.addWelcomeMail({
-        email: user.email?.toLowerCase(),
-        name: user.fullname,
-        username: user.username,
-        password: user.password,
-      });
+    if (isSendMail) {
+      for (const user of createUserDtos) {
+        await this.mailQueueService.addWelcomeMail({
+          email: user.email?.toLowerCase(),
+          name: user.fullname,
+          username: user.username,
+          password: user.password,
+        });
+      }
     }
 
     return res;
@@ -136,10 +143,9 @@ export class UserService {
 
   async changeAvatar(id: number, file: Express.Multer.File): Promise<User> {
     const user = await this.getUserInfoById(id);
-
-    const { url } = await this.uploadService.uploadFile(file);
-    const key = getKeyS3(user.avatar);
-    if (key) await this.uploadService.deleteFileS3(key);
+    const key = `avatar/${user.username}_${Math.round(Math.random() * 1e9)}`;
+    const { url } = await this.uploadService.uploadFile(file, key);
+    await this.uploadService.deleteFileS3(user.avatar);
 
     await this.prisma.user.update({
       where: { id },

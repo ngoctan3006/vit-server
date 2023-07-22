@@ -80,13 +80,14 @@ model Activity {
 }
 
 model ActivityTime {
-  id           Int            @id @default(autoincrement())
-  name         String
-  start_time   DateTime
-  end_time     DateTime
-  activity_id  Int
-  activity     Activity       @relation(fields: [activity_id], references: [id], onDelete: Cascade)
-  UserActivity UserActivity[]
+  id             Int            @id @default(autoincrement())
+  name           String
+  number_require Int            @default(0)
+  start_time     DateTime
+  end_time       DateTime
+  activity_id    Int
+  activity       Activity       @relation(fields: [activity_id], references: [id], onDelete: Cascade)
+  UserActivity   UserActivity[]
 }
 
 model UserActivity {
@@ -243,5 +244,6 @@ enum Status {
 enum UserActivityStatus {
   REGISTERED
   ACCEPTED
-  CANCLED
+  WITHDRAWN
+  REJECTED
 }

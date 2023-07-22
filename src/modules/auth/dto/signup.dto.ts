@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender, Position } from '@prisma/client';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class SignupDto {
   @ApiProperty()
@@ -72,4 +78,9 @@ export class SignupDto {
   @IsOptional()
   @IsString()
   position: Position;
+
+  @ApiProperty({ required: false, default: true })
+  @IsOptional()
+  @IsBoolean()
+  isSendMail: Boolean;
 }

@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -18,6 +19,7 @@ import {
   ChangePasswordFirstLoginDto,
   CheckTokenDto,
   FileUploadDto,
+  IsSendMailDto,
   RefreshTokenDto,
   RequestResetPasswordDto,
   ResetPasswordDto,
@@ -72,8 +74,11 @@ export class AuthController {
     type: FileUploadDto,
   })
   @Post('import-many')
-  async importMany(@UploadedFile() file: Express.Multer.File) {
-    return await this.authService.importMany(file);
+  async importMany(
+    @UploadedFile() file: Express.Multer.File,
+    @Query() { isSendMail }: IsSendMailDto
+  ) {
+    return await this.authService.importMany(file, isSendMail);
   }
 
   @Post('refresh-token')

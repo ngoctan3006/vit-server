@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   async signup(signupData: SignupDto): Promise<ResponseDto<User>> {
-    const { email, phone, fullname } = signupData;
+    const { email, phone, fullname, isSendMail } = signupData;
 
     const isExists = await this.userService.checkUserExists({
       email,
@@ -70,11 +70,15 @@ export class AuthService {
     if (usernameCount > 0) {
       username = `${username}${usernameCount + 1}`;
     }
-    const newUser = await this.userService.create({
-      ...signupData,
-      username,
-      password: generatePassword(),
-    });
+    delete signupData.isSendMail;
+    const newUser = await this.userService.create(
+      {
+        ...signupData,
+        username,
+        password: generatePassword(),
+      },
+      Boolean(isSendMail)
+    );
     return { data: newUser };
   }
 
@@ -99,7 +103,7 @@ export class AuthService {
     };
   }
 
-  async importMany(file: Express.Multer.File) {
+  async importMany(file: Express.Multer.File, isSendMail: boolean) {
     const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
     const jsonData = utils.sheet_to_json(
       fileData.Sheets[fileData.SheetNames[0]]
@@ -121,24 +125,31 @@ export class AuthService {
         username,
         password: generatePassword(),
         fullname: user.Fullname,
-        phone: user.Phone?.split(' ').join(''),
+        phone: String(user.Phone)?.split(' ').join(''),
         email: user.Email?.toLowerCase(),
-        birthday: user.Birthday,
+        birthday:
+          user['Birthday'] &&
+          new Date(user['Birthday']).getTime() + 8 * 60 * 60 * 1000,
         school: user.School,
-        student_id: user.StudentID,
+        student_id: user.StudentID && String(user.StudentID),
+        cccd: user.CCCD && String(user.CCCD),
         class: user.Class,
-        date_join: new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
+        date_join:
+          user['Date Join'] &&
+          new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
         date_out:
-          user['Date Out'] ??
+          user['Date Out'] &&
           new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
         gender: getGender(user.Gender),
         position: getPosition(user.Position),
       };
     });
-    const result = await this.userService.createMany(userData);
+    const result = await this.userService.createMany(userData, isSendMail);
     console.log(result);
 
-    return userData;
+    return {
+      data: messageSuccess.USER_IMPORT,
+    };
   }
 
   async generateToken(user: User): Promise<{

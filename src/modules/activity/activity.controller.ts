@@ -18,6 +18,7 @@ import { ActivityService } from './activity.service';
 import {
   ApproveDto,
   CreateActivityDto,
+  GetMemberResponseDto,
   RegistryActivityDto,
   UpdateActivityDto,
 } from './dto';
@@ -74,6 +75,14 @@ export class ActivityController {
     return await this.activityService.findOne(+id);
   }
 
+  @UseGuards(JwtGuard)
+  @Get('member/:id')
+  async getMember(
+    @Param('id') id: number
+  ): Promise<ResponseDto<GetMemberResponseDto[]>> {
+    return await this.activityService.getMember(+id);
+  }
+
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Get('trash/:id')
   async findOneDeleted(@Param('id') id: number): Promise<
@@ -121,13 +130,7 @@ export class ActivityController {
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Put('restore/:id')
-  async restore(@Param('id') id: number): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
+  async restore(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
     return await this.activityService.restore(+id);
   }
 
@@ -141,12 +144,12 @@ export class ActivityController {
   }
 
   @UseGuards(JwtGuard)
-  @Put('cancel/:id')
-  async cancelRegister(
+  @Put('withdrawn/:id')
+  async withdrawn(
     @GetUser('id') userId: number,
     @Param('id') timeId: number
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.cancelRegister(userId, +timeId);
+    return await this.activityService.withdrawn(userId, +timeId);
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
@@ -155,5 +158,11 @@ export class ActivityController {
     @Body() data: ApproveDto
   ): Promise<ResponseDto<MessageDto>> {
     return await this.activityService.approve(data);
+  }
+
+  @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
+  @Post('reject')
+  async rejectUser(@Body() data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+    return await this.activityService.reject(data);
   }
 }

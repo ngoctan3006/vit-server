@@ -5,12 +5,17 @@ import { httpErrors } from 'src/shares/exception';
 @Injectable()
 export class JwtGuard extends AuthGuard('jwt') {
   handleRequest(err: any, user: any) {
-    if (err || !user) {
+    if (err)
       throw (
         err ||
         new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.UNAUTHORIZED)
       );
-    }
+    if (!user)
+      throw new HttpException(
+        httpErrors.TOKEN_EXPIRED,
+        HttpStatus.UNAUTHORIZED
+      );
+
     return user;
   }
 }

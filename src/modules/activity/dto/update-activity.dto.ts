@@ -8,11 +8,8 @@ import {
 } from 'class-validator';
 import { ActivityTimeUpdateDto, CreateActivityDto } from './';
 
-export class UpdateActivityDto extends PartialType(
-  OmitType(CreateActivityDto, ['times'])
-) {
-  @ApiProperty({ required: false })
-  @IsOptional()
+export class UpdateActivityDto extends OmitType(CreateActivityDto, ['times']) {
+  @ApiProperty()
   @IsArray()
   @ArrayNotEmpty()
   @ValidateNested({ each: true })

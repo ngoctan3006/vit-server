@@ -9,6 +9,7 @@ import { UserService } from './../user/user.service';
 import {
   ApproveDto,
   CreateActivityDto,
+  GetMemberResponseDto,
   RegistryActivityDto,
   UpdateActivityDto,
 } from './dto';
@@ -18,6 +19,7 @@ export class ActivityService {
   private readonly selectTimes: {
     id: boolean;
     name: boolean;
+    number_require: boolean;
     start_time: boolean;
     end_time: boolean;
   };
@@ -30,6 +32,7 @@ export class ActivityService {
     this.selectTimes = {
       id: true,
       name: true,
+      number_require: true,
       start_time: true,
       end_time: true,
     };
@@ -209,6 +212,52 @@ export class ActivityService {
     return { data: activity };
   }
 
+  async getMember(id: number): Promise<ResponseDto<GetMemberResponseDto[]>> {
+    const activity = await this.prisma.activity.findUnique({
+      where: { id },
+      include: {
+        times: {
+          select: this.selectTimes,
+          orderBy: {
+            start_time: 'asc',
+          },
+        },
+      },
+    });
+    if (!activity || activity.deleted_at)
+      throw new HttpException(
+        httpErrors.ACTIVITY_NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
+
+    const activityMember: GetMemberResponseDto[] = [];
+    for (const time of activity.times) {
+      const member = await this.prisma.userActivity.findMany({
+        where: { time_id: time.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              fullname: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+      activityMember.push({
+        id: time.id,
+        name: time.name,
+        member: member.map((item) => ({
+          ...item.user,
+          status: item.status,
+        })),
+      });
+    }
+
+    return { data: activityMember };
+  }
+
   async findOneDeleted(id: number): Promise<
     ResponseDto<
       Activity & {
@@ -245,24 +294,40 @@ export class ActivityService {
       }
     >
   > {
+    const { data: activity } = await this.findOne(id);
+    const timesId = activity.times.map(({ id }) => id);
     const { times, ...data } = updateActivityDto;
+    const timesIdToUpdate = times.map(({ id }) => id);
+
     await this.checkTimesInActivity(
       id,
-      times ? times.map((item) => item.id) : []
+      timesIdToUpdate.filter((id) => id !== 0)
     );
     await this.prisma.$transaction(async (transactionClient) => {
       await transactionClient.activity.update({
         where: { id },
         data,
       });
-      if (times && times.length) {
-        for (const time of times) {
-          const { id, ...data } = time;
+      for (const time of times) {
+        const { id: timeId, ...data } = time;
+        if (timeId !== 0)
           await transactionClient.activityTime.update({
-            where: { id },
+            where: { id: timeId },
             data,
           });
-        }
+        else
+          await transactionClient.activityTime.create({
+            data: {
+              activity_id: id,
+              ...data,
+            },
+          });
+      }
+      for (const timeId of timesId) {
+        if (!timesIdToUpdate.includes(timeId))
+          await transactionClient.activityTime.delete({
+            where: { id: timeId },
+          });
       }
     });
 
@@ -279,20 +344,16 @@ export class ActivityService {
     return { data: messageSuccess.ACTIVITY_DELETE };
   }
 
-  async restore(id: number): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
+  async restore(id: number): Promise<ResponseDto<MessageDto>> {
     await this.checkActivityDeleted(id);
     await this.prisma.activity.update({
       where: { id },
       data: { deleted_at: null },
     });
 
-    return await this.findOne(id);
+    return {
+      data: messageSuccess.ACTIVITY_RESTORED,
+    };
   }
 
   async checkTimesInActivity(id: number, times: number[]): Promise<true> {
@@ -366,7 +427,7 @@ export class ActivityService {
     };
   }
 
-  async cancelRegister(
+  async withdrawn(
     userId: number,
     timeId: number
   ): Promise<ResponseDto<MessageDto>> {
@@ -379,9 +440,14 @@ export class ActivityService {
         },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    if (isRegistered.status === UserActivityStatus.REJECTED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_REJECTED,
         HttpStatus.BAD_REQUEST
       );
     await this.prisma.userActivity.update({
@@ -391,10 +457,10 @@ export class ActivityService {
           time_id: timeId,
         },
       },
-      data: { status: UserActivityStatus.CANCLED },
+      data: { status: UserActivityStatus.WITHDRAWN },
     });
 
-    return { data: messageSuccess.ACTIVITY_CANCEL };
+    return { data: messageSuccess.ACTIVITY_WITHDRAWN };
   }
 
   async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
@@ -408,7 +474,7 @@ export class ActivityService {
         },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.CANCLED)
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_USER_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
@@ -429,5 +495,39 @@ export class ActivityService {
     });
 
     return { data: messageSuccess.ACTIVITY_APPROVE };
+  }
+
+  async reject(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+    const { timeId, userId } = data;
+    await this.userService.checkUserExisted(userId);
+    const isRegistered = await this.prisma.userActivity.findUnique({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+    });
+    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
+      throw new HttpException(
+        httpErrors.ACTIVITY_USER_NOT_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    else if (isRegistered.status === UserActivityStatus.REJECTED)
+      throw new HttpException(
+        httpErrors.ACTIVITY_REGISTERED,
+        HttpStatus.BAD_REQUEST
+      );
+    await this.prisma.userActivity.update({
+      where: {
+        user_id_time_id: {
+          user_id: userId,
+          time_id: timeId,
+        },
+      },
+      data: { status: UserActivityStatus.REJECTED },
+    });
+
+    return { data: messageSuccess.ACTIVITY_REJECT };
   }
 }
