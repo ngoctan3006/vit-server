@@ -38,6 +38,10 @@ export const messageSuccess = {
     message: 'Đặt lại mật khẩu thành công',
     code: 'USER_1003',
   },
+  USER_IMPORT: {
+    message: 'Đã thêm thành viên thành công',
+    code: 'USER_1004',
+  },
 
   // club
   CLUB_DELETE: {
