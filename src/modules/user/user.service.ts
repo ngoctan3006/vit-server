@@ -35,7 +35,10 @@ export class UserService {
     return true;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(
+    createUserDto: CreateUserDto,
+    isSendMail: boolean
+  ): Promise<User> {
     const { password, birthday, date_join, date_out, ...userData } =
       createUserDto;
 
@@ -51,18 +54,20 @@ export class UserService {
       },
     });
 
-    await this.mailQueueService.addWelcomeMail({
-      email: user.email,
-      name: user.fullname,
-      username: user.username,
-      password,
-    });
+    if (isSendMail) {
+      await this.mailQueueService.addWelcomeMail({
+        email: user.email,
+        name: user.fullname,
+        username: user.username,
+        password,
+      });
+    }
 
     delete user.password;
     return user;
   }
 
-  async createMany(createUserDtos: CreateUserDto[]) {
+  async createMany(createUserDtos: CreateUserDto[], isSendMail: boolean) {
     const data = await Promise.all(
       createUserDtos.map(
         async ({
@@ -86,13 +91,15 @@ export class UserService {
     );
     const res = await this.prisma.user.createMany({ data });
 
-    for (const user of createUserDtos) {
-      await this.mailQueueService.addWelcomeMail({
-        email: user.email?.toLowerCase(),
-        name: user.fullname,
-        username: user.username,
-        password: user.password,
-      });
+    if (isSendMail) {
+      for (const user of createUserDtos) {
+        await this.mailQueueService.addWelcomeMail({
+          email: user.email?.toLowerCase(),
+          name: user.fullname,
+          username: user.username,
+          password: user.password,
+        });
+      }
     }
 
     return res;

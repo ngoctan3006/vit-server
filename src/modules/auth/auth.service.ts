@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   async signup(signupData: SignupDto): Promise<ResponseDto<User>> {
-    const { email, phone, fullname } = signupData;
+    const { email, phone, fullname, isSendMail } = signupData;
 
     const isExists = await this.userService.checkUserExists({
       email,
@@ -70,11 +70,15 @@ export class AuthService {
     if (usernameCount > 0) {
       username = `${username}${usernameCount + 1}`;
     }
-    const newUser = await this.userService.create({
-      ...signupData,
-      username,
-      password: generatePassword(),
-    });
+    delete signupData.isSendMail;
+    const newUser = await this.userService.create(
+      {
+        ...signupData,
+        username,
+        password: generatePassword(),
+      },
+      Boolean(isSendMail)
+    );
     return { data: newUser };
   }
 
@@ -135,7 +139,7 @@ export class AuthService {
         position: getPosition(user.Position),
       };
     });
-    const result = await this.userService.createMany(userData);
+    const result = await this.userService.createMany(userData, false);
     console.log(result);
 
     return userData;
