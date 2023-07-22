@@ -71,7 +71,7 @@ export class AuthService {
       username = `${username}${usernameCount + 1}`;
     }
     delete signupData.isSendMail;
-    const newUser = await this.userService.create(
+    await this.userService.create(
       {
         ...signupData,
         username,
@@ -144,8 +144,7 @@ export class AuthService {
         position: getPosition(user.Position),
       };
     });
-    const result = await this.userService.createMany(userData, isSendMail);
-    console.log(result);
+    await this.userService.createMany(userData, isSendMail);
 
     return {
       data: messageSuccess.USER_IMPORT,
