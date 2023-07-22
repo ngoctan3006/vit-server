@@ -56,7 +56,7 @@ export class AuthController {
   )
   @ApiBearerAuth()
   @Post('signup')
-  async signup(@Body() signupData: SignupDto): Promise<ResponseDto<User>> {
+  async signup(@Body() signupData: SignupDto) {
     return await this.authService.signup(signupData);
   }
 
