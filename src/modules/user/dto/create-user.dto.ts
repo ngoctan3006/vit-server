@@ -6,7 +6,7 @@ export class CreateUserDto {
   fullname: string;
   email: string;
   phone: string;
-  birthday?: string;
+  birthday?: string | number;
   hometown?: string;
   address?: string;
   school?: string;
