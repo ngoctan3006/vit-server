@@ -19,6 +19,7 @@ export class ActivityService {
   private readonly selectTimes: {
     id: boolean;
     name: boolean;
+    number_require: boolean;
     start_time: boolean;
     end_time: boolean;
   };
@@ -31,6 +32,7 @@ export class ActivityService {
     this.selectTimes = {
       id: true,
       name: true,
+      number_require: true,
       start_time: true,
       end_time: true,
     };
