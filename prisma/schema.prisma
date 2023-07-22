@@ -28,9 +28,9 @@ model User {
   hometown    String?
   address     String?
   school      String?
-  student_id  String?          @unique
+  student_id  String?
   class       String?
-  cccd        String?          @unique
+  cccd        String?
   date_join   DateTime?
   date_out    DateTime?
   last_login  DateTime?
