@@ -128,17 +128,17 @@ export class AuthService {
         phone: String(user.Phone)?.split(' ').join(''),
         email: user.Email?.toLowerCase(),
         birthday:
-          user['Birthday'] ??
+          user['Birthday'] &&
           new Date(user['Birthday']).getTime() + 8 * 60 * 60 * 1000,
         school: user.School,
-        student_id: user.StudentID ?? String(user.StudentID),
-        cccd: user.CCCD ?? String(user.CCCD),
+        student_id: user.StudentID && String(user.StudentID),
+        cccd: user.CCCD && String(user.CCCD),
         class: user.Class,
         date_join:
-          user['Date Join'] ??
+          user['Date Join'] &&
           new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
         date_out:
-          user['Date Out'] ??
+          user['Date Out'] &&
           new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
         gender: getGender(user.Gender),
         position: getPosition(user.Position),
@@ -147,7 +147,9 @@ export class AuthService {
     const result = await this.userService.createMany(userData, isSendMail);
     console.log(result);
 
-    return userData;
+    return {
+      data: messageSuccess.USER_IMPORT,
+    };
   }
 
   async generateToken(user: User): Promise<{
