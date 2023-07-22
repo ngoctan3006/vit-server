@@ -103,7 +103,7 @@ export class AuthService {
     };
   }
 
-  async importMany(file: Express.Multer.File) {
+  async importMany(file: Express.Multer.File, isSendMail: boolean) {
     const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
     const jsonData = utils.sheet_to_json(
       fileData.Sheets[fileData.SheetNames[0]]
@@ -127,9 +127,9 @@ export class AuthService {
         fullname: user.Fullname,
         phone: user.Phone?.split(' ').join(''),
         email: user.Email?.toLowerCase(),
-        birthday: user.Birthday,
+        birthday: new Date(user['Birthday']).getTime() + 8 * 60 * 60 * 1000,
         school: user.School,
-        student_id: user.StudentID,
+        student_id: String(user.StudentID),
         class: user.Class,
         date_join: new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
         date_out:
@@ -139,7 +139,7 @@ export class AuthService {
         position: getPosition(user.Position),
       };
     });
-    const result = await this.userService.createMany(userData, false);
+    const result = await this.userService.createMany(userData, isSendMail);
     console.log(result);
 
     return userData;
