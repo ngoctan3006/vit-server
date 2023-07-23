@@ -7,6 +7,7 @@ export class CreateUserDto {
   email: string;
   phone: string;
   birthday?: string | number;
+  gen?: number;
   hometown?: string;
   address?: string;
   school?: string;

@@ -24,6 +24,7 @@ model User {
   phone       String           @unique
   bio         String?
   avatar      String?
+  gen         Int?
   birthday    DateTime?
   hometown    String?
   address     String?
