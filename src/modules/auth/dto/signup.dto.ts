@@ -1,9 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender, Position } from '@prisma/client';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -28,6 +30,12 @@ export class SignupDto {
   @IsOptional()
   @IsString()
   birthday: string;
+
+  @ApiProperty({ required: false })
+  @Transform(({ value }) => parseInt(value))
+  @IsOptional()
+  @IsNumber()
+  gen: number;
 
   @ApiProperty({ required: false })
   @IsOptional()
