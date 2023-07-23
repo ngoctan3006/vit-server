@@ -18,6 +18,7 @@ import { messageSuccess } from 'src/shares/message';
 import { comparePassword } from 'src/shares/utils';
 import { read, utils } from 'xlsx';
 import { MailQueueService } from '../mail/services';
+import { CreateUserDto } from '../user/dto';
 import { UserService } from '../user/user.service';
 import {
   ChangePasswordFirstLoginDto,
@@ -111,7 +112,7 @@ export class AuthService {
     const usernameList = (await this.userService.getAllUsername()).map(
       (item) => item.username
     );
-    const userData = jsonData.map((user: any) => {
+    const userData = jsonData.map<CreateUserDto>((user: any) => {
       let username = generateUsername(user.Fullname);
       const usernameCount = usernameList.filter(
         (item) => item.replace(/\d/g, '') === username
@@ -131,6 +132,7 @@ export class AuthService {
           user['Birthday'] &&
           new Date(user['Birthday']).getTime() + 8 * 60 * 60 * 1000,
         school: user.School,
+        gen: user.Gen,
         student_id: user.StudentID && String(user.StudentID),
         cccd: user.CCCD && String(user.CCCD),
         class: user.Class,
