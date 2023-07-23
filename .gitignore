@@ -36,6 +36,7 @@ lerna-debug.log*
 
 .env*
 prisma/*.svg
+prisma/migrations/
 
 raw-data.json
 
