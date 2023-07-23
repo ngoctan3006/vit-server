@@ -50,7 +50,7 @@ export class AuthService {
     return { data: user };
   }
 
-  async signup(signupData: SignupDto): Promise<ResponseDto<User>> {
+  async signup(signupData: SignupDto) {
     const { email, phone, fullname, isSendMail } = signupData;
 
     const isExists = await this.userService.checkUserExists({
@@ -79,7 +79,7 @@ export class AuthService {
       },
       Boolean(isSendMail)
     );
-    return { data: newUser };
+    return { data: messageSuccess.USER_IMPORT };
   }
 
   async signin(signinData: SigninDto): Promise<ResponseDto<ResponseLoginDto>> {
