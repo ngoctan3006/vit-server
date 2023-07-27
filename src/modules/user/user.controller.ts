@@ -88,10 +88,10 @@ export class UserController {
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
   @Put('position/:id')
-  async changePosition(
+  async adminUpdateUserInfo(
     @Param('id', new ParseIntPipe()) id: number,
     @Body() data: UpdateUserDto
-  ) {
-    return await this.userService.update(id, { position: data.position });
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.update(id, data) };
   }
 }
