@@ -14,8 +14,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { User } from '@prisma/client';
-import { GetUser } from 'src/shares/decorators';
+import { Position, User } from '@prisma/client';
+import { GetUser, Roles } from 'src/shares/decorators';
 import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { FileUploadDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guards';
@@ -84,5 +84,14 @@ export class UserController {
     @Body() data: UpdateUserDto
   ): Promise<ResponseDto<User>> {
     return { data: await this.userService.update(id, data) };
+  }
+
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
+  @Put('position/:id')
+  async changePosition(
+    @Param('id', new ParseIntPipe()) id: number,
+    @Body() data: UpdateUserDto
+  ) {
+    return await this.userService.update(id, { position: data.position });
   }
 }
