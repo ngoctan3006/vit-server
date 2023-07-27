@@ -89,7 +89,7 @@ export class UserController {
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
-  @Put('position/:id')
+  @Put('update-info/:id')
   async adminUpdateUserInfo(
     @Param('id', new ParseIntPipe()) id: number,
     @Body() data: UpdateUserDto
