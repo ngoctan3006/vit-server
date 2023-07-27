@@ -83,7 +83,9 @@ export class UserController {
     @GetUser('id') id: number,
     @Body() data: UpdateUserDto
   ): Promise<ResponseDto<User>> {
-    return { data: await this.userService.update(id, data) };
+    const { fullname, date_join, date_out, gender, status, position, ...rest } =
+      data;
+    return { data: await this.userService.update(id, rest) };
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
