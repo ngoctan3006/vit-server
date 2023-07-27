@@ -240,6 +240,7 @@ enum Status {
   ACTIVE
   INACTIVE
   BLOCKED
+  OUT
 }
 
 enum UserActivityStatus {
