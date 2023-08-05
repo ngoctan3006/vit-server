@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Activity, ActivityTime, UserActivityStatus } from '@prisma/client';
+import * as moment from 'moment';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
@@ -11,6 +12,7 @@ import {
   CreateActivityDto,
   GetMemberResponseDto,
   RegistryActivityDto,
+  TopMember,
   UpdateActivityDto,
 } from './dto';
 
@@ -529,5 +531,44 @@ export class ActivityService {
     });
 
     return { data: messageSuccess.ACTIVITY_REJECT };
+  }
+
+  async getTopMember() {
+    const currentDate = moment();
+    const startOfMonth = currentDate.startOf('month').toDate();
+    const endOfMonth = currentDate.endOf('month').toDate();
+    const topMember: TopMember[] = [];
+    const activities = await this.prisma.activity.findMany({
+      where: {
+        deleted_at: null,
+        deadline: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+    });
+    const activitiesIds = activities.map((act) => act.id);
+    for (const id of activitiesIds) {
+      const { data: activityMember } = await this.getMember(id);
+      for (const { member } of activityMember) {
+        for (const mem of member) {
+          const isExisted = topMember.findIndex((item) => item.id === mem.id);
+          if (isExisted !== -1) {
+            if (mem.status === UserActivityStatus.ACCEPTED) {
+              topMember[isExisted].count += 1;
+            }
+          } else {
+            if (mem.status === UserActivityStatus.ACCEPTED) {
+              delete mem.status;
+              topMember.push({
+                ...mem,
+                count: 1,
+              });
+            }
+          }
+        }
+      }
+    }
+    return topMember.sort((a, b) => b.count - a.count).slice(0, 6);
   }
 }
