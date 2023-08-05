@@ -63,6 +63,12 @@ export class ActivityController {
     );
   }
 
+  @Roles(Position.ADMIN)
+  @Get('top-member')
+  async getTopMember() {
+    return await this.activityService.getTopMember();
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<
