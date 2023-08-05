@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
-import { ResetPasswordDto, WelcomeDto } from '../dto';
+import { HappyBirthdayDto, ResetPasswordDto, WelcomeDto } from '../dto';
 
 @Injectable()
 export class MailQueueService {
@@ -15,6 +15,12 @@ export class MailQueueService {
 
   async addResetPasswordMail(data: ResetPasswordDto) {
     await this.sendMail.add('reset-password', data, {
+      removeOnComplete: true,
+    });
+  }
+
+  async addHappyBirthdayMail(data: HappyBirthdayDto) {
+    await this.sendMail.add('happy-birthday', data, {
       removeOnComplete: true,
     });
   }
