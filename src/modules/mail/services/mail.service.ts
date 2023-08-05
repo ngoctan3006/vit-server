@@ -53,5 +53,6 @@ export class MailService {
       template: './happy-birthday',
       context: { fullname },
     });
+    this.logger.log(`Mail sent to ${email} successfully`);
   }
 }
