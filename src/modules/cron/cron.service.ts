@@ -3,7 +3,11 @@ import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronService {
-  private readonly logger = new Logger(CronService.name);
+  private readonly logger: Logger;
+
+  constructor() {
+    this.logger = new Logger(CronService.name);
+  }
 
   @Cron('45 * * * * *')
   handleCron() {
