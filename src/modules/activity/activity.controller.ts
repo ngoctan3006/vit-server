@@ -20,6 +20,7 @@ import {
   CreateActivityDto,
   GetMemberResponseDto,
   RegistryActivityDto,
+  TopMember,
   UpdateActivityDto,
 } from './dto';
 
@@ -65,8 +66,8 @@ export class ActivityController {
 
   @Roles(Position.ADMIN)
   @Get('top-member')
-  async getTopMember() {
-    return await this.activityService.getTopMember();
+  async getTopMember(): Promise<ResponseDto<TopMember[]>> {
+    return { data: await this.activityService.getTopMember() };
   }
 
   @UseGuards(JwtGuard)
