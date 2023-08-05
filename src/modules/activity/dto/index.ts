@@ -4,4 +4,5 @@ export * from './approve.dto';
 export * from './create-activity.dto';
 export * from './get-member-response.dto';
 export * from './registry-activity.dto';
+export * from './top-member.dto';
 export * from './update-activity.dto';
