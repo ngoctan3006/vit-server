@@ -1,11 +1,12 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EnvConstant } from 'src/shares/constants';
 import { ResetPasswordDto, WelcomeDto } from '../dto';
 
 @Injectable()
 export class MailService {
+  private readonly logger = new Logger(MailService.name);
   private readonly webUrl: string;
 
   constructor(
@@ -29,7 +30,7 @@ export class MailService {
         loginUrl: `${this.webUrl}/login`,
       },
     });
-    console.log(`Mail sent to ${email} successfully`);
+    this.logger.log(`Mail sent to ${email} successfully`);
   }
 
   async sendResetPasswordMail(data: ResetPasswordDto) {
@@ -40,6 +41,6 @@ export class MailService {
       template: './reset-password',
       context: data,
     });
-    console.log(`Mail sent to ${email} successfully`);
+    this.logger.log(`Mail sent to ${email} successfully`);
   }
 }
