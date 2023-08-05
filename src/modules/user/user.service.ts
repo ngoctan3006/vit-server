@@ -8,6 +8,7 @@ import {
   ChangePasswordFirstLoginDto,
   RequestResetPasswordDto,
 } from '../auth/dto';
+import { HappyBirthdayDto } from '../mail/dto';
 import { MailQueueService } from '../mail/services';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
@@ -314,5 +315,15 @@ export class UserService {
 
     delete user.password;
     return user;
+  }
+
+  async getUserBirthday() {
+    const today = new Date();
+    const users = await this.prisma.$queryRaw<
+      HappyBirthdayDto[]
+    >`SELECT fullname, email from "User" where DATE_PART('day', "birthday") = ${today.getDate()} AND DATE_PART('month', "birthday") = ${
+      today.getMonth() + 1
+    }`;
+    return users;
   }
 }
