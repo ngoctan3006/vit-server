@@ -227,13 +227,17 @@ export class UserService {
 
   async update(id: number, data: UpdateUserDto): Promise<User> {
     const { email, phone, birthday, ...userData } = data;
-    await this.getUserInfoById(id);
-    const checkUserExists = await this.checkUserExists({
-      email,
-      phone,
-    });
-    if (checkUserExists)
-      throw new HttpException(checkUserExists, HttpStatus.BAD_REQUEST);
+    const user = await this.getUserInfoById(id);
+    if (user.email !== email.toLowerCase()) {
+      const checkEmailExists = await this.checkUserExists({ email });
+      if (checkEmailExists)
+        throw new HttpException(checkEmailExists, HttpStatus.BAD_REQUEST);
+    }
+    if (user.phone !== phone.split(' ').join('')) {
+      const checkPhoneExists = await this.checkUserExists({ phone });
+      if (checkPhoneExists)
+        throw new HttpException(checkPhoneExists, HttpStatus.BAD_REQUEST);
+    }
 
     await this.prisma.user.update({
       where: { id },
