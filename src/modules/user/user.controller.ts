@@ -63,15 +63,14 @@ export class UserController {
   })
   async changeAvatar(
     @GetUser('id') id: number,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({
-            fileType: /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/,
-          }),
-        ],
-      })
-    )
+    @UploadedFile()
+    // new ParseFilePipe({
+    //   validators: [
+    //     new FileTypeValidator({
+    //       fileType: /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/,
+    //     }),
+    //   ],
+    // })
     file: Express.Multer.File
   ): Promise<ResponseDto<User>> {
     return { data: await this.userService.changeAvatar(id, file) };
