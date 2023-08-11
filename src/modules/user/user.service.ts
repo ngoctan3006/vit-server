@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Status, User } from '@prisma/client';
+import { Position, Status, User } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
@@ -329,5 +329,29 @@ export class UserService {
       today.getMonth() + 1
     }`;
     return users;
+  }
+
+  async getManagement() {
+    const doiTruong = await this.prisma.user.findMany({
+      where: { position: Position.DOI_TRUONG },
+      select: {
+        id: true,
+        username: true,
+        fullname: true,
+        avatar: true,
+        position: true,
+      },
+    });
+    const doiPho = await this.prisma.user.findMany({
+      where: { position: Position.DOI_PHO },
+      select: {
+        id: true,
+        username: true,
+        fullname: true,
+        avatar: true,
+        position: true,
+      },
+    });
+    return [...doiTruong, ...doiPho];
   }
 }
