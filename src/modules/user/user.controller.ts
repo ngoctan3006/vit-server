@@ -37,6 +37,12 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
+  @Get('management')
+  async getManage() {
+    return { data: await this.userService.getManagement() };
+  }
+
+  @UseGuards(JwtGuard)
   @Get(':id')
   async getUserById(
     @Param('id', new ParseIntPipe()) id: number
@@ -64,14 +70,14 @@ export class UserController {
   async changeAvatar(
     @GetUser('id') id: number,
     @UploadedFile()
-    // new ParseFilePipe({
+    file: // new ParseFilePipe({
     //   validators: [
     //     new FileTypeValidator({
     //       fileType: /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/,
     //     }),
     //   ],
     // })
-    file: Express.Multer.File
+    Express.Multer.File
   ): Promise<ResponseDto<User>> {
     return { data: await this.userService.changeAvatar(id, file) };
   }
