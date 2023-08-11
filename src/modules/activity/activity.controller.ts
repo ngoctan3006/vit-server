@@ -64,7 +64,7 @@ export class ActivityController {
     );
   }
 
-  @Roles(Position.ADMIN)
+  @UseGuards(JwtGuard)
   @Get('top-member')
   async getTopMember(): Promise<ResponseDto<TopMember[]>> {
     return { data: await this.activityService.getTopMember() };
