@@ -14,8 +14,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { User } from '@prisma/client';
-import { GetUser } from 'src/shares/decorators';
+import { Position, User } from '@prisma/client';
+import { GetUser, Roles } from 'src/shares/decorators';
 import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { FileUploadDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guards';
@@ -34,6 +34,12 @@ export class UserController {
     @Query() { page, limit }: PaginationDto
   ): Promise<ResponseDto<Omit<User, 'password'>[]>> {
     return await this.userService.getAll(page, limit);
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('management')
+  async getManage() {
+    return { data: await this.userService.getManagement() };
   }
 
   @UseGuards(JwtGuard)
@@ -63,16 +69,15 @@ export class UserController {
   })
   async changeAvatar(
     @GetUser('id') id: number,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({
-            fileType: /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/,
-          }),
-        ],
-      })
-    )
-    file: Express.Multer.File
+    @UploadedFile()
+    file: // new ParseFilePipe({
+    //   validators: [
+    //     new FileTypeValidator({
+    //       fileType: /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/,
+    //     }),
+    //   ],
+    // })
+    Express.Multer.File
   ): Promise<ResponseDto<User>> {
     return { data: await this.userService.changeAvatar(id, file) };
   }
@@ -81,6 +86,17 @@ export class UserController {
   @Put('profile')
   async updateProfile(
     @GetUser('id') id: number,
+    @Body() data: UpdateUserDto
+  ): Promise<ResponseDto<User>> {
+    const { fullname, date_join, date_out, gender, status, position, ...rest } =
+      data;
+    return { data: await this.userService.update(id, rest) };
+  }
+
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
+  @Put('update-info/:id')
+  async adminUpdateUserInfo(
+    @Param('id', new ParseIntPipe()) id: number,
     @Body() data: UpdateUserDto
   ): Promise<ResponseDto<User>> {
     return { data: await this.userService.update(id, data) };

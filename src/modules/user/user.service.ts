@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Status, User } from '@prisma/client';
+import { Position, Status, User } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
@@ -8,6 +8,7 @@ import {
   ChangePasswordFirstLoginDto,
   RequestResetPasswordDto,
 } from '../auth/dto';
+import { HappyBirthdayDto } from '../mail/dto';
 import { MailQueueService } from '../mail/services';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
@@ -226,13 +227,17 @@ export class UserService {
 
   async update(id: number, data: UpdateUserDto): Promise<User> {
     const { email, phone, birthday, ...userData } = data;
-    await this.getUserInfoById(id);
-    const checkUserExists = await this.checkUserExists({
-      email,
-      phone,
-    });
-    if (checkUserExists)
-      throw new HttpException(checkUserExists, HttpStatus.BAD_REQUEST);
+    const user = await this.getUserInfoById(id);
+    if (user.email !== email.toLowerCase()) {
+      const checkEmailExists = await this.checkUserExists({ email });
+      if (checkEmailExists)
+        throw new HttpException(checkEmailExists, HttpStatus.BAD_REQUEST);
+    }
+    if (user.phone !== phone.split(' ').join('')) {
+      const checkPhoneExists = await this.checkUserExists({ phone });
+      if (checkPhoneExists)
+        throw new HttpException(checkPhoneExists, HttpStatus.BAD_REQUEST);
+    }
 
     await this.prisma.user.update({
       where: { id },
@@ -314,5 +319,39 @@ export class UserService {
 
     delete user.password;
     return user;
+  }
+
+  async getUserBirthday() {
+    const today = new Date();
+    const users = await this.prisma.$queryRaw<
+      HappyBirthdayDto[]
+    >`SELECT fullname, email from "User" where DATE_PART('day', "birthday") = ${today.getDate()} AND DATE_PART('month', "birthday") = ${
+      today.getMonth() + 1
+    }`;
+    return users;
+  }
+
+  async getManagement() {
+    const doiTruong = await this.prisma.user.findMany({
+      where: { position: Position.DOI_TRUONG },
+      select: {
+        id: true,
+        username: true,
+        fullname: true,
+        avatar: true,
+        position: true,
+      },
+    });
+    const doiPho = await this.prisma.user.findMany({
+      where: { position: Position.DOI_PHO },
+      select: {
+        id: true,
+        username: true,
+        fullname: true,
+        avatar: true,
+        position: true,
+      },
+    });
+    return [...doiTruong, ...doiPho];
   }
 }
