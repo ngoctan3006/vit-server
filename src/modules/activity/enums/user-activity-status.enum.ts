@@ -1,0 +1,6 @@
+export enum UserActivityStatus {
+  REGISTERED = 'REGISTERED',
+  ACCEPTED = 'ACCEPTED',
+  WITHDRAWN = 'WITHDRAWN',
+  REJECTED = 'REJECTED',
+}
