@@ -3,8 +3,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
-import { bullConfig, cacheConfig } from './config';
+import { bullConfig, cacheConfig, databaseConfig } from './config';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ClubModule } from './modules/club/club.module';
@@ -29,6 +30,7 @@ import { UserModule } from './modules/user/user.module';
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forRootAsync(databaseConfig),
     BullModule.forRootAsync(bullConfig),
     ScheduleModule.forRoot(),
     AuthModule,
