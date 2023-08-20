@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 
 export class BaseEntity {
-  @ApiProperty({ type: String })
   @ObjectIdColumn({ name: '_id' })
   id: ObjectId;
 
