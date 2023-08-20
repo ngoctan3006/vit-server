@@ -1,7 +1,8 @@
 import { Position, UserStatus } from 'src/modules/user/enums';
 import { BaseEntity } from 'src/shares/entities';
-import { Column, ObjectId } from 'typeorm';
+import { Column, Entity, ObjectId } from 'typeorm';
 
+@Entity('user_club')
 export class UserClubEntity extends BaseEntity {
   @Column()
   clubId: ObjectId;
