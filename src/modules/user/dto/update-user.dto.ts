@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender, Position, Status } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Gender, Position, UserStatus } from 'src/shares/enums';
 
 export class UpdateUserDto {
   @ApiProperty({ required: false })
@@ -80,10 +80,10 @@ export class UpdateUserDto {
   @IsString()
   gender?: Gender;
 
-  @ApiProperty({ required: false, enum: Status })
+  @ApiProperty({ required: false, enum: UserStatus })
   @IsOptional()
   @IsString()
-  status?: Status;
+  status?: UserStatus;
 
   @ApiProperty({ required: false, enum: Position })
   @IsOptional()

@@ -1,4 +1,4 @@
-import { Position } from '@prisma/client';
+import { Position } from 'src/shares/enums';
 
 export class JwtPayload {
   id: number;

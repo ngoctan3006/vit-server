@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender, Position } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
@@ -9,6 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Gender, Position } from 'src/shares/enums';
 
 export class SignupDto {
   @ApiProperty()
