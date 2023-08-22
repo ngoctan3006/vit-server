@@ -1,3 +1,4 @@
+import { Position } from 'src/modules/user/enums';
 import { BaseEntity } from 'src/shares/entities';
 import { UserJoinStatus } from 'src/shares/enums';
 import { Column, Entity, ObjectId } from 'typeorm';
@@ -19,4 +20,7 @@ export class UserActivity extends BaseEntity {
     default: UserJoinStatus.REGISTERED,
   })
   status: UserJoinStatus;
+
+  @Column({ type: 'enum', enum: Position, default: Position.MEMBER })
+  position: Position;
 }
