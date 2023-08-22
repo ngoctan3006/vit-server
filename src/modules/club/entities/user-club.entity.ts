@@ -11,7 +11,7 @@ export class UserClubEntity extends BaseEntity {
   @Column()
   userId: ObjectId;
 
-  @Column({ type: 'enum', enum: Position, default: Position.MEMBER })
+  @Column({ type: 'enum', enum: Position, default: Position.THANH_VIEN })
   position: Position;
 
   @Column({
