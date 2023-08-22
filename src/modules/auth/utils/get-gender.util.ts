@@ -1,4 +1,4 @@
-import { Gender } from '@prisma/client';
+import { Gender } from 'src/shares/enums';
 import { removeAccents } from '../../../shares/utils';
 
 export const getGender = (gender?: string): Gender => {

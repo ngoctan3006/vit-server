@@ -1,7 +1,6 @@
 import { BaseEntity } from 'src/shares/entities';
-import { Position } from 'src/shares/enums';
+import { Gender, Position, UserStatus } from 'src/shares/enums';
 import { Column, Entity } from 'typeorm';
-import { Gender, UserStatus } from '../enums';
 
 @Entity('user')
 export class UserEntity extends BaseEntity {
