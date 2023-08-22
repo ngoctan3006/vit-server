@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Status } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UserStatus } from 'src/modules/user/enums';
 import { UserService } from 'src/modules/user/user.service';
 import { EnvConstant } from 'src/shares/constants';
 import { httpErrors } from 'src/shares/exception';
@@ -24,20 +24,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.userService.findById(payload.id);
-    if (!user) {
-      throw new HttpException(
-        httpErrors.USER_NOT_FOUND,
-        HttpStatus.UNAUTHORIZED
-      );
-    }
-    if (user.status === Status.BLOCKED) {
-      throw new HttpException(httpErrors.BLOCKED_USER, HttpStatus.FORBIDDEN);
-    }
-    if (user.status === Status.INACTIVE) {
-      throw new HttpException(httpErrors.INACTIVE_USER, HttpStatus.FORBIDDEN);
-    }
-    delete user.password;
-    return user;
+    // const user = await this.userService.findById(payload.id);
+    // if (!user) {
+    //   throw new HttpException(
+    //     httpErrors.USER_NOT_FOUND,
+    //     HttpStatus.UNAUTHORIZED
+    //   );
+    // }
+    // if (user.status === UserStatus.BLOCKED) {
+    //   throw new HttpException(httpErrors.BLOCKED_USER, HttpStatus.FORBIDDEN);
+    // }
+    // if (user.status === UserStatus.INACTIVE) {
+    //   throw new HttpException(httpErrors.INACTIVE_USER, HttpStatus.FORBIDDEN);
+    // }
+    // delete user.password;
+    // return user;
   }
 }
