@@ -21,6 +21,6 @@ export class UserActivity extends BaseEntity {
   })
   status: UserJoinStatus;
 
-  @Column({ type: 'enum', enum: Position, default: Position.MEMBER })
+  @Column({ type: 'enum', enum: Position, default: Position.THANH_VIEN })
   position: Position;
 }
