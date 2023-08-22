@@ -1,4 +1,4 @@
-export enum UserActivityStatus {
+export enum UserJoinStatus {
   REGISTERED = 'REGISTERED',
   ACCEPTED = 'ACCEPTED',
   WITHDRAWN = 'WITHDRAWN',
