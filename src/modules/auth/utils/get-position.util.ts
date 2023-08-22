@@ -1,8 +1,8 @@
-import { Position } from '@prisma/client';
+import { Position } from 'src/shares/enums';
 import { removeAccents } from '../../../shares/utils';
 
 export const getPosition = (position?: string): Position => {
-  if (!position) return Position.MEMBER;
+  if (!position) return Position.THANH_VIEN;
   const rmAc = removeAccents(position).toLowerCase();
   switch (rmAc) {
     case 'doi truong':
@@ -36,6 +36,6 @@ export const getPosition = (position?: string): Position => {
     case 'nhom pho':
       return Position.NHOM_PHO;
     default:
-      return Position.MEMBER;
+      return Position.THANH_VIEN;
   }
 };

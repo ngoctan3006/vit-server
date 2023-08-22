@@ -1,4 +1,4 @@
-import { Gender, Position } from '@prisma/client';
+import { Gender, Position } from 'src/shares/enums';
 
 export class CreateUserDto {
   username: string;
