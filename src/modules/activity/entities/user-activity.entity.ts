@@ -1,6 +1,6 @@
 import { BaseEntity } from 'src/shares/entities';
+import { UserJoinStatus } from 'src/shares/enums';
 import { Column, Entity, ObjectId } from 'typeorm';
-import { UserActivityStatus } from '../enums';
 
 @Entity('user_activity')
 export class UserActivity extends BaseEntity {
@@ -15,8 +15,8 @@ export class UserActivity extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: UserActivityStatus,
-    default: UserActivityStatus.REGISTERED,
+    enum: UserJoinStatus,
+    default: UserJoinStatus.REGISTERED,
   })
-  status: UserActivityStatus;
+  status: UserJoinStatus;
 }
