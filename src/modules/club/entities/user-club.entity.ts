@@ -1,6 +1,5 @@
-import { Position } from 'src/modules/user/enums';
 import { BaseEntity } from 'src/shares/entities';
-import { UserJoinStatus } from 'src/shares/enums';
+import { Position, UserJoinStatus } from 'src/shares/enums';
 import { Column, Entity, ObjectId } from 'typeorm';
 
 @Entity('user_club')
