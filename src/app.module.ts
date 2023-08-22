@@ -15,7 +15,6 @@ import { EventModule } from './modules/event/event.module';
 import { GroupModule } from './modules/group/group.module';
 import { MailModule } from './modules/mail/mail.module';
 import { EmailProcessor } from './modules/mail/processors';
-import { PrismaModule } from './modules/prisma/prisma.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -34,7 +33,6 @@ import { UserModule } from './modules/user/user.module';
     BullModule.forRootAsync(bullConfig),
     ScheduleModule.forRoot(),
     AuthModule,
-    PrismaModule,
     UserModule,
     MailModule,
     UploadModule,
