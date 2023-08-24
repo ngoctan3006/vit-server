@@ -3,7 +3,7 @@ import { Gender, Position, UserStatus } from 'src/shares/enums';
 import { Column, Entity } from 'typeorm';
 
 @Entity('user')
-export class UserEntity extends BaseEntity {
+export class User extends BaseEntity {
   @Column({ unique: true })
   username: string;
 
