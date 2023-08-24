@@ -31,8 +31,8 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  async getMe(id: ObjectId | string): Promise<User> {
-    return this.userService.getUserInfoById(id);
+  async getMe(id: string): Promise<User> {
+    return this.userService.getUserInfoById(String(id));
   }
 
   async signup(signupData: SignupDto) {

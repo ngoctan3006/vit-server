@@ -116,7 +116,7 @@ export class UserService {
   //   };
   // }
 
-  async getUserInfoById(id: ObjectId | string) {
+  async getUserInfoById(id: string) {
     const user = await this.findById(id);
     if (!user)
       throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -235,11 +235,11 @@ export class UserService {
   // }
 
   async findByUsername(username: string) {
-    return this.userRepository.findOne({ where: { username } });
+    return this.userRepository.findOneBy({ username });
   }
 
-  async findById(id: ObjectId | string) {
-    return this.userRepository.findOne({ where: { id } });
+  async findById(id: string) {
+    return this.userRepository.findOneBy({ id });
   }
 
   async checkUserExists(data: {
