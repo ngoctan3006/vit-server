@@ -5,10 +5,10 @@ import { Column, Entity, ObjectId } from 'typeorm';
 @Entity('user_event')
 export class UserEventEntity extends BaseEntity {
   @Column()
-  userId: ObjectId;
+  userId: ObjectId | string;
 
   @Column()
-  eventId: ObjectId;
+  eventId: ObjectId | string;
 
   @Column({ type: 'enum', enum: Position, default: Position.THANH_VIEN })
   position: Position;

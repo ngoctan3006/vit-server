@@ -16,5 +16,5 @@ export class ActivityEntity extends BaseEntity {
   deadline: Date;
 
   @Column()
-  eventId?: ObjectId;
+  eventId?: ObjectId | string;
 }

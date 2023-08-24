@@ -4,7 +4,7 @@ import { Column, Entity, ObjectId } from 'typeorm';
 @Entity('activity_time')
 export class ActivityTimeEntity extends BaseEntity {
   @Column()
-  activityId: ObjectId;
+  activityId: ObjectId | string;
 
   @Column()
   name: string;

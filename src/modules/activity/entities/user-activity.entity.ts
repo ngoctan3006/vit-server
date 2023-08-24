@@ -5,13 +5,13 @@ import { Column, Entity, ObjectId } from 'typeorm';
 @Entity('user_activity')
 export class UserActivity extends BaseEntity {
   @Column()
-  userId: ObjectId;
+  userId: ObjectId | string;
 
   @Column()
-  activityId: ObjectId;
+  activityId: ObjectId | string;
 
   @Column()
-  timeId: ObjectId;
+  timeId: ObjectId | string;
 
   @Column({
     type: 'enum',
