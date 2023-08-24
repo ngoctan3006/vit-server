@@ -38,10 +38,7 @@ export class AuthService {
   async signup(signupData: SignupDto): Promise<MessageDto> {
     const { email, phone, fullname, isSendMail } = signupData;
 
-    const isExists = await this.userService.checkUserExists({
-      email,
-      phone,
-    });
+    const isExists = await this.userService.checkUserExists({ email, phone });
     if (isExists) {
       throw new BadRequestException(isExists);
     }
@@ -81,11 +78,7 @@ export class AuthService {
     delete user.password;
     delete user.createdAt;
     delete user.updatedAt;
-    return {
-      accessToken,
-      refreshToken,
-      user,
-    };
+    return { accessToken, refreshToken, user };
   }
 
   // async importMany(file: Express.Multer.File, isSendMail: boolean) {
@@ -137,10 +130,9 @@ export class AuthService {
   //   };
   // }
 
-  async generateToken(user: User): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
+  async generateToken(
+    user: User
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const payload: JwtPayload = {
       id: user.id,
       username: user.username,
@@ -155,10 +147,7 @@ export class AuthService {
         EnvConstant.JWT_REFRESH_TOKEN_EXPIRATION_TIME
       ),
     });
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return { accessToken, refreshToken };
   }
 
   async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
