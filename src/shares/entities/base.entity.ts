@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   CreateDateColumn,
   DeleteDateColumn,
@@ -9,7 +8,7 @@ import {
 
 export class BaseEntity {
   @ObjectIdColumn({ name: '_id' })
-  id: ObjectId;
+  id: ObjectId | string;
 
   @CreateDateColumn()
   createdAt: Date;
