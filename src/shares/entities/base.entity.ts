@@ -1,14 +1,13 @@
 import {
   CreateDateColumn,
   DeleteDateColumn,
-  ObjectId,
   ObjectIdColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 export class BaseEntity {
   @ObjectIdColumn()
-  id: ObjectId | string;
+  id: string;
 
   @CreateDateColumn()
   createdAt: Date;
