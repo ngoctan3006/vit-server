@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 export class BaseEntity {
-  @ObjectIdColumn({ name: '_id' })
+  @ObjectIdColumn()
   id: ObjectId | string;
 
   @CreateDateColumn()
