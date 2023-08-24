@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { EnvConstant } from 'src/shares/constants';
+import { MessageDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { comparePassword } from 'src/shares/utils';
@@ -34,7 +35,7 @@ export class AuthService {
     return this.userService.getUserInfoById(String(id));
   }
 
-  async signup(signupData: SignupDto) {
+  async signup(signupData: SignupDto): Promise<MessageDto> {
     const { email, phone, fullname, isSendMail } = signupData;
 
     const isExists = await this.userService.checkUserExists({
@@ -63,7 +64,7 @@ export class AuthService {
       },
       Boolean(isSendMail)
     );
-    return { data: messageSuccess.USER_IMPORT };
+    return messageSuccess.USER_IMPORT;
   }
 
   async signin(signinData: SigninDto): Promise<ResponseLoginDto> {

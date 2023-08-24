@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetUser, Roles } from 'src/shares/decorators';
-import { ResponseDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { Position } from 'src/shares/enums';
 import { User } from '../user/entities';
 import { AuthService } from './auth.service';
@@ -35,8 +35,10 @@ export class AuthController {
   )
   @ApiBearerAuth()
   @Post('signup')
-  async signup(@Body() signupData: SignupDto) {
-    return await this.authService.signup(signupData);
+  async signup(
+    @Body() signupData: SignupDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.authService.signup(signupData) };
   }
 
   // @Roles(
