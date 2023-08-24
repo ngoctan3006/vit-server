@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
+import { ObjectId } from 'typeorm';
 import { MailQueueService } from '../mail/services';
 import { UserService } from '../user/user.service';
 
@@ -16,10 +17,10 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  // async getMe(userId: number): Promise<ResponseDto<User>> {
-  //   const user = await this.userService.getUserInfoById(userId);
-  //   return { data: user };
-  // }
+  async getMe(id: ObjectId | string) {
+    const user = await this.userService.getUserInfoById(id);
+    return { data: user };
+  }
 
   // async signup(signupData: SignupDto) {
   //   const { email, phone, fullname, isSendMail } = signupData;
