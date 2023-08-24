@@ -26,10 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     const user = await this.userService.findById(payload.id);
     if (!user) {
-      throw new HttpException(
-        httpErrors.USER_NOT_FOUND,
-        HttpStatus.UNAUTHORIZED
-      );
+      throw new HttpException(httpErrors.FORBIDDEN, HttpStatus.FORBIDDEN);
     }
     if (user.status === UserStatus.BLOCKED) {
       throw new HttpException(httpErrors.BLOCKED_USER, HttpStatus.FORBIDDEN);
