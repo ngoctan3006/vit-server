@@ -1,9 +1,11 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { GetUser } from 'src/shares/decorators';
+import { GetUser, Roles } from 'src/shares/decorators';
 import { ResponseDto } from 'src/shares/dto';
+import { Position } from 'src/shares/enums';
 import { User } from '../user/entities';
 import { AuthService } from './auth.service';
+import { SignupDto } from './dto';
 import { JwtGuard } from './guards';
 
 @Controller('auth')
@@ -25,17 +27,17 @@ export class AuthController {
   //   return await this.authService.signin(signinData);
   // }
 
-  // @Roles(
-  //   Position.ADMIN,
-  //   Position.DOI_TRUONG,
-  //   Position.DOI_PHO,
-  //   Position.TRUONG_HANH_CHINH
-  // )
-  // @ApiBearerAuth()
-  // @Post('signup')
-  // async signup(@Body() signupData: SignupDto) {
-  //   return await this.authService.signup(signupData);
-  // }
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @ApiBearerAuth()
+  @Post('signup')
+  async signup(@Body() signupData: SignupDto) {
+    return await this.authService.signup(signupData);
+  }
 
   // @Roles(
   //   Position.ADMIN,

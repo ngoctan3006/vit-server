@@ -1,9 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { MessageDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { hashPassword } from 'src/shares/utils';
 import { MongoRepository, ObjectId } from 'typeorm';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
+import { CreateUserDto } from './dto';
 import { User } from './entities';
 
 @Injectable()
@@ -23,37 +26,29 @@ export class UserService {
   //   return true;
   // }
 
-  // async create(
-  //   createUserDto: CreateUserDto,
-  //   isSendMail: boolean
-  // ): Promise<User> {
-  //   const { password, birthday, date_join, date_out, ...userData } =
-  //     createUserDto;
+  async create(createUserDto: CreateUserDto, isSendMail: boolean) {
+    const { password, birthday, date_join, date_out, ...userData } =
+      createUserDto;
 
-  //   const user = await this.prisma.user.create({
-  //     data: {
-  //       ...userData,
-  //       password: await hashPassword(password),
-  //       date_join: new Date(date_join),
-  //       date_out: date_out ? new Date(date_out) : null,
-  //       birthday: birthday ? new Date(birthday) : null,
-  //       email: userData.email?.toLowerCase(),
-  //       phone: userData.phone?.split(' ').join(''),
-  //     },
-  //   });
+    const user = await this.userRepository.save({
+      ...userData,
+      password: await hashPassword(password),
+      date_join: new Date(date_join),
+      date_out: date_out ? new Date(date_out) : null,
+      birthday: birthday ? new Date(birthday) : null,
+      email: userData.email?.toLowerCase(),
+      phone: userData.phone?.split(' ').join(''),
+    });
 
-  //   if (isSendMail) {
-  //     await this.mailQueueService.addWelcomeMail({
-  //       email: user.email,
-  //       name: user.fullname,
-  //       username: user.username,
-  //       password,
-  //     });
-  //   }
-
-  //   delete user.password;
-  //   return user;
-  // }
+    if (isSendMail) {
+      await this.mailQueueService.addWelcomeMail({
+        email: user.email,
+        name: user.fullname,
+        username: user.username,
+        password,
+      });
+    }
+  }
 
   // async createMany(createUserDtos: CreateUserDto[], isSendMail: boolean) {
   //   const data = await Promise.all(
@@ -247,42 +242,36 @@ export class UserService {
     return this.userRepository.findOne({ where: { id } });
   }
 
-  // async checkUserExists(data: {
-  //   username?: string;
-  //   email?: string;
-  //   phone?: string;
-  // }): Promise<MessageDto | false> {
-  //   const { username, email, phone } = data;
-  //   if (username) {
-  //     const usernameExist = await this.prisma.user.count({
-  //       where: { username },
-  //     });
-  //     if (usernameExist > 0) return httpErrors.USERNAME_EXISTED;
-  //   }
-  //   if (email) {
-  //     const emailExist = await this.prisma.user.count({
-  //       where: {
-  //         email: email.toLowerCase(),
-  //       },
-  //     });
-  //     if (emailExist > 0) return httpErrors.EMAIL_EXISTED;
-  //   }
-  //   if (phone) {
-  //     const phoneExist = await this.prisma.user.count({
-  //       where: {
-  //         phone: phone.split(' ').join(''),
-  //       },
-  //     });
-  //     if (phoneExist > 0) return httpErrors.PHONE_EXISTED;
-  //   }
-  //   return false;
-  // }
+  async checkUserExists(data: {
+    username?: string;
+    email?: string;
+    phone?: string;
+  }): Promise<MessageDto | false> {
+    const { username, email, phone } = data;
+    if (username) {
+      const usernameExist = await this.userRepository.countBy({ username });
+      if (usernameExist > 0) return httpErrors.USERNAME_EXISTED;
+    }
+    if (email) {
+      const emailExist = await this.userRepository.countBy({
+        email: email.toLowerCase(),
+      });
+      if (emailExist > 0) return httpErrors.EMAIL_EXISTED;
+    }
+    if (phone) {
+      const phoneExist = await this.userRepository.countBy({
+        phone: phone.split(' ').join(''),
+      });
+      if (phoneExist > 0) return httpErrors.PHONE_EXISTED;
+    }
+    return false;
+  }
 
-  // async getAllUsername() {
-  //   return await this.prisma.user.findMany({
-  //     select: { username: true },
-  //   });
-  // }
+  async getAllUsername() {
+    return await this.userRepository.find({
+      select: { username: true },
+    });
+  }
 
   // async checkUserMailAndPhone(data: RequestResetPasswordDto): Promise<User> {
   //   const { username, email, phone } = data;

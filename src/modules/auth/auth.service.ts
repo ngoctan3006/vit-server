@@ -1,11 +1,14 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
+import { messageSuccess } from 'src/shares/message';
 import { ObjectId } from 'typeorm';
 import { MailQueueService } from '../mail/services';
 import { UserService } from '../user/user.service';
+import { SignupDto } from './dto';
+import { generatePassword, generateUsername } from './utils';
 
 @Injectable()
 export class AuthService {
@@ -22,37 +25,37 @@ export class AuthService {
     return { data: user };
   }
 
-  // async signup(signupData: SignupDto) {
-  //   const { email, phone, fullname, isSendMail } = signupData;
+  async signup(signupData: SignupDto) {
+    const { email, phone, fullname, isSendMail } = signupData;
 
-  //   const isExists = await this.userService.checkUserExists({
-  //     email,
-  //     phone,
-  //   });
-  //   if (isExists) {
-  //     throw new BadRequestException(isExists);
-  //   }
-  //   const usernameList = (await this.userService.getAllUsername()).map(
-  //     (item) => item.username
-  //   );
-  //   let username = generateUsername(fullname);
-  //   const usernameCount = usernameList.filter(
-  //     (item) => item.replace(/\d/g, '') === username
-  //   ).length;
-  //   if (usernameCount > 0) {
-  //     username = `${username}${usernameCount + 1}`;
-  //   }
-  //   delete signupData.isSendMail;
-  //   await this.userService.create(
-  //     {
-  //       ...signupData,
-  //       username,
-  //       password: generatePassword(),
-  //     },
-  //     Boolean(isSendMail)
-  //   );
-  //   return { data: messageSuccess.USER_IMPORT };
-  // }
+    const isExists = await this.userService.checkUserExists({
+      email,
+      phone,
+    });
+    if (isExists) {
+      throw new BadRequestException(isExists);
+    }
+    const usernameList = (await this.userService.getAllUsername()).map(
+      (item) => item.username
+    );
+    let username = generateUsername(fullname);
+    const usernameCount = usernameList.filter(
+      (item) => item.replace(/\d/g, '') === username
+    ).length;
+    if (usernameCount > 0) {
+      username = `${username}${usernameCount + 1}`;
+    }
+    delete signupData.isSendMail;
+    await this.userService.create(
+      {
+        ...signupData,
+        username,
+        password: generatePassword(),
+      },
+      Boolean(isSendMail)
+    );
+    return { data: messageSuccess.USER_IMPORT };
+  }
 
   // async signin(signinData: SigninDto): Promise<ResponseDto<ResponseLoginDto>> {
   //   const { username, password } = signinData;
