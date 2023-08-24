@@ -5,7 +5,7 @@ import { ResponseDto } from 'src/shares/dto';
 import { Position } from 'src/shares/enums';
 import { User } from '../user/entities';
 import { AuthService } from './auth.service';
-import { ResponseLoginDto, SigninDto, SignupDto } from './dto';
+import { RefreshTokenDto, ResponseLoginDto, SigninDto, SignupDto } from './dto';
 import { JwtGuard } from './guards';
 
 @Controller('auth')
@@ -16,8 +16,8 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @Get('me')
-  async getMe(@GetUser('id') userId: string): Promise<ResponseDto<User>> {
-    return await this.authService.getMe(userId);
+  async getMe(@GetUser('id') id: string): Promise<ResponseDto<User>> {
+    return { data: await this.authService.getMe(id) };
   }
 
   @Post('signin')
@@ -64,7 +64,7 @@ export class AuthController {
   // async refreshToken(
   //   @Body() { refreshToken }: RefreshTokenDto
   // ): Promise<ResponseDto<{ accessToken: string }>> {
-  //   return await this.authService.refreshToken(refreshToken);
+  //   return { data: await this.authService.refreshToken(refreshToken) };
   // }
 
   // @Post('request-reset-password')

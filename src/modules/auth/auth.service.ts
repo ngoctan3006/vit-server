@@ -31,9 +31,8 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  async getMe(id: ObjectId | string) {
-    const user = await this.userService.getUserInfoById(id);
-    return { data: user };
+  async getMe(id: ObjectId | string): Promise<User> {
+    return this.userService.getUserInfoById(id);
   }
 
   async signup(signupData: SignupDto) {
@@ -162,15 +161,16 @@ export class AuthService {
     };
   }
 
-  // async refreshToken(
-  //   refreshToken: string
-  // ): Promise<ResponseDto<{ accessToken: string }>> {
+  // async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
   //   try {
-  //     const payload = await this.jwtService.verifyAsync(refreshToken, {
-  //       secret: this.configService.get<string>(
-  //         EnvConstant.JWT_REFRESH_TOKEN_SECRET
-  //       ),
-  //     });
+  //     const payload = await this.jwtService.verifyAsync<JwtPayload>(
+  //       refreshToken,
+  //       {
+  //         secret: this.configService.get<string>(
+  //           EnvConstant.JWT_REFRESH_TOKEN_SECRET
+  //         ),
+  //       }
+  //     );
 
   //     const user = await this.userService.findById(payload.id);
   //     if (!user) {
@@ -184,7 +184,7 @@ export class AuthService {
   //     delete payload.exp;
 
   //     const accessToken = await this.jwtService.signAsync(payload);
-  //     return { data: { accessToken } };
+  //     return { accessToken };
   //   } catch (error) {
   //     throw new HttpException(
   //       httpErrors.REFRESH_TOKEN_EXPIRED,
