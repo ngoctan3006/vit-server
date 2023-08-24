@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MessageDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { hashPassword } from 'src/shares/utils';
-import { MongoRepository } from 'typeorm';
+import { MongoRepository, ObjectId } from 'typeorm';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
 import { CreateUserDto } from './dto';
@@ -18,6 +18,30 @@ export class UserService {
     private readonly userRepository: MongoRepository<User>
   ) {}
 
+  async findByUsername(username: string) {
+    return this.userRepository.findOneBy({ username });
+  }
+
+  async findById(id: string | ObjectId) {
+    return this.userRepository.findOneBy({ id });
+  }
+
+  async getUserInfoById(id: string) {
+    const user = await this.findById(id);
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+    delete user.password;
+    delete user.createdAt;
+    delete user.updatedAt;
+    return user;
+  }
+
+  async getAllUsername() {
+    return await this.userRepository.find({
+      select: { username: true },
+    });
+  }
+
   // async checkUserExisted(id: number): Promise<boolean> {
   //   const count = await this.prisma.user.count({ where: { id } });
   //   if (count === 0) {
@@ -25,6 +49,31 @@ export class UserService {
   //   }
   //   return true;
   // }
+
+  async checkUserExists(data: {
+    username?: string;
+    email?: string;
+    phone?: string;
+  }): Promise<MessageDto | false> {
+    const { username, email, phone } = data;
+    if (username) {
+      const usernameExist = await this.userRepository.countBy({ username });
+      if (usernameExist > 0) return httpErrors.USERNAME_EXISTED;
+    }
+    if (email) {
+      const emailExist = await this.userRepository.countBy({
+        email: email.toLowerCase(),
+      });
+      if (emailExist > 0) return httpErrors.EMAIL_EXISTED;
+    }
+    if (phone) {
+      const phoneExist = await this.userRepository.countBy({
+        phone: phone.split(' ').join(''),
+      });
+      if (phoneExist > 0) return httpErrors.PHONE_EXISTED;
+    }
+    return false;
+  }
 
   async create(createUserDto: CreateUserDto, isSendMail: boolean) {
     const { password, birthday, date_join, date_out, ...userData } =
@@ -115,16 +164,6 @@ export class UserService {
   //     },
   //   };
   // }
-
-  async getUserInfoById(id: string) {
-    const user = await this.findById(id);
-    if (!user)
-      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-    delete user.password;
-    delete user.createdAt;
-    delete user.updatedAt;
-    return user;
-  }
 
   // async changeAvatar(id: number, file: Express.Multer.File): Promise<User> {
   //   const user = await this.getUserInfoById(id);
@@ -235,45 +274,6 @@ export class UserService {
 
   //   return await this.getUserInfoById(id);
   // }
-
-  async findByUsername(username: string) {
-    return this.userRepository.findOneBy({ username });
-  }
-
-  async findById(id: string) {
-    return this.userRepository.findOneBy({ id });
-  }
-
-  async checkUserExists(data: {
-    username?: string;
-    email?: string;
-    phone?: string;
-  }): Promise<MessageDto | false> {
-    const { username, email, phone } = data;
-    if (username) {
-      const usernameExist = await this.userRepository.countBy({ username });
-      if (usernameExist > 0) return httpErrors.USERNAME_EXISTED;
-    }
-    if (email) {
-      const emailExist = await this.userRepository.countBy({
-        email: email.toLowerCase(),
-      });
-      if (emailExist > 0) return httpErrors.EMAIL_EXISTED;
-    }
-    if (phone) {
-      const phoneExist = await this.userRepository.countBy({
-        phone: phone.split(' ').join(''),
-      });
-      if (phoneExist > 0) return httpErrors.PHONE_EXISTED;
-    }
-    return false;
-  }
-
-  async getAllUsername() {
-    return await this.userRepository.find({
-      select: { username: true },
-    });
-  }
 
   // async checkUserMailAndPhone(data: RequestResetPasswordDto): Promise<User> {
   //   const { username, email, phone } = data;
