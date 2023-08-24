@@ -1,13 +1,24 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
+import { EnvConstant } from 'src/shares/constants';
+import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
+import { comparePassword } from 'src/shares/utils';
 import { ObjectId } from 'typeorm';
 import { MailQueueService } from '../mail/services';
+import { User } from '../user/entities';
 import { UserService } from '../user/user.service';
-import { SignupDto } from './dto';
+import { ResponseLoginDto, SigninDto, SignupDto } from './dto';
+import { JwtPayload } from './strategies';
 import { generatePassword, generateUsername } from './utils';
 
 @Injectable()
@@ -57,26 +68,26 @@ export class AuthService {
     return { data: messageSuccess.USER_IMPORT };
   }
 
-  // async signin(signinData: SigninDto): Promise<ResponseDto<ResponseLoginDto>> {
-  //   const { username, password } = signinData;
-  //   const user = await this.userService.findByUsername(username);
-  //   if (!user) {
-  //     throw new HttpException(httpErrors.LOGIN_WRONG, HttpStatus.BAD_REQUEST);
-  //   }
-  //   const isMatch = await comparePassword(password, user.password);
-  //   if (!isMatch) {
-  //     throw new HttpException(httpErrors.LOGIN_WRONG, HttpStatus.BAD_REQUEST);
-  //   }
-  //   const { accessToken, refreshToken } = await this.generateToken(user);
-  //   delete user.password;
-  //   return {
-  //     data: {
-  //       accessToken,
-  //       refreshToken,
-  //       user,
-  //     },
-  //   };
-  // }
+  async signin(signinData: SigninDto): Promise<ResponseLoginDto> {
+    const { username, password } = signinData;
+    const user = await this.userService.findByUsername(username);
+    if (!user) {
+      throw new HttpException(httpErrors.LOGIN_WRONG, HttpStatus.BAD_REQUEST);
+    }
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) {
+      throw new HttpException(httpErrors.LOGIN_WRONG, HttpStatus.BAD_REQUEST);
+    }
+    const { accessToken, refreshToken } = await this.generateToken(user);
+    delete user.password;
+    delete user.createdAt;
+    delete user.updatedAt;
+    return {
+      accessToken,
+      refreshToken,
+      user,
+    };
+  }
 
   // async importMany(file: Express.Multer.File, isSendMail: boolean) {
   //   const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
@@ -127,29 +138,29 @@ export class AuthService {
   //   };
   // }
 
-  // async generateToken(user: User): Promise<{
-  //   accessToken: string;
-  //   refreshToken: string;
-  // }> {
-  //   const payload: JwtPayload = {
-  //     id: user.id,
-  //     username: user.username,
-  //     position: user.position,
-  //   };
-  //   const accessToken = await this.jwtService.signAsync(payload);
-  //   const refreshToken = await this.jwtService.signAsync(payload, {
-  //     secret: this.configService.get<string>(
-  //       EnvConstant.JWT_REFRESH_TOKEN_SECRET
-  //     ),
-  //     expiresIn: this.configService.get<number>(
-  //       EnvConstant.JWT_REFRESH_TOKEN_EXPIRATION_TIME
-  //     ),
-  //   });
-  //   return {
-  //     accessToken,
-  //     refreshToken,
-  //   };
-  // }
+  async generateToken(user: User): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const payload: JwtPayload = {
+      id: user.id,
+      username: user.username,
+      position: user.position,
+    };
+    const accessToken = await this.jwtService.signAsync(payload);
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>(
+        EnvConstant.JWT_REFRESH_TOKEN_SECRET
+      ),
+      expiresIn: this.configService.get<number>(
+        EnvConstant.JWT_REFRESH_TOKEN_EXPIRATION_TIME
+      ),
+    });
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
 
   // async refreshToken(
   //   refreshToken: string

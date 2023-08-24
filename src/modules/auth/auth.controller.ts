@@ -5,7 +5,7 @@ import { ResponseDto } from 'src/shares/dto';
 import { Position } from 'src/shares/enums';
 import { User } from '../user/entities';
 import { AuthService } from './auth.service';
-import { SignupDto } from './dto';
+import { ResponseLoginDto, SigninDto, SignupDto } from './dto';
 import { JwtGuard } from './guards';
 
 @Controller('auth')
@@ -20,12 +20,12 @@ export class AuthController {
     return await this.authService.getMe(userId);
   }
 
-  // @Post('signin')
-  // async signin(
-  //   @Body() signinData: SigninDto
-  // ): Promise<ResponseDto<ResponseLoginDto>> {
-  //   return await this.authService.signin(signinData);
-  // }
+  @Post('signin')
+  async signin(
+    @Body() signinData: SigninDto
+  ): Promise<ResponseDto<ResponseLoginDto>> {
+    return { data: await this.authService.signin(signinData) };
+  }
 
   @Roles(
     Position.ADMIN,
