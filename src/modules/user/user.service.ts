@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MessageDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { hashPassword } from 'src/shares/utils';
-import { MongoRepository, ObjectId } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
 import { CreateUserDto } from './dto';
@@ -121,6 +121,8 @@ export class UserService {
     if (!user)
       throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     delete user.password;
+    delete user.createdAt;
+    delete user.updatedAt;
     return user;
   }
 
