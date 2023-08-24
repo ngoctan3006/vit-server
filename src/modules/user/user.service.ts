@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { httpErrors } from 'src/shares/exception';
+import { MongoRepository, ObjectId } from 'typeorm';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
+import { User } from './entities';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly mailQueueService: MailQueueService,
-    private readonly uploadService: UploadService
+    private readonly uploadService: UploadService,
+    @InjectRepository(User)
+    private readonly userRepository: MongoRepository<User>
   ) {}
 
   // async checkUserExisted(id: number): Promise<boolean> {
@@ -115,13 +121,13 @@ export class UserService {
   //   };
   // }
 
-  // async getUserInfoById(id: number): Promise<User | null> {
-  //   const user = await this.findById(id);
-  //   if (!user)
-  //     throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-  //   delete user.password;
-  //   return user;
-  // }
+  async getUserInfoById(id: ObjectId | string) {
+    const user = await this.findById(id);
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+    delete user.password;
+    return user;
+  }
 
   // async changeAvatar(id: number, file: Express.Multer.File): Promise<User> {
   //   const user = await this.getUserInfoById(id);
@@ -233,17 +239,13 @@ export class UserService {
   //   return await this.getUserInfoById(id);
   // }
 
-  // async findByUsername(username: string): Promise<User | null> {
-  //   return this.prisma.user.findUnique({
-  //     where: { username },
-  //   });
-  // }
+  async findByUsername(username: string) {
+    return this.userRepository.findOne({ where: { username } });
+  }
 
-  // async findById(id: number): Promise<User | null> {
-  //   return this.prisma.user.findUnique({
-  //     where: { id },
-  //   });
-  // }
+  async findById(id: ObjectId | string) {
+    return this.userRepository.findOne({ where: { id } });
+  }
 
   // async checkUserExists(data: {
   //   username?: string;
