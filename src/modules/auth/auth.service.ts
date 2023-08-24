@@ -13,7 +13,6 @@ import { EnvConstant } from 'src/shares/constants';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { comparePassword } from 'src/shares/utils';
-import { ObjectId } from 'typeorm';
 import { MailQueueService } from '../mail/services';
 import { User } from '../user/entities';
 import { UserService } from '../user/user.service';
@@ -161,37 +160,37 @@ export class AuthService {
     };
   }
 
-  // async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
-  //   try {
-  //     const payload = await this.jwtService.verifyAsync<JwtPayload>(
-  //       refreshToken,
-  //       {
-  //         secret: this.configService.get<string>(
-  //           EnvConstant.JWT_REFRESH_TOKEN_SECRET
-  //         ),
-  //       }
-  //     );
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        {
+          secret: this.configService.get<string>(
+            EnvConstant.JWT_REFRESH_TOKEN_SECRET
+          ),
+        }
+      );
 
-  //     const user = await this.userService.findById(payload.id);
-  //     if (!user) {
-  //       throw new HttpException(
-  //         httpErrors.REFRESH_TOKEN_INVALID,
-  //         HttpStatus.BAD_REQUEST
-  //       );
-  //     }
+      const user = await this.userService.findById(payload.id);
+      if (!user) {
+        throw new HttpException(
+          httpErrors.REFRESH_TOKEN_INVALID,
+          HttpStatus.BAD_REQUEST
+        );
+      }
 
-  //     delete payload.iat;
-  //     delete payload.exp;
+      delete payload.iat;
+      delete payload.exp;
 
-  //     const accessToken = await this.jwtService.signAsync(payload);
-  //     return { accessToken };
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       httpErrors.REFRESH_TOKEN_EXPIRED,
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-  // }
+      const accessToken = await this.jwtService.signAsync(payload);
+      return { accessToken };
+    } catch (error) {
+      throw new HttpException(
+        httpErrors.REFRESH_TOKEN_EXPIRED,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
 
   // async requestResetPassword(
   //   data: RequestResetPasswordDto

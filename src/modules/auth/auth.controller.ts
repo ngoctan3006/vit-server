@@ -60,12 +60,12 @@ export class AuthController {
   //   return await this.authService.importMany(file, isSendMail);
   // }
 
-  // @Post('refresh-token')
-  // async refreshToken(
-  //   @Body() { refreshToken }: RefreshTokenDto
-  // ): Promise<ResponseDto<{ accessToken: string }>> {
-  //   return { data: await this.authService.refreshToken(refreshToken) };
-  // }
+  @Post('refresh-token')
+  async refreshToken(
+    @Body() { refreshToken }: RefreshTokenDto
+  ): Promise<ResponseDto<{ accessToken: string }>> {
+    return { data: await this.authService.refreshToken(refreshToken) };
+  }
 
   // @Post('request-reset-password')
   // async requestResetPassword(
