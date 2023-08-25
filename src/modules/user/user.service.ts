@@ -167,19 +167,14 @@ export class UserService {
     };
   }
 
-  // async changeAvatar(id: number, file: Express.Multer.File): Promise<User> {
-  //   const user = await this.getUserInfoById(id);
-  //   const key = `avatar/${user.username}_${Math.round(Math.random() * 1e9)}`;
-  //   const { url } = await this.uploadService.uploadFile(file, key);
-  //   await this.uploadService.deleteFileS3(user.avatar);
-
-  //   await this.prisma.user.update({
-  //     where: { id },
-  //     data: { avatar: url },
-  //   });
-
-  //   return await this.getUserInfoById(id);
-  // }
+  async changeAvatar(id: string, file: Express.Multer.File): Promise<User> {
+    const user = await this.getUserInfoById(id);
+    const key = `avatar/${user.username}_${Math.round(Math.random() * 1e9)}`;
+    const { url } = await this.uploadService.uploadFile(file, key);
+    await this.uploadService.deleteFileS3(user.avatar);
+    await this.userRepository.update(id, { avatar: url });
+    return await this.getUserInfoById(id);
+  }
 
   async changePassword(
     id: string,

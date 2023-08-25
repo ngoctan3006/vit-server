@@ -5,11 +5,15 @@ import {
   Param,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/shares/decorators';
 import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
+import { FileUploadDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guards';
 import { ChangePasswordDto } from './dto';
 import { User } from './entities';
@@ -50,21 +54,21 @@ export class UserController {
     return { data: await this.userService.changePassword(id, data) };
   }
 
-  // @UseGuards(JwtGuard)
-  // @Put('avatar')
-  // @UseInterceptors(FileInterceptor('file'))
-  // @ApiConsumes('multipart/form-data')
-  // @ApiBody({
-  //   description: 'Avatar image file (jpg, jpeg, png, gif)',
-  //   type: FileUploadDto,
-  // })
-  // async changeAvatar(
-  //   @GetUser('id') id: number,
-  //   @UploadedFile()
-  //   file: Express.Multer.File
-  // ): Promise<ResponseDto<User>> {
-  //   return { data: await this.userService.changeAvatar(id, file) };
-  // }
+  @UseGuards(JwtGuard)
+  @Put('avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Avatar image file (jpg, jpeg, png, gif)',
+    type: FileUploadDto,
+  })
+  async changeAvatar(
+    @GetUser('id') id: string,
+    @UploadedFile()
+    file: Express.Multer.File
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.changeAvatar(id, file) };
+  }
 
   // @UseGuards(JwtGuard)
   // @Put('profile')
