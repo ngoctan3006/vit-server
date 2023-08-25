@@ -1,5 +1,8 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { PaginationDto, ResponseDto } from 'src/shares/dto';
+import { JwtGuard } from '../auth/guards';
+import { User } from './entities';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -8,13 +11,13 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @UseGuards(JwtGuard)
-  // @Get('all')
-  // async getAll(
-  //   @Query() { page, limit }: PaginationDto
-  // ): Promise<ResponseDto<Omit<User, 'password'>[]>> {
-  //   return await this.userService.getAll(page, limit);
-  // }
+  @UseGuards(JwtGuard)
+  @Get('all')
+  async getAll(
+    @Query() { page, limit }: PaginationDto
+  ): Promise<ResponseDto<User[]>> {
+    return await this.userService.getAll(page, limit);
+  }
 
   // @UseGuards(JwtGuard)
   // @Get('management')

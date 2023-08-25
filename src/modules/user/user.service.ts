@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
-import { MessageDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { hashPassword } from 'src/shares/utils';
 import { MongoRepository } from 'typeorm';
@@ -143,33 +143,31 @@ export class UserService {
   //   return res;
   // }
 
-  // async getAll(
-  //   page: number,
-  //   limit: number
-  // ): Promise<ResponseDto<Omit<User, 'password'>[]>> {
-  //   if (isNaN(page) || isNaN(limit))
-  //     throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
+  async getAll(page: number, limit: number): Promise<ResponseDto<User[]>> {
+    if (isNaN(page) || isNaN(limit))
+      throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
-  //   const users = await this.prisma.user.findMany({
-  //     skip: (page - 1) * limit,
-  //     take: limit,
-  //     orderBy: {
-  //       date_join: 'desc',
-  //     },
-  //   });
+    const users = await this.userRepository.find({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        date_join: 'desc',
+      },
+    });
 
-  //   const modifiedUsers = users.map((user) => {
-  //     const { password, ...userWithoutPassword } = user;
-  //     return userWithoutPassword;
-  //   });
+    users.forEach((user) => {
+      delete user.password;
+      delete user.createdAt;
+      delete user.updatedAt;
+    });
 
-  //   return {
-  //     data: modifiedUsers,
-  //     metadata: {
-  //       totalPage: Math.ceil((await this.prisma.user.count()) / limit),
-  //     },
-  //   };
-  // }
+    return {
+      data: users,
+      pagination: {
+        totalPage: Math.ceil((await this.userRepository.count()) / limit),
+      },
+    };
+  }
 
   // async changeAvatar(id: number, file: Express.Multer.File): Promise<User> {
   //   const user = await this.getUserInfoById(id);
