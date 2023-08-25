@@ -5,7 +5,7 @@ import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { Position, UserStatus } from 'src/shares/enums';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
-import { hashPassword } from 'src/shares/utils';
+import { comparePassword, hashPassword } from 'src/shares/utils';
 import { MongoRepository } from 'typeorm';
 import {
   ChangePasswordFirstLoginDto,
@@ -13,7 +13,12 @@ import {
 } from '../auth/dto';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
-import { CreateUserDto, ResetPasswordDto, UpdateUserDto } from './dto';
+import {
+  ChangePasswordDto,
+  CreateUserDto,
+  ResetPasswordDto,
+  UpdateUserDto,
+} from './dto';
 import { User } from './entities';
 
 @Injectable()
@@ -176,36 +181,30 @@ export class UserService {
   //   return await this.getUserInfoById(id);
   // }
 
-  // async changePassword(
-  //   id: number,
-  //   data: ChangePasswordDto
-  // ): Promise<MessageDto> {
-  //   const { password, newPassword, cfPassword } = data;
-  //   const user = await this.prisma.user.findUnique({
-  //     where: { id },
-  //     select: {
-  //       password: true,
-  //     },
-  //   });
-  //   if (!user)
-  //     throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-  //   if (newPassword !== cfPassword)
-  //     throw new HttpException(
-  //       httpErrors.PASSWORD_NOT_MATCH,
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   if (!(await comparePassword(password, user.password)))
-  //     throw new HttpException(
-  //       httpErrors.PASSWORD_WRONG,
-  //       HttpStatus.BAD_REQUEST
-  //     );
+  async changePassword(
+    id: string,
+    data: ChangePasswordDto
+  ): Promise<MessageDto> {
+    const { password, newPassword, cfPassword } = data;
+    const user = await this.findById(id);
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+    if (newPassword !== cfPassword)
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
+    if (!(await comparePassword(password, user.password)))
+      throw new HttpException(
+        httpErrors.PASSWORD_WRONG,
+        HttpStatus.BAD_REQUEST
+      );
 
-  //   await this.prisma.user.update({
-  //     where: { id },
-  //     data: { password: await hashPassword(newPassword) },
-  //   });
-  //   return messageSuccess.USER_CHANGE_PASSWORD;
-  // }
+    await this.userRepository.update(id, {
+      password: await hashPassword(newPassword),
+    });
+    return messageSuccess.USER_CHANGE_PASSWORD;
+  }
 
   async changePasswordInFirstLogin(
     id: string,

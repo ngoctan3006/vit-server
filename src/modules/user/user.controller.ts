@@ -1,7 +1,17 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { PaginationDto, ResponseDto } from 'src/shares/dto';
+import { GetUser } from 'src/shares/decorators';
+import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
+import { ChangePasswordDto } from './dto';
 import { User } from './entities';
 import { UserService } from './user.service';
 
@@ -31,14 +41,14 @@ export class UserController {
     return { data: await this.userService.getUserInfoById(id) };
   }
 
-  // @UseGuards(JwtGuard)
-  // @Put('password')
-  // async changePassword(
-  //   @GetUser('id') id: number,
-  //   @Body() data: ChangePasswordDto
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   return { data: await this.userService.changePassword(id, data) };
-  // }
+  @UseGuards(JwtGuard)
+  @Put('password')
+  async changePassword(
+    @GetUser('id') id: string,
+    @Body() data: ChangePasswordDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.userService.changePassword(id, data) };
+  }
 
   // @UseGuards(JwtGuard)
   // @Put('avatar')
