@@ -9,17 +9,25 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
+import * as moment from 'moment';
 import { EnvConstant } from 'src/shares/constants';
 import { MessageDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { comparePassword } from 'src/shares/utils';
+import { read, utils } from 'xlsx';
 import { MailQueueService } from '../mail/services';
+import { CreateUserDto } from '../user/dto';
 import { User } from '../user/entities';
 import { UserService } from '../user/user.service';
 import { ResponseLoginDto, SigninDto, SignupDto } from './dto';
 import { JwtPayload } from './strategies';
-import { generatePassword, generateUsername } from './utils';
+import {
+  generatePassword,
+  generateUsername,
+  getGender,
+  getPosition,
+} from './utils';
 
 @Injectable()
 export class AuthService {
@@ -81,54 +89,73 @@ export class AuthService {
     return { accessToken, refreshToken, user };
   }
 
-  // async importMany(file: Express.Multer.File, isSendMail: boolean) {
-  //   const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
-  //   const jsonData = utils.sheet_to_json(
-  //     fileData.Sheets[fileData.SheetNames[0]]
-  //   );
-  //   const usernameList = (await this.userService.getAllUsername()).map(
-  //     (item) => item.username
-  //   );
-  //   const userData = jsonData.map<CreateUserDto>((user: any) => {
-  //     let username = generateUsername(user.Fullname);
-  //     const usernameCount = usernameList.filter(
-  //       (item) => item.replace(/\d/g, '') === username
-  //     ).length;
-  //     if (usernameCount > 0) {
-  //       username = `${username}${usernameCount + 1}`;
-  //     }
-  //     usernameList.push(username);
+  async importMany(
+    file: Express.Multer.File,
+    isSendMail: boolean
+  ): Promise<MessageDto> {
+    const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
+    const jsonData = utils.sheet_to_json(
+      fileData.Sheets[fileData.SheetNames[0]]
+    );
+    const usernameList = (await this.userService.getAllUsername()).map(
+      (item) => item.username
+    );
+    const userData = jsonData.map<CreateUserDto>((user: any) => {
+      let username = generateUsername(user.Fullname);
+      const usernameCount = usernameList.filter(
+        (item) => item.replace(/\d/g, '') === username
+      ).length;
+      if (usernameCount > 0) {
+        username = `${username}${usernameCount + 1}`;
+      }
+      usernameList.push(username);
 
-  //     return {
-  //       username,
-  //       password: generatePassword(),
-  //       fullname: user.Fullname,
-  //       phone: String(user.Phone)?.split(' ').join(''),
-  //       email: user.Email?.toLowerCase(),
-  //       birthday:
-  //         user['Birthday'] &&
-  //         new Date(user['Birthday']).getTime() + 8 * 60 * 60 * 1000,
-  //       school: user.School,
-  //       gen: user.Gen,
-  //       student_id: user.StudentID && String(user.StudentID),
-  //       cccd: user.CCCD && String(user.CCCD),
-  //       class: user.Class,
-  //       date_join:
-  //         user['Date Join'] &&
-  //         new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
-  //       date_out:
-  //         user['Date Out'] &&
-  //         new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
-  //       gender: getGender(user.Gender),
-  //       position: getPosition(user.Position),
-  //     };
-  //   });
-  //   await this.userService.createMany(userData, isSendMail);
+      return {
+        username,
+        password: generatePassword(),
+        fullname: user.Fullname,
+        phone: String(user.Phone)?.split(' ').join(''),
+        email: user.Email?.toLowerCase(),
+        birthday:
+          user['Birthday'] &&
+          moment(user['Birthday'])
+            .add(8, 'h')
+            .hour(7)
+            .minutes(0)
+            .seconds(0)
+            .milliseconds(0)
+            .toDate(),
+        school: user.School,
+        gen: user.Gen,
+        student_id: user.StudentID && String(user.StudentID),
+        cccd: user.CCCD && String(user.CCCD),
+        class: user.Class,
+        date_join:
+          user['Date Join'] &&
+          moment(user['Date Join'])
+            .add(8, 'h')
+            .hour(7)
+            .minutes(0)
+            .seconds(0)
+            .milliseconds(0)
+            .toDate(),
+        date_out:
+          user['Date Out'] &&
+          moment(user['Date Out'])
+            .add(8, 'h')
+            .hour(7)
+            .minutes(0)
+            .seconds(0)
+            .milliseconds(0)
+            .toDate(),
+        gender: getGender(user.Gender),
+        position: getPosition(user.Position),
+      };
+    });
+    await this.userService.createMany(userData, isSendMail);
 
-  //   return {
-  //     data: messageSuccess.USER_IMPORT,
-  //   };
-  // }
+    return messageSuccess.USER_IMPORT;
+  }
 
   async generateToken(
     user: User

@@ -105,43 +105,30 @@ export class UserService {
     }
   }
 
-  // async createMany(createUserDtos: CreateUserDto[], isSendMail: boolean) {
-  //   const data = await Promise.all(
-  //     createUserDtos.map(
-  //       async ({
-  //         email,
-  //         phone,
-  //         birthday,
-  //         password,
-  //         date_join,
-  //         date_out,
-  //         ...userData
-  //       }) => ({
-  //         ...userData,
-  //         password: await hashPassword(password),
-  //         date_join: new Date(date_join),
-  //         date_out: date_out ? new Date(date_out) : null,
-  //         birthday: birthday ? new Date(birthday) : null,
-  //         email: email?.toLowerCase(),
-  //         phone: phone?.split(' ').join(''),
-  //       })
-  //     )
-  //   );
-  //   const res = await this.prisma.user.createMany({ data });
+  async createMany(createUserDtos: CreateUserDto[], isSendMail: boolean) {
+    const data = await Promise.all(
+      createUserDtos.map(async ({ email, phone, password, ...userData }) => ({
+        ...userData,
+        password: await hashPassword(password),
+        email: email?.toLowerCase(),
+        phone: phone?.split(' ').join(''),
+      }))
+    );
+    const res = await this.userRepository.save(data);
 
-  //   if (isSendMail) {
-  //     for (const user of createUserDtos) {
-  //       await this.mailQueueService.addWelcomeMail({
-  //         email: user.email?.toLowerCase(),
-  //         name: user.fullname,
-  //         username: user.username,
-  //         password: user.password,
-  //       });
-  //     }
-  //   }
+    if (isSendMail) {
+      for (const user of createUserDtos) {
+        await this.mailQueueService.addWelcomeMail({
+          email: user.email?.toLowerCase(),
+          name: user.fullname,
+          username: user.username,
+          password: user.password,
+        });
+      }
+    }
 
-  //   return res;
-  // }
+    return res;
+  }
 
   async getAll(page: number, limit: number): Promise<ResponseDto<User[]>> {
     if (isNaN(page) || isNaN(limit))

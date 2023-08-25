@@ -1,11 +1,28 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { GetUser, Roles } from 'src/shares/decorators';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { Position } from 'src/shares/enums';
 import { User } from '../user/entities';
 import { AuthService } from './auth.service';
-import { RefreshTokenDto, ResponseLoginDto, SigninDto, SignupDto } from './dto';
+import {
+  FileUploadDto,
+  IsSendMailDto,
+  RefreshTokenDto,
+  ResponseLoginDto,
+  SigninDto,
+  SignupDto,
+} from './dto';
 import { JwtGuard } from './guards';
 
 @Controller('auth')
@@ -41,26 +58,26 @@ export class AuthController {
     return { data: await this.authService.signup(signupData) };
   }
 
-  // @Roles(
-  //   Position.ADMIN,
-  //   Position.DOI_TRUONG,
-  //   Position.DOI_PHO,
-  //   Position.TRUONG_HANH_CHINH
-  // )
-  // @ApiBearerAuth()
-  // @UseInterceptors(FileInterceptor('file'))
-  // @ApiConsumes('multipart/form-data')
-  // @ApiBody({
-  //   description: 'List of users to import',
-  //   type: FileUploadDto,
-  // })
-  // @Post('import-many')
-  // async importMany(
-  //   @UploadedFile() file: Express.Multer.File,
-  //   @Query() { isSendMail }: IsSendMailDto
-  // ) {
-  //   return await this.authService.importMany(file, isSendMail);
-  // }
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'List of users to import',
+    type: FileUploadDto,
+  })
+  @Post('import-many')
+  async importMany(
+    @UploadedFile() file: Express.Multer.File,
+    @Query() { isSendMail }: IsSendMailDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.authService.importMany(file, isSendMail) };
+  }
 
   @Post('refresh-token')
   async refreshToken(
