@@ -1,7 +1,6 @@
 export class ResponseDto<T> {
   data: T;
-  metadata?: {
+  pagination?: {
     totalPage?: number;
-    [key: string]: unknown;
   };
 }
