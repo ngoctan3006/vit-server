@@ -44,7 +44,15 @@ export class AuthService {
   }
 
   async signup(signupData: SignupDto): Promise<MessageDto> {
-    const { email, phone, fullname, isSendMail } = signupData;
+    const {
+      email,
+      phone,
+      fullname,
+      isSendMail,
+      date_join,
+      date_out,
+      birthday,
+    } = signupData;
 
     const isExists = await this.userService.checkUserExists({ email, phone });
     if (isExists) {
@@ -64,6 +72,9 @@ export class AuthService {
     await this.userService.create(
       {
         ...signupData,
+        date_join: date_join && moment(date_join).toDate(),
+        date_out: date_out && moment(date_out).toDate(),
+        birthday: birthday && moment(birthday).toDate(),
         username,
         password: generatePassword(),
       },
