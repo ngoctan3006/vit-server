@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   CreateDateColumn,
   DeleteDateColumn,
@@ -8,8 +7,8 @@ import {
 } from 'typeorm';
 
 export class BaseEntity {
-  @ObjectIdColumn({ name: '_id' })
-  id: ObjectId;
+  @ObjectIdColumn()
+  id: ObjectId | string;
 
   @CreateDateColumn()
   createdAt: Date;

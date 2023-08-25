@@ -8,7 +8,7 @@ export const databaseConfig: TypeOrmModuleAsyncOptions = {
     url: configService.get(EnvConstant.DATABASE_URL),
     retryWrites: true,
     w: 'majority',
-    entities: [__dirname + '/../modules/**/entities/*.entity.ts'],
+    entities: [__dirname + '/../modules/**/entities/*.entity.{js,ts}'],
     synchronize: true,
   }),
   inject: [ConfigService],

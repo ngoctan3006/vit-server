@@ -10,5 +10,5 @@ export class ClubEntity extends BaseEntity {
   description: string;
 
   @Column()
-  departmentId: ObjectId;
+  departmentId: ObjectId | string;
 }

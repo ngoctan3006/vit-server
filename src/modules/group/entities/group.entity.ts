@@ -10,5 +10,5 @@ export class GroupEntity extends BaseEntity {
   description: string;
 
   @Column()
-  eventId: ObjectId;
+  eventId: ObjectId | string;
 }

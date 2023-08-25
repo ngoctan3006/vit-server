@@ -1,7 +1,7 @@
-import { UserInfo } from './user-info.dto';
+import { User } from 'src/modules/user/entities';
 
 export class ResponseLoginDto {
   accessToken: string;
   refreshToken: string;
-  user: UserInfo;
+  user: User;
 }
