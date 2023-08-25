@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ObjectId } from 'mongodb';
 import { MessageDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { hashPassword } from 'src/shares/utils';
-import { MongoRepository, ObjectId } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
 import { CreateUserDto } from './dto';
@@ -18,15 +19,17 @@ export class UserService {
     private readonly userRepository: MongoRepository<User>
   ) {}
 
-  async findByUsername(username: string) {
+  async findByUsername(username: string): Promise<User> {
     return this.userRepository.findOneBy({ username });
   }
 
-  async findById(id: string | ObjectId) {
-    return this.userRepository.findOneBy({ id });
+  async findById(id: string | ObjectId): Promise<User> {
+    return this.userRepository.findOneBy({
+      _id: typeof id === 'string' ? new ObjectId(id) : id,
+    });
   }
 
-  async getUserInfoById(id: string) {
+  async getUserInfoById(id: string): Promise<User> {
     const user = await this.findById(id);
     if (!user)
       throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -36,7 +39,7 @@ export class UserService {
     return user;
   }
 
-  async getAllUsername() {
+  async getAllUsername(): Promise<User[]> {
     return await this.userRepository.find({
       select: { username: true },
     });
@@ -75,7 +78,10 @@ export class UserService {
     return false;
   }
 
-  async create(createUserDto: CreateUserDto, isSendMail: boolean) {
+  async create(
+    createUserDto: CreateUserDto,
+    isSendMail: boolean
+  ): Promise<void> {
     const { password, birthday, date_join, date_out, ...userData } =
       createUserDto;
 
