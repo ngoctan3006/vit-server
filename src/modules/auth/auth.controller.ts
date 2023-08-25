@@ -21,6 +21,7 @@ import {
   IsSendMailDto,
   RefreshTokenDto,
   RequestResetPasswordDto,
+  ResetPasswordDto,
   ResponseLoginDto,
   SigninDto,
   SignupDto,
@@ -103,12 +104,12 @@ export class AuthController {
     return { data: true };
   }
 
-  // @Post('reset-password')
-  // async resetPassword(
-  //   @Body() data: ResetPasswordDto
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   return await this.authService.resetPassword(data);
-  // }
+  @Post('reset-password')
+  async resetPassword(
+    @Body() data: ResetPasswordDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.authService.resetPassword(data) };
+  }
 
   // @ApiBearerAuth()
   // @UseGuards(FirstLoginGuard)

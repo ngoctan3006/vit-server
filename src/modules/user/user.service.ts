@@ -3,12 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
+import { messageSuccess } from 'src/shares/message';
 import { hashPassword } from 'src/shares/utils';
 import { MongoRepository } from 'typeorm';
 import { RequestResetPasswordDto } from '../auth/dto';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
-import { CreateUserDto } from './dto';
+import { CreateUserDto, ResetPasswordDto } from './dto';
 import { User } from './entities';
 
 @Injectable()
@@ -24,13 +25,13 @@ export class UserService {
     return this.userRepository.findOneBy({ username });
   }
 
-  async findById(id: string | ObjectId): Promise<User> {
+  async findById(id: ObjectId | string): Promise<User> {
     return this.userRepository.findOneBy({
       _id: typeof id === 'string' ? new ObjectId(id) : id,
     });
   }
 
-  async getUserInfoById(id: string): Promise<User> {
+  async getUserInfoById(id: ObjectId | string): Promise<User> {
     const user = await this.findById(id);
     if (!user)
       throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -224,21 +225,22 @@ export class UserService {
   //   return messageSuccess.USER_CHANGE_PASSWORD;
   // }
 
-  // async resetPassword(id: number, data: ResetPasswordDto): Promise<MessageDto> {
-  //   const { password, cfPassword } = data;
-  //   await this.getUserInfoById(id);
-  //   if (password !== cfPassword)
-  //     throw new HttpException(
-  //       httpErrors.PASSWORD_NOT_MATCH,
-  //       HttpStatus.BAD_REQUEST
-  //     );
-
-  //   await this.prisma.user.update({
-  //     where: { id },
-  //     data: { password: await hashPassword(password) },
-  //   });
-  //   return messageSuccess.USER_RESET_PASSWORD;
-  // }
+  async resetPassword(
+    id: ObjectId | string,
+    data: ResetPasswordDto
+  ): Promise<MessageDto> {
+    const { password, cfPassword } = data;
+    await this.getUserInfoById(id);
+    if (password !== cfPassword)
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
+    await this.userRepository.update(id, {
+      password: await hashPassword(password),
+    });
+    return messageSuccess.USER_RESET_PASSWORD;
+  }
 
   // async update(id: number, data: UpdateUserDto): Promise<User> {
   //   const { email, phone, birthday, ...userData } = data;

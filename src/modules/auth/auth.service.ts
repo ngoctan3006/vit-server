@@ -23,6 +23,7 @@ import { User } from '../user/entities';
 import { UserService } from '../user/user.service';
 import {
   RequestResetPasswordDto,
+  ResetPasswordDto,
   ResponseLoginDto,
   SigninDto,
   SignupDto,
@@ -37,13 +38,17 @@ import {
 
 @Injectable()
 export class AuthService {
+  private readonly ENC_KEY: string;
+
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly mailQueueService: MailQueueService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
-  ) {}
+  ) {
+    this.ENC_KEY = this.configService.get<string>(EnvConstant.ENC_PASSWORD);
+  }
 
   async getMe(id: string): Promise<User> {
     return this.userService.getUserInfoById(String(id));
@@ -230,10 +235,7 @@ export class AuthService {
     data: RequestResetPasswordDto
   ): Promise<MessageDto> {
     const user = await this.userService.checkUserMailAndPhone(data);
-    const enc = AES.encrypt(
-      JSON.stringify(data),
-      this.configService.get<string>(EnvConstant.ENC_PASSWORD)
-    ).toString();
+    const enc = AES.encrypt(JSON.stringify(data), this.ENC_KEY).toString();
     await this.cacheManager.set(
       user.username,
       enc,
@@ -250,13 +252,10 @@ export class AuthService {
     return messageSuccess.USER_REQUEST_RESET_PASSWORD;
   }
 
-  async checkTokenResetPassword(token: string): Promise<void> {
+  async checkTokenResetPassword(token: string): Promise<User> {
     try {
       const data = JSON.parse(
-        AES.decrypt(
-          token,
-          this.configService.get<string>(EnvConstant.ENC_PASSWORD)
-        ).toString(enc.Utf8)
+        AES.decrypt(token, this.ENC_KEY).toString(enc.Utf8)
       );
       const cache = await this.cacheManager.get<string>(data.username);
       if (!cache) {
@@ -271,29 +270,27 @@ export class AuthService {
           HttpStatus.BAD_REQUEST
         );
       }
-      await this.userService.checkUserMailAndPhone(data);
+      return await this.userService.checkUserMailAndPhone(data);
     } catch (error) {
       throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
     }
   }
 
-  // async resetPassword(
-  //   data: ResetPasswordDto
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   const { token, password, cfPassword } = data;
+  async resetPassword(data: ResetPasswordDto): Promise<MessageDto> {
+    const { token, password, cfPassword } = data;
 
-  //   try {
-  //     const user = await this.checkTokenResetPassword(token);
-  //     const message = await this.userService.resetPassword(user.id, {
-  //       password,
-  //       cfPassword,
-  //     });
-  //     await this.cacheManager.del(user.username);
-  //     return { data: message };
-  //   } catch (error) {
-  //     throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
-  //   }
-  // }
+    try {
+      const user = await this.checkTokenResetPassword(token);
+      const message = await this.userService.resetPassword(user.id, {
+        password,
+        cfPassword,
+      });
+      await this.cacheManager.del(user.username);
+      return message;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   // async changePasswordInFirstLogin(
   //   id: number,
