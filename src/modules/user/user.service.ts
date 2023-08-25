@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
-import { UserStatus } from 'src/shares/enums';
+import { Position, UserStatus } from 'src/shares/enums';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { hashPassword } from 'src/shares/utils';
@@ -13,7 +13,7 @@ import {
 } from '../auth/dto';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
-import { CreateUserDto, ResetPasswordDto } from './dto';
+import { CreateUserDto, ResetPasswordDto, UpdateUserDto } from './dto';
 import { User } from './entities';
 
 @Injectable()
@@ -242,32 +242,29 @@ export class UserService {
     return messageSuccess.USER_RESET_PASSWORD;
   }
 
-  // async update(id: number, data: UpdateUserDto): Promise<User> {
-  //   const { email, phone, birthday, ...userData } = data;
-  //   const user = await this.getUserInfoById(id);
-  //   if (user.email !== email.toLowerCase()) {
-  //     const checkEmailExists = await this.checkUserExists({ email });
-  //     if (checkEmailExists)
-  //       throw new HttpException(checkEmailExists, HttpStatus.BAD_REQUEST);
-  //   }
-  //   if (user.phone !== phone.split(' ').join('')) {
-  //     const checkPhoneExists = await this.checkUserExists({ phone });
-  //     if (checkPhoneExists)
-  //       throw new HttpException(checkPhoneExists, HttpStatus.BAD_REQUEST);
-  //   }
+  async update(id: string, data: UpdateUserDto): Promise<User> {
+    const { email, phone, birthday, ...userData } = data;
+    const user = await this.getUserInfoById(id);
+    if (user.email !== email.toLowerCase()) {
+      const checkEmailExists = await this.checkUserExists({ email });
+      if (checkEmailExists)
+        throw new HttpException(checkEmailExists, HttpStatus.BAD_REQUEST);
+    }
+    if (user.phone !== phone.split(' ').join('')) {
+      const checkPhoneExists = await this.checkUserExists({ phone });
+      if (checkPhoneExists)
+        throw new HttpException(checkPhoneExists, HttpStatus.BAD_REQUEST);
+    }
 
-  //   await this.prisma.user.update({
-  //     where: { id },
-  //     data: {
-  //       ...userData,
-  //       email: email?.toLowerCase(),
-  //       phone: phone?.split(' ').join(''),
-  //       birthday: birthday ? new Date(birthday) : null,
-  //     },
-  //   });
+    await this.userRepository.update(id, {
+      ...userData,
+      email: email?.toLowerCase(),
+      phone: phone?.split(' ').join(''),
+      birthday: birthday ? new Date(birthday) : null,
+    });
 
-  //   return await this.getUserInfoById(id);
-  // }
+    return await this.getUserInfoById(id);
+  }
 
   async checkUserMailAndPhone(data: RequestResetPasswordDto): Promise<User> {
     const { username, email, phone } = data;
@@ -301,27 +298,27 @@ export class UserService {
   //   return users;
   // }
 
-  // async getManagement() {
-  //   const doiTruong = await this.prisma.user.findMany({
-  //     where: { position: Position.DOI_TRUONG },
-  //     select: {
-  //       id: true,
-  //       username: true,
-  //       fullname: true,
-  //       avatar: true,
-  //       position: true,
-  //     },
-  //   });
-  //   const doiPho = await this.prisma.user.findMany({
-  //     where: { position: Position.DOI_PHO },
-  //     select: {
-  //       id: true,
-  //       username: true,
-  //       fullname: true,
-  //       avatar: true,
-  //       position: true,
-  //     },
-  //   });
-  //   return [...doiTruong, ...doiPho];
-  // }
+  async getManagement(): Promise<User[]> {
+    const doiTruong = await this.userRepository.find({
+      where: { position: Position.DOI_TRUONG },
+      select: {
+        id: true,
+        username: true,
+        fullname: true,
+        avatar: true,
+        position: true,
+      },
+    });
+    const doiPho = await this.userRepository.find({
+      where: { position: Position.DOI_PHO },
+      select: {
+        id: true,
+        username: true,
+        fullname: true,
+        avatar: true,
+        position: true,
+      },
+    });
+    return [...doiTruong, ...doiPho];
+  }
 }

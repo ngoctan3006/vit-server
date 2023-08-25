@@ -19,11 +19,11 @@ export class UserController {
     return await this.userService.getAll(page, limit);
   }
 
-  // @UseGuards(JwtGuard)
-  // @Get('management')
-  // async getManage() {
-  //   return { data: await this.userService.getManagement() };
-  // }
+  @UseGuards(JwtGuard)
+  @Get('management')
+  async getManage(): Promise<ResponseDto<User[]>> {
+    return { data: await this.userService.getManagement() };
+  }
 
   @UseGuards(JwtGuard)
   @Get(':id')
