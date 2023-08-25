@@ -15,7 +15,7 @@ import { GetUser } from 'src/shares/decorators';
 import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { FileUploadDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guards';
-import { ChangePasswordDto } from './dto';
+import { ChangePasswordDto, UpdateUserDto } from './dto';
 import { User } from './entities';
 import { UserService } from './user.service';
 
@@ -70,16 +70,16 @@ export class UserController {
     return { data: await this.userService.changeAvatar(id, file) };
   }
 
-  // @UseGuards(JwtGuard)
-  // @Put('profile')
-  // async updateProfile(
-  //   @GetUser('id') id: number,
-  //   @Body() data: UpdateUserDto
-  // ): Promise<ResponseDto<User>> {
-  //   const { fullname, date_join, date_out, gender, status, position, ...rest } =
-  //     data;
-  //   return { data: await this.userService.update(id, rest) };
-  // }
+  @UseGuards(JwtGuard)
+  @Put('profile')
+  async updateProfile(
+    @GetUser('id') id: string,
+    @Body() data: UpdateUserDto
+  ): Promise<ResponseDto<User>> {
+    const { fullname, date_join, date_out, gender, status, position, ...rest } =
+      data;
+    return { data: await this.userService.update(id, rest) };
+  }
 
   // @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
   // @Put('update-info/:id')
