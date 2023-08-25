@@ -11,13 +11,14 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { GetUser } from 'src/shares/decorators';
+import { GetUser, Roles } from 'src/shares/decorators';
 import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { FileUploadDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guards';
 import { ChangePasswordDto, UpdateUserDto } from './dto';
 import { User } from './entities';
 import { UserService } from './user.service';
+import { Position } from 'src/shares/enums';
 
 @Controller('user')
 @ApiTags('user')
@@ -81,12 +82,12 @@ export class UserController {
     return { data: await this.userService.update(id, rest) };
   }
 
-  // @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
-  // @Put('update-info/:id')
-  // async adminUpdateUserInfo(
-  //   @Param('id', new ParseIntPipe()) id: number,
-  //   @Body() data: UpdateUserDto
-  // ): Promise<ResponseDto<User>> {
-  //   return { data: await this.userService.update(id, data) };
-  // }
+  @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
+  @Put('update-info/:id')
+  async adminUpdateUserInfo(
+    @Param('id') id: string,
+    @Body() data: UpdateUserDto
+  ): Promise<ResponseDto<User>> {
+    return { data: await this.userService.update(id, data) };
+  }
 }
