@@ -9,7 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
-import { AES } from 'crypto-js';
+import { AES, enc } from 'crypto-js';
 import * as moment from 'moment';
 import { EnvConstant } from 'src/shares/constants';
 import { MessageDto } from 'src/shares/dto';
@@ -250,32 +250,32 @@ export class AuthService {
     return messageSuccess.USER_REQUEST_RESET_PASSWORD;
   }
 
-  // async checkTokenResetPassword(token: string): Promise<User> {
-  //   try {
-  //     const data = JSON.parse(
-  //       AES.decrypt(
-  //         token,
-  //         this.configService.get<string>(EnvConstant.ENC_PASSWORD)
-  //       ).toString(enc.Utf8)
-  //     );
-  //     const cache = await this.cacheManager.get<string>(data.username);
-  //     if (!cache) {
-  //       throw new HttpException(
-  //         httpErrors.TOKEN_EXPIRED,
-  //         HttpStatus.BAD_REQUEST
-  //       );
-  //     }
-  //     if (cache !== token) {
-  //       throw new HttpException(
-  //         httpErrors.TOKEN_INVALID,
-  //         HttpStatus.BAD_REQUEST
-  //       );
-  //     }
-  //     return await this.userService.checkUserMailAndPhone(data);
-  //   } catch (error) {
-  //     throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
-  //   }
-  // }
+  async checkTokenResetPassword(token: string): Promise<void> {
+    try {
+      const data = JSON.parse(
+        AES.decrypt(
+          token,
+          this.configService.get<string>(EnvConstant.ENC_PASSWORD)
+        ).toString(enc.Utf8)
+      );
+      const cache = await this.cacheManager.get<string>(data.username);
+      if (!cache) {
+        throw new HttpException(
+          httpErrors.TOKEN_EXPIRED,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      if (cache !== token) {
+        throw new HttpException(
+          httpErrors.TOKEN_INVALID,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      await this.userService.checkUserMailAndPhone(data);
+    } catch (error) {
+      throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
+    }
+  }
 
   // async resetPassword(
   //   data: ResetPasswordDto

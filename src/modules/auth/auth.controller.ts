@@ -16,6 +16,7 @@ import { Position } from 'src/shares/enums';
 import { User } from '../user/entities';
 import { AuthService } from './auth.service';
 import {
+  CheckTokenDto,
   FileUploadDto,
   IsSendMailDto,
   RefreshTokenDto,
@@ -94,13 +95,13 @@ export class AuthController {
     return { data: await this.authService.requestResetPassword(data) };
   }
 
-  // @Post('token')
-  // async checkTokenResetPassword(
-  //   @Body() { token }: CheckTokenDto
-  // ): Promise<ResponseDto<true>> {
-  //   await this.authService.checkTokenResetPassword(token);
-  //   return { data: true };
-  // }
+  @Post('token')
+  async checkTokenResetPassword(
+    @Body() { token }: CheckTokenDto
+  ): Promise<ResponseDto<true>> {
+    await this.authService.checkTokenResetPassword(token);
+    return { data: true };
+  }
 
   // @Post('reset-password')
   // async resetPassword(
