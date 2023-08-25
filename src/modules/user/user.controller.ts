@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
@@ -25,13 +25,11 @@ export class UserController {
   //   return { data: await this.userService.getManagement() };
   // }
 
-  // @UseGuards(JwtGuard)
-  // @Get(':id')
-  // async getUserById(
-  //   @Param('id', new ParseIntPipe()) id: number
-  // ): Promise<ResponseDto<User>> {
-  //   return { data: await this.userService.getUserInfoById(id) };
-  // }
+  @UseGuards(JwtGuard)
+  @Get(':id')
+  async getUserById(@Param('id') id: string): Promise<ResponseDto<User>> {
+    return { data: await this.userService.getUserInfoById(id) };
+  }
 
   // @UseGuards(JwtGuard)
   // @Put('password')
