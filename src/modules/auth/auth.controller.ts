@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -16,6 +17,7 @@ import { Position } from 'src/shares/enums';
 import { User } from '../user/entities';
 import { AuthService } from './auth.service';
 import {
+  ChangePasswordFirstLoginDto,
   CheckTokenDto,
   FileUploadDto,
   IsSendMailDto,
@@ -26,7 +28,7 @@ import {
   SigninDto,
   SignupDto,
 } from './dto';
-import { JwtGuard } from './guards';
+import { FirstLoginGuard, JwtGuard } from './guards';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -111,15 +113,15 @@ export class AuthController {
     return { data: await this.authService.resetPassword(data) };
   }
 
-  // @ApiBearerAuth()
-  // @UseGuards(FirstLoginGuard)
-  // @Put('first-login')
-  // async firstLogin(
-  //   @GetUser('id') id: number,
-  //   @Body() data: ChangePasswordFirstLoginDto
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   return {
-  //     data: await this.authService.changePasswordInFirstLogin(id, data),
-  //   };
-  // }
+  @ApiBearerAuth()
+  @UseGuards(FirstLoginGuard)
+  @Put('first-login')
+  async firstLogin(
+    @GetUser('id') id: string,
+    @Body() data: ChangePasswordFirstLoginDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return {
+      data: await this.authService.changePasswordInFirstLogin(id, data),
+    };
+  }
 }

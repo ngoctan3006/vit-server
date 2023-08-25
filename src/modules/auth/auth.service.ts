@@ -22,6 +22,7 @@ import { CreateUserDto } from '../user/dto';
 import { User } from '../user/entities';
 import { UserService } from '../user/user.service';
 import {
+  ChangePasswordFirstLoginDto,
   RequestResetPasswordDto,
   ResetPasswordDto,
   ResponseLoginDto,
@@ -292,10 +293,10 @@ export class AuthService {
     }
   }
 
-  // async changePasswordInFirstLogin(
-  //   id: number,
-  //   data: ChangePasswordFirstLoginDto
-  // ): Promise<MessageDto> {
-  //   return await this.userService.changePasswordInFirstLogin(id, data);
-  // }
+  async changePasswordInFirstLogin(
+    id: string,
+    data: ChangePasswordFirstLoginDto
+  ): Promise<MessageDto> {
+    return await this.userService.changePasswordInFirstLogin(id, data);
+  }
 }

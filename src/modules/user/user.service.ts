@@ -2,11 +2,15 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
+import { UserStatus } from 'src/shares/enums';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { hashPassword } from 'src/shares/utils';
 import { MongoRepository } from 'typeorm';
-import { RequestResetPasswordDto } from '../auth/dto';
+import {
+  ChangePasswordFirstLoginDto,
+  RequestResetPasswordDto,
+} from '../auth/dto';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
 import { CreateUserDto, ResetPasswordDto } from './dto';
@@ -203,27 +207,23 @@ export class UserService {
   //   return messageSuccess.USER_CHANGE_PASSWORD;
   // }
 
-  // async changePasswordInFirstLogin(
-  //   id: number,
-  //   data: ChangePasswordFirstLoginDto
-  // ): Promise<MessageDto> {
-  //   const { password, cfPassword } = data;
-  //   await this.getUserInfoById(id);
-  //   if (password !== cfPassword)
-  //     throw new HttpException(
-  //       httpErrors.PASSWORD_NOT_MATCH,
-  //       HttpStatus.BAD_REQUEST
-  //     );
-
-  //   await this.prisma.user.update({
-  //     where: { id },
-  //     data: {
-  //       password: await hashPassword(password),
-  //       status: Status.ACTIVE,
-  //     },
-  //   });
-  //   return messageSuccess.USER_CHANGE_PASSWORD;
-  // }
+  async changePasswordInFirstLogin(
+    id: string,
+    data: ChangePasswordFirstLoginDto
+  ): Promise<MessageDto> {
+    const { password, cfPassword } = data;
+    await this.getUserInfoById(id);
+    if (password !== cfPassword)
+      throw new HttpException(
+        httpErrors.PASSWORD_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
+    await this.userRepository.update(id, {
+      password: await hashPassword(password),
+      status: UserStatus.ACTIVE,
+    });
+    return messageSuccess.USER_CHANGE_PASSWORD;
+  }
 
   async resetPassword(
     id: ObjectId | string,
