@@ -9,6 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
+import { AES } from 'crypto-js';
 import * as moment from 'moment';
 import { EnvConstant } from 'src/shares/constants';
 import { MessageDto } from 'src/shares/dto';
@@ -20,7 +21,12 @@ import { MailQueueService } from '../mail/services';
 import { CreateUserDto } from '../user/dto';
 import { User } from '../user/entities';
 import { UserService } from '../user/user.service';
-import { ResponseLoginDto, SigninDto, SignupDto } from './dto';
+import {
+  RequestResetPasswordDto,
+  ResponseLoginDto,
+  SigninDto,
+  SignupDto,
+} from './dto';
 import { JwtPayload } from './strategies';
 import {
   generatePassword,
@@ -220,29 +226,29 @@ export class AuthService {
     }
   }
 
-  // async requestResetPassword(
-  //   data: RequestResetPasswordDto
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   const user = await this.userService.checkUserMailAndPhone(data);
-  //   const enc = AES.encrypt(
-  //     JSON.stringify(data),
-  //     this.configService.get<string>(EnvConstant.ENC_PASSWORD)
-  //   ).toString();
-  //   await this.cacheManager.set(
-  //     user.username,
-  //     enc,
-  //     this.configService.get<number>(EnvConstant.CACHE_TTL)
-  //   );
-  //   await this.mailQueueService.addResetPasswordMail({
-  //     ...data,
-  //     name: user.fullname,
-  //     resetPasswordUrl: `${this.configService.get<string>(
-  //       EnvConstant.CLIENT_URL
-  //     )}/reset-password?token=${enc}`,
-  //   });
+  async requestResetPassword(
+    data: RequestResetPasswordDto
+  ): Promise<MessageDto> {
+    const user = await this.userService.checkUserMailAndPhone(data);
+    const enc = AES.encrypt(
+      JSON.stringify(data),
+      this.configService.get<string>(EnvConstant.ENC_PASSWORD)
+    ).toString();
+    await this.cacheManager.set(
+      user.username,
+      enc,
+      this.configService.get<number>(EnvConstant.CACHE_TTL)
+    );
+    await this.mailQueueService.addResetPasswordMail({
+      ...data,
+      name: user.fullname,
+      resetPasswordUrl: `${this.configService.get<string>(
+        EnvConstant.CLIENT_URL
+      )}/reset-password?token=${enc}`,
+    });
 
-  //   return { data: messageSuccess.USER_REQUEST_RESET_PASSWORD };
-  // }
+    return messageSuccess.USER_REQUEST_RESET_PASSWORD;
+  }
 
   // async checkTokenResetPassword(token: string): Promise<User> {
   //   try {

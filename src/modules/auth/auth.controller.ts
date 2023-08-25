@@ -19,6 +19,7 @@ import {
   FileUploadDto,
   IsSendMailDto,
   RefreshTokenDto,
+  RequestResetPasswordDto,
   ResponseLoginDto,
   SigninDto,
   SignupDto,
@@ -86,12 +87,12 @@ export class AuthController {
     return { data: await this.authService.refreshToken(refreshToken) };
   }
 
-  // @Post('request-reset-password')
-  // async requestResetPassword(
-  //   @Body() data: RequestResetPasswordDto
-  // ): Promise<ResponseDto<MessageDto>> {
-  //   return await this.authService.requestResetPassword(data);
-  // }
+  @Post('request-reset-password')
+  async requestResetPassword(
+    @Body() data: RequestResetPasswordDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.authService.requestResetPassword(data) };
+  }
 
   // @Post('token')
   // async checkTokenResetPassword(

@@ -5,6 +5,7 @@ import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { hashPassword } from 'src/shares/utils';
 import { MongoRepository } from 'typeorm';
+import { RequestResetPasswordDto } from '../auth/dto';
 import { MailQueueService } from '../mail/services';
 import { UploadService } from '../upload/upload.service';
 import { CreateUserDto } from './dto';
@@ -266,25 +267,27 @@ export class UserService {
   //   return await this.getUserInfoById(id);
   // }
 
-  // async checkUserMailAndPhone(data: RequestResetPasswordDto): Promise<User> {
-  //   const { username, email, phone } = data;
-  //   const user = await this.findByUsername(username);
-  //   if (!user)
-  //     throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-  //   if (user.email !== email.toLowerCase())
-  //     throw new HttpException(
-  //       httpErrors.EMAIL_PHONE_NOT_MATCH,
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   if (user.phone !== phone.split(' ').join(''))
-  //     throw new HttpException(
-  //       httpErrors.EMAIL_PHONE_NOT_MATCH,
-  //       HttpStatus.BAD_REQUEST
-  //     );
+  async checkUserMailAndPhone(data: RequestResetPasswordDto): Promise<User> {
+    const { username, email, phone } = data;
+    const user = await this.findByUsername(username);
+    if (!user)
+      throw new HttpException(httpErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+    if (user.email !== email.toLowerCase())
+      throw new HttpException(
+        httpErrors.EMAIL_PHONE_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
+    if (user.phone !== phone.split(' ').join(''))
+      throw new HttpException(
+        httpErrors.EMAIL_PHONE_NOT_MATCH,
+        HttpStatus.BAD_REQUEST
+      );
 
-  //   delete user.password;
-  //   return user;
-  // }
+    delete user.password;
+    delete user.createdAt;
+    delete user.updatedAt;
+    return user;
+  }
 
   // async getUserBirthday() {
   //   const today = new Date();
