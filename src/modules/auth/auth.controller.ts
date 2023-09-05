@@ -11,10 +11,9 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Position, User } from '@prisma/client';
 import { GetUser, Roles } from 'src/shares/decorators';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
-import { Position } from 'src/shares/enums';
-import { User } from '../user/entities';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordFirstLoginDto,
@@ -38,15 +37,15 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @Get('me')
-  async getMe(@GetUser('id') id: string): Promise<ResponseDto<User>> {
-    return { data: await this.authService.getMe(id) };
+  async getMe(@GetUser('id') userId: string): Promise<ResponseDto<User>> {
+    return { data: await this.authService.getMe(userId) };
   }
 
   @Post('signin')
   async signin(
     @Body() signinData: SigninDto
   ): Promise<ResponseDto<ResponseLoginDto>> {
-    return { data: await this.authService.signin(signinData) };
+    return await this.authService.signin(signinData);
   }
 
   @Roles(
@@ -57,10 +56,8 @@ export class AuthController {
   )
   @ApiBearerAuth()
   @Post('signup')
-  async signup(
-    @Body() signupData: SignupDto
-  ): Promise<ResponseDto<MessageDto>> {
-    return { data: await this.authService.signup(signupData) };
+  async signup(@Body() signupData: SignupDto) {
+    return await this.authService.signup(signupData);
   }
 
   @Roles(
@@ -80,22 +77,22 @@ export class AuthController {
   async importMany(
     @UploadedFile() file: Express.Multer.File,
     @Query() { isSendMail }: IsSendMailDto
-  ): Promise<ResponseDto<MessageDto>> {
-    return { data: await this.authService.importMany(file, isSendMail) };
+  ) {
+    return await this.authService.importMany(file, isSendMail);
   }
 
   @Post('refresh-token')
   async refreshToken(
     @Body() { refreshToken }: RefreshTokenDto
   ): Promise<ResponseDto<{ accessToken: string }>> {
-    return { data: await this.authService.refreshToken(refreshToken) };
+    return await this.authService.refreshToken(refreshToken);
   }
 
   @Post('request-reset-password')
   async requestResetPassword(
     @Body() data: RequestResetPasswordDto
   ): Promise<ResponseDto<MessageDto>> {
-    return { data: await this.authService.requestResetPassword(data) };
+    return await this.authService.requestResetPassword(data);
   }
 
   @Post('token')
@@ -110,7 +107,7 @@ export class AuthController {
   async resetPassword(
     @Body() data: ResetPasswordDto
   ): Promise<ResponseDto<MessageDto>> {
-    return { data: await this.authService.resetPassword(data) };
+    return await this.authService.resetPassword(data);
   }
 
   @ApiBearerAuth()
