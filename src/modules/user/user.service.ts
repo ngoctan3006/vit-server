@@ -226,12 +226,12 @@ export class UserService {
   async update(id: string, data: UpdateUserDto): Promise<User> {
     const { email, phone, birthday, ...userData } = data;
     const user = await this.getUserInfoById(id);
-    if (user.email !== email.toLowerCase()) {
+    if (email && user.email !== email.toLowerCase()) {
       const checkEmailExists = await this.checkUserExists({ email });
       if (checkEmailExists)
         throw new HttpException(checkEmailExists, HttpStatus.BAD_REQUEST);
     }
-    if (user.phone !== phone.split(' ').join('')) {
+    if (phone && user.phone !== phone.split(' ').join('')) {
       const checkPhoneExists = await this.checkUserExists({ phone });
       if (checkPhoneExists)
         throw new HttpException(checkPhoneExists, HttpStatus.BAD_REQUEST);
