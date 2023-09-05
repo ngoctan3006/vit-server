@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateEventDto {
   @ApiProperty()
@@ -15,12 +15,12 @@ export class CreateEventDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  start_time: string;
+  startTime: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  end_time: string;
+  endTime: string;
 
   @ApiProperty()
   @IsNotEmpty()
