@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { UserStatus } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from 'src/modules/user/user.service';
 import { EnvConstant } from 'src/shares/constants';
-import { UserStatus } from 'src/shares/enums';
 import { httpErrors } from 'src/shares/exception';
 import { JwtPayload } from './jwt.payload';
 
@@ -26,7 +26,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     const user = await this.userService.findById(payload.id);
     if (!user) {
-      throw new HttpException(httpErrors.FORBIDDEN, HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        httpErrors.USER_NOT_FOUND,
+        HttpStatus.UNAUTHORIZED
+      );
     }
     if (user.status === UserStatus.BLOCKED) {
       throw new HttpException(httpErrors.BLOCKED_USER, HttpStatus.FORBIDDEN);

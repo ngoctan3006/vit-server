@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender, Position } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
@@ -8,7 +9,6 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Gender, Position } from 'src/shares/enums';
 
 export class SignupDto {
   @ApiProperty()
@@ -55,7 +55,7 @@ export class SignupDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  student_id: string;
+  studentId: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -70,12 +70,12 @@ export class SignupDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_join: string | number;
+  dateJoin: string | number;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_out: string | number;
+  dateOut: string | number;
 
   @ApiProperty({ required: false, enum: Gender })
   @IsOptional()

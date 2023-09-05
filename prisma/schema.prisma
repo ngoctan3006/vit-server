@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  username    String           @unique
+  password    String
+  fullname    String
+  email       String           @unique
+  phone       String           @unique
+  bio         String?
+  avatar      String?
+  gen         Int?
+  birthday    DateTime?
+  hometown    String?
+  address     String?
+  school      String?
+  studentId   String?
+  class       String?
+  cccd        String?
+  dateJoin    DateTime?
+  dateOut     DateTime?
+  lastLogin   DateTime?
+  gender      Gender           @default(OTHER)
+  status      UserStatus       @default(INACTIVE)
+  position    Position         @default(THANH_VIEN)
+  social      UserSocial[]
+  activities  UserActivity[]
+  groups      UserGroup[]
+  departments UserDepartment[]
+  clubs       UserClub[]
+  events      UserEvent[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+}
+
+model Social {
+  id      String       @id @default(auto()) @map("_id") @db.ObjectId
+  type    String       @unique
+  icon    String
+  baseUrl String
+  users   UserSocial[]
+}
+
+model UserSocial {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String  @db.ObjectId
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialId String  @db.ObjectId
+  social   Social  @relation(fields: [socialId], references: [id], onDelete: Cascade)
+  value    String
+  default  Boolean @default(false)
+}
+
+model Activity {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  location    String
+  deadline    DateTime
+  times       ActivityTime[]
+  eventId     String?        @db.ObjectId
+  event       Event?         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users       UserActivity[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+}
+
+model ActivityTime {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  numberRequire Int            @default(1)
+  startTime     DateTime
+  endTime       DateTime
+  activityId    String         @db.ObjectId
+  activity      Activity       @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  users         UserActivity[]
+}
+
+model UserActivity {
+  id         String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String         @db.ObjectId
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timeId     String         @db.ObjectId
+  times      ActivityTime   @relation(fields: [timeId], references: [id], onDelete: Cascade)
+  activityId String         @db.ObjectId
+  activity   Activity       @relation(fields: [activityId], references: [id])
+  status     UserJoinStatus @default(REGISTERED)
+  position   Position       @default(THANH_VIEN)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([userId, timeId])
+}
+
+model Event {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  location    String
+  deadline    DateTime
+  startTime   DateTime
+  endTime     DateTime
+  activities  Activity[]
+  users       UserEvent[]
+  groups      Group[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+}
+
+model UserEvent {
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String         @db.ObjectId
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String         @db.ObjectId
+  event     Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  position  Position       @default(THANH_VIEN)
+  status    UserJoinStatus @default(REGISTERED)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([userId, eventId])
+}
+
+model Group {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  eventId     String?     @db.ObjectId
+  event       Event?      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users       UserGroup[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+}
+
+model UserGroup {
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  groupId   String         @db.ObjectId
+  group     Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String         @db.ObjectId
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position  Position       @default(THANH_VIEN)
+  status    UserJoinStatus @default(REGISTERED)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([groupId, userId])
+}
+
+model Department {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  users       UserDepartment[]
+  clubs       Club[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+}
+
+model UserDepartment {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  departmentId String         @db.ObjectId
+  department   Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  userId       String         @db.ObjectId
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position     Position       @default(THANH_VIEN)
+  status       UserJoinStatus @default(REGISTERED)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([departmentId, userId])
+}
+
+model Club {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String
+  departmentId String     @db.ObjectId
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  users        UserClub[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+}
+
+model UserClub {
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  clubId    String         @db.ObjectId
+  club      Club           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId    String         @db.ObjectId
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position  Position       @default(THANH_VIEN)
+  status    UserJoinStatus @default(REGISTERED)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([clubId, userId])
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Position {
+  ADMIN
+  DOI_TRUONG
+  DOI_PHO
+  MANG_TRUONG
+  MANG_PHO
+  TRUONG_PHONG_TRAO
+  PHO_PHONG_TRAO
+  TRUONG_HANH_CHINH
+  PHO_HANH_CHINH
+  TRUONG_HAU_CAN
+  PHO_HAU_CAN
+  TRUONG_TRUYEN_THONG
+  PHO_TRUYEN_THONG
+  CHU_NHIEM
+  CN_MEDIA
+  CN_GUITAR
+  CN_DANCER
+  NHOM_TRUONG
+  NHOM_PHO
+  THANH_VIEN
+  OUT
+  LEADER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  OUT
+}
+
+enum UserJoinStatus {
+  REGISTERED
+  ACCEPTED
+  WITHDRAWN
+  REJECTED
+}

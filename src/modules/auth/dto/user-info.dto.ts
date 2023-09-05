@@ -1,9 +1,8 @@
 import { Position } from '@prisma/client';
 
-export class JwtPayload {
+export class UserInfo {
   id: string;
   username: string;
+  fullname: string;
   position: Position;
-  iat?: number;
-  exp?: number;
 }

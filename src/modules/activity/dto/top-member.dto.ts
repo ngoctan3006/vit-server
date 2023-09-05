@@ -1,5 +1,5 @@
 export interface TopMember {
-  id: number;
+  id: string;
   username: string;
   fullname: string;
   avatar: string | null;

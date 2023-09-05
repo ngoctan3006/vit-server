@@ -8,18 +8,17 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { AES, enc } from 'crypto-js';
-import * as moment from 'moment';
 import { EnvConstant } from 'src/shares/constants';
-import { MessageDto } from 'src/shares/dto';
+import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { comparePassword } from 'src/shares/utils';
 import { read, utils } from 'xlsx';
 import { MailQueueService } from '../mail/services';
 import { CreateUserDto } from '../user/dto';
-import { User } from '../user/entities';
 import { UserService } from '../user/user.service';
 import {
   ChangePasswordFirstLoginDto,
@@ -39,34 +38,26 @@ import {
 
 @Injectable()
 export class AuthService {
-  private readonly ENC_KEY: string;
-
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly mailQueueService: MailQueueService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
-  ) {
-    this.ENC_KEY = this.configService.get<string>(EnvConstant.ENC_PASSWORD);
-  }
+  ) {}
 
-  async getMe(id: string): Promise<User> {
-    return this.userService.getUserInfoById(String(id));
+  async getMe(userId: string): Promise<User> {
+    const user = await this.userService.getUserInfoById(userId);
+    return user;
   }
 
   async signup(signupData: SignupDto): Promise<MessageDto> {
-    const {
+    const { email, phone, fullname, isSendMail } = signupData;
+
+    const isExists = await this.userService.checkUserExists({
       email,
       phone,
-      fullname,
-      isSendMail,
-      date_join,
-      date_out,
-      birthday,
-    } = signupData;
-
-    const isExists = await this.userService.checkUserExists({ email, phone });
+    });
     if (isExists) {
       throw new BadRequestException(isExists);
     }
@@ -84,9 +75,6 @@ export class AuthService {
     await this.userService.create(
       {
         ...signupData,
-        date_join: date_join && moment(date_join).toDate(),
-        date_out: date_out && moment(date_out).toDate(),
-        birthday: birthday && moment(birthday).toDate(),
         username,
         password: generatePassword(),
       },
@@ -107,8 +95,6 @@ export class AuthService {
     }
     const { accessToken, refreshToken } = await this.generateToken(user);
     delete user.password;
-    delete user.createdAt;
-    delete user.updatedAt;
     return { accessToken, refreshToken, user };
   }
 
@@ -141,13 +127,7 @@ export class AuthService {
         email: user.Email?.toLowerCase(),
         birthday:
           user['Birthday'] &&
-          moment(user['Birthday'])
-            .add(8, 'h')
-            .hour(7)
-            .minutes(0)
-            .seconds(0)
-            .milliseconds(0)
-            .toDate(),
+          new Date(user['Birthday']).getTime() + 8 * 60 * 60 * 1000,
         school: user.School,
         gen: user.Gen,
         student_id: user.StudentID && String(user.StudentID),
@@ -155,22 +135,10 @@ export class AuthService {
         class: user.Class,
         date_join:
           user['Date Join'] &&
-          moment(user['Date Join'])
-            .add(8, 'h')
-            .hour(7)
-            .minutes(0)
-            .seconds(0)
-            .milliseconds(0)
-            .toDate(),
+          new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
         date_out:
           user['Date Out'] &&
-          moment(user['Date Out'])
-            .add(8, 'h')
-            .hour(7)
-            .minutes(0)
-            .seconds(0)
-            .milliseconds(0)
-            .toDate(),
+          new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
         gender: getGender(user.Gender),
         position: getPosition(user.Position),
       };
@@ -180,9 +148,10 @@ export class AuthService {
     return messageSuccess.USER_IMPORT;
   }
 
-  async generateToken(
-    user: User
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async generateToken(user: User): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const payload: JwtPayload = {
       id: user.id,
       username: user.username,
@@ -202,14 +171,11 @@ export class AuthService {
 
   async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
     try {
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(
-        refreshToken,
-        {
-          secret: this.configService.get<string>(
-            EnvConstant.JWT_REFRESH_TOKEN_SECRET
-          ),
-        }
-      );
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>(
+          EnvConstant.JWT_REFRESH_TOKEN_SECRET
+        ),
+      });
 
       const user = await this.userService.findById(payload.id);
       if (!user) {
@@ -236,7 +202,10 @@ export class AuthService {
     data: RequestResetPasswordDto
   ): Promise<MessageDto> {
     const user = await this.userService.checkUserMailAndPhone(data);
-    const enc = AES.encrypt(JSON.stringify(data), this.ENC_KEY).toString();
+    const enc = AES.encrypt(
+      JSON.stringify(data),
+      this.configService.get<string>(EnvConstant.ENC_PASSWORD)
+    ).toString();
     await this.cacheManager.set(
       user.username,
       enc,
@@ -256,7 +225,10 @@ export class AuthService {
   async checkTokenResetPassword(token: string): Promise<User> {
     try {
       const data = JSON.parse(
-        AES.decrypt(token, this.ENC_KEY).toString(enc.Utf8)
+        AES.decrypt(
+          token,
+          this.configService.get<string>(EnvConstant.ENC_PASSWORD)
+        ).toString(enc.Utf8)
       );
       const cache = await this.cacheManager.get<string>(data.username);
       if (!cache) {
@@ -289,7 +261,7 @@ export class AuthService {
       await this.cacheManager.del(user.username);
       return message;
     } catch (error) {
-      throw error;
+      throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
     }
   }
 
