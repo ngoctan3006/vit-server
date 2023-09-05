@@ -130,13 +130,13 @@ export class AuthService {
           new Date(user['Birthday']).getTime() + 8 * 60 * 60 * 1000,
         school: user.School,
         gen: user.Gen,
-        student_id: user.StudentID && String(user.StudentID),
+        studentId: user.StudentID && String(user.StudentID),
         cccd: user.CCCD && String(user.CCCD),
         class: user.Class,
-        date_join:
+        dateJoin:
           user['Date Join'] &&
           new Date(user['Date Join']).getTime() + 8 * 60 * 60 * 1000,
-        date_out:
+        dateOut:
           user['Date Out'] &&
           new Date(user['Date Out']).getTime() + 8 * 60 * 60 * 1000,
         gender: getGender(user.Gender),
