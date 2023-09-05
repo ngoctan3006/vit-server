@@ -12,15 +12,15 @@ export class ActivityTimeDto {
   @Transform(({ value }) => parseInt(value))
   @IsNotEmpty()
   @IsNumber()
-  number_require: number;
+  numberRequire: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
-  start_time: Date;
+  startTime: Date;
 
   @ApiProperty()
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
-  end_time: Date;
+  endTime: Date;
 }

@@ -1,7 +1,7 @@
-import { UserJoinStatus } from 'src/shares/enums';
+import { UserJoinStatus } from '@prisma/client';
 
 export interface Member {
-  id: number;
+  id: string;
   username: string;
   fullname: string;
   avatar: string | null;
@@ -9,7 +9,7 @@ export interface Member {
 }
 
 export interface GetMemberResponseDto {
-  id: number;
+  id: string;
   name: string;
   member: Member[];
 }
