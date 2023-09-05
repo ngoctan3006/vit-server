@@ -3,9 +3,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
-import { bullConfig, cacheConfig, databaseConfig } from './config';
+import { bullConfig, cacheConfig } from './config';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ClubModule } from './modules/club/club.module';
@@ -15,6 +14,7 @@ import { EventModule } from './modules/event/event.module';
 import { GroupModule } from './modules/group/group.module';
 import { MailModule } from './modules/mail/mail.module';
 import { EmailProcessor } from './modules/mail/processors';
+import { PrismaModule } from './modules/prisma/prisma.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -29,9 +29,9 @@ import { UserModule } from './modules/user/user.module';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forRootAsync(databaseConfig),
     BullModule.forRootAsync(bullConfig),
     ScheduleModule.forRoot(),
+    PrismaModule,
     AuthModule,
     UserModule,
     MailModule,
