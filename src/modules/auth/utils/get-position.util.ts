@@ -1,4 +1,4 @@
-import { Position } from 'src/shares/enums';
+import { Position } from '@prisma/client';
 import { removeAccents } from '../../../shares/utils';
 
 export const getPosition = (position?: string): Position => {
