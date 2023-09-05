@@ -3,8 +3,8 @@ import { Club } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
-import { DepartmentService } from './../department/department.service';
-import { PrismaService } from './../prisma/prisma.service';
+import { DepartmentService } from '../department/department.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateClubDto, UpdateClubDto } from './dto';
 
 @Injectable()
