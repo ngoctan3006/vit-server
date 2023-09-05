@@ -3,8 +3,8 @@ import { Group } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
+import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { EventService } from './../event/event.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
 
 @Injectable()
