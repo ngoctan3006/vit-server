@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumberString, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateGroupDto {
   @ApiProperty()
@@ -13,7 +13,7 @@ export class CreateGroupDto {
   description: string;
 
   @ApiProperty()
-  @IsNumberString()
+  @IsString()
   @IsNotEmpty()
-  event_id: number;
+  eventId: string;
 }
