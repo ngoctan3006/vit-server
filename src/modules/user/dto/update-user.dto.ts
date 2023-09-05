@@ -83,7 +83,7 @@ export class UpdateUserDto {
   @ApiProperty({ required: false, enum: UserStatus })
   @IsOptional()
   @IsString()
-  UserStatus?: UserStatus;
+  status?: UserStatus;
 
   @ApiProperty({ required: false, enum: Position })
   @IsOptional()
