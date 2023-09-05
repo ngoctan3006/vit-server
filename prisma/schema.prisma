@@ -41,7 +41,7 @@ model User {
   events      UserEvent[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-  deletedAt   DateTime
+  deletedAt   DateTime?
 }
 
 model Social {
