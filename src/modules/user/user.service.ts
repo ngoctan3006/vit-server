@@ -3,16 +3,14 @@ import { Position, User, UserStatus } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
-import { hashPassword } from 'src/shares/utils';
+import { comparePassword, hashPassword } from 'src/shares/utils';
 import {
   ChangePasswordFirstLoginDto,
   RequestResetPasswordDto,
 } from '../auth/dto';
-import { HappyBirthdayDto } from '../mail/dto';
 import { MailQueueService } from '../mail/services';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
-import { comparePassword } from './../../shares/utils';
 import {
   ChangePasswordDto,
   CreateUserDto,
