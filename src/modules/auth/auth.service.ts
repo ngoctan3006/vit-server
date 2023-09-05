@@ -51,7 +51,7 @@ export class AuthService {
     return user;
   }
 
-  async signup(signupData: SignupDto) {
+  async signup(signupData: SignupDto): Promise<MessageDto> {
     const { email, phone, fullname, isSendMail } = signupData;
 
     const isExists = await this.userService.checkUserExists({
@@ -80,10 +80,10 @@ export class AuthService {
       },
       Boolean(isSendMail)
     );
-    return { data: messageSuccess.USER_IMPORT };
+    return messageSuccess.USER_IMPORT;
   }
 
-  async signin(signinData: SigninDto): Promise<ResponseDto<ResponseLoginDto>> {
+  async signin(signinData: SigninDto): Promise<ResponseLoginDto> {
     const { username, password } = signinData;
     const user = await this.userService.findByUsername(username);
     if (!user) {
@@ -95,16 +95,13 @@ export class AuthService {
     }
     const { accessToken, refreshToken } = await this.generateToken(user);
     delete user.password;
-    return {
-      data: {
-        accessToken,
-        refreshToken,
-        user,
-      },
-    };
+    return { accessToken, refreshToken, user };
   }
 
-  async importMany(file: Express.Multer.File, isSendMail: boolean) {
+  async importMany(
+    file: Express.Multer.File,
+    isSendMail: boolean
+  ): Promise<MessageDto> {
     const fileData = read(file.buffer, { type: 'buffer', cellDates: true });
     const jsonData = utils.sheet_to_json(
       fileData.Sheets[fileData.SheetNames[0]]
@@ -148,9 +145,7 @@ export class AuthService {
     });
     await this.userService.createMany(userData, isSendMail);
 
-    return {
-      data: messageSuccess.USER_IMPORT,
-    };
+    return messageSuccess.USER_IMPORT;
   }
 
   async generateToken(user: User): Promise<{
@@ -171,15 +166,10 @@ export class AuthService {
         EnvConstant.JWT_REFRESH_TOKEN_EXPIRATION_TIME
       ),
     });
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return { accessToken, refreshToken };
   }
 
-  async refreshToken(
-    refreshToken: string
-  ): Promise<ResponseDto<{ accessToken: string }>> {
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
     try {
       const payload = await this.jwtService.verifyAsync(refreshToken, {
         secret: this.configService.get<string>(
@@ -199,7 +189,7 @@ export class AuthService {
       delete payload.exp;
 
       const accessToken = await this.jwtService.signAsync(payload);
-      return { data: { accessToken } };
+      return { accessToken };
     } catch (error) {
       throw new HttpException(
         httpErrors.REFRESH_TOKEN_EXPIRED,
@@ -210,7 +200,7 @@ export class AuthService {
 
   async requestResetPassword(
     data: RequestResetPasswordDto
-  ): Promise<ResponseDto<MessageDto>> {
+  ): Promise<MessageDto> {
     const user = await this.userService.checkUserMailAndPhone(data);
     const enc = AES.encrypt(
       JSON.stringify(data),
@@ -229,7 +219,7 @@ export class AuthService {
       )}/reset-password?token=${enc}`,
     });
 
-    return { data: messageSuccess.USER_REQUEST_RESET_PASSWORD };
+    return messageSuccess.USER_REQUEST_RESET_PASSWORD;
   }
 
   async checkTokenResetPassword(token: string): Promise<User> {
@@ -259,9 +249,7 @@ export class AuthService {
     }
   }
 
-  async resetPassword(
-    data: ResetPasswordDto
-  ): Promise<ResponseDto<MessageDto>> {
+  async resetPassword(data: ResetPasswordDto): Promise<MessageDto> {
     const { token, password, cfPassword } = data;
 
     try {
@@ -271,7 +259,7 @@ export class AuthService {
         cfPassword,
       });
       await this.cacheManager.del(user.username);
-      return { data: message };
+      return message;
     } catch (error) {
       throw new HttpException(httpErrors.TOKEN_INVALID, HttpStatus.BAD_REQUEST);
     }
