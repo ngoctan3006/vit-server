@@ -6,7 +6,7 @@ import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserService } from './../user/user.service';
+import { UserService } from '../user/user.service';
 import {
   ApproveDto,
   CreateActivityDto,
