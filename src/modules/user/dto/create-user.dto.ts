@@ -1,4 +1,4 @@
-import { Gender, Position } from 'src/shares/enums';
+import { Gender, Position } from '@prisma/client';
 
 export class CreateUserDto {
   username: string;
@@ -6,16 +6,16 @@ export class CreateUserDto {
   fullname: string;
   email: string;
   phone: string;
-  birthday?: Date;
+  birthday?: string | number;
   gen?: number;
   hometown?: string;
   address?: string;
   school?: string;
-  student_id?: string;
+  studentId?: string;
   class?: string;
   cccd?: string;
-  date_join?: Date;
-  date_out?: Date;
+  dateJoin?: string | number;
+  dateOut?: string | number;
   gender?: Gender;
   position?: Position;
 }
