@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   Put,
   Query,
   UploadedFile,
@@ -42,9 +41,7 @@ export class UserController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async getUserById(
-    @Param('id', new ParseIntPipe()) id: string
-  ): Promise<ResponseDto<User>> {
+  async getUserById(@Param('id') id: string): Promise<ResponseDto<User>> {
     return { data: await this.userService.getUserInfoById(id) };
   }
 
@@ -87,7 +84,7 @@ export class UserController {
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
   @Put('update-info/:id')
   async adminUpdateUserInfo(
-    @Param('id', new ParseIntPipe()) id: string,
+    @Param('id') id: string,
     @Body() data: UpdateUserDto
   ): Promise<ResponseDto<User>> {
     return { data: await this.userService.update(id, data) };
