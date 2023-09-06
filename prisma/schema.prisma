@@ -95,7 +95,7 @@ model UserActivity {
   timeId     String         @db.ObjectId
   times      ActivityTime   @relation(fields: [timeId], references: [id], onDelete: Cascade)
   activityId String         @db.ObjectId
-  activity   Activity       @relation(fields: [activityId], references: [id])
+  activity   Activity       @relation(fields: [activityId], references: [id], onDelete: Cascade)
   status     UserJoinStatus @default(REGISTERED)
   position   Position       @default(THANH_VIEN)
   createdAt  DateTime       @default(now())
