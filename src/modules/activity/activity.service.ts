@@ -55,7 +55,7 @@ export class ActivityService {
 
   async checkActivityNotDeleted(id: string): Promise<boolean> {
     const count = await this.prisma.activity.count({
-      where: { id, deletedAt: null },
+      where: { id, ...this.filterAllActivity },
     });
     if (count === 0)
       throw new HttpException(
