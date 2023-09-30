@@ -3,8 +3,8 @@ import { Group } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
+import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { EventService } from './../event/event.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
 
 @Injectable()
@@ -24,17 +24,17 @@ export class GroupService {
 
     return {
       data: await this.prisma.group.findMany({
-        where: { deleted_at: null },
+        where: { deletedAt: null },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: {
-          created_at: 'desc',
+          createdAt: 'desc',
         },
       }),
-      metadata: {
+      pagination: {
         totalPage: Math.ceil(
           (await this.prisma.group.count({
-            where: { deleted_at: null },
+            where: { deletedAt: null },
           })) / limit
         ),
       },
@@ -50,63 +50,63 @@ export class GroupService {
 
     return {
       data: await this.prisma.group.findMany({
-        where: { deleted_at: { not: null } },
+        where: { deletedAt: { not: null } },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: {
-          deleted_at: 'desc',
+          deletedAt: 'desc',
         },
       }),
-      metadata: {
+      pagination: {
         totalPage: Math.ceil(
           (await this.prisma.group.count({
-            where: { deleted_at: { not: null } },
+            where: { deletedAt: { not: null } },
           })) / limit
         ),
       },
     };
   }
 
-  async findOne(id: number): Promise<ResponseDto<Group>> {
+  async findOne(id: string): Promise<Group> {
     const group = await this.prisma.group.findUnique({
       where: { id },
     });
-    if (!group || group.deleted_at) {
+    if (!group || group.deletedAt) {
       throw new HttpException(httpErrors.GROUP_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-    return { data: group };
+    return group;
   }
 
-  async findOneDeleted(id: number): Promise<ResponseDto<Group>> {
+  async findOneDeleted(id: string): Promise<Group> {
     const group = await this.prisma.group.findUnique({
       where: { id },
     });
-    if (!group || !group.deleted_at) {
+    if (!group || !group.deletedAt) {
       throw new HttpException(httpErrors.GROUP_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-    return { data: group };
+    return group;
   }
 
-  async update(id: number, data: UpdateGroupDto): Promise<Group> {
+  async update(id: string, data: UpdateGroupDto): Promise<Group> {
     await this.findOne(id);
-    if (data.event_id) await this.eventService.findOne(data.event_id);
+    if (data.eventId) await this.eventService.findOne(data.eventId);
     return await this.prisma.group.update({ where: { id }, data });
   }
 
-  async softRemove(id: number): Promise<ResponseDto<MessageDto>> {
+  async softRemove(id: string): Promise<MessageDto> {
     await this.findOne(id);
     await this.prisma.group.update({
       where: { id },
-      data: { deleted_at: new Date() },
+      data: { deletedAt: new Date() },
     });
-    return { data: messageSuccess.GROUP_DELETE };
+    return messageSuccess.GROUP_DELETE;
   }
 
-  async restore(id: number): Promise<ResponseDto<Group>> {
+  async restore(id: string): Promise<Group> {
     await this.findOneDeleted(id);
     await this.prisma.group.update({
       where: { id },
-      data: { deleted_at: null },
+      data: { deletedAt: null },
     });
     return await this.findOne(id);
   }

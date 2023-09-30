@@ -16,6 +16,7 @@ import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
 import { ActivityService } from './activity.service';
 import {
+  ActivityResponse,
   ApproveDto,
   CreateActivityDto,
   GetMemberResponseDto,
@@ -32,15 +33,9 @@ export class ActivityController {
 
   @UseGuards(JwtGuard)
   @Get()
-  async findAll(@Query() pagination: PaginationDto): Promise<
-    ResponseDto<
-      Array<
-        Activity & {
-          times: Omit<ActivityTime, 'activity_id'>[];
-        }
-      >
-    >
-  > {
+  async findAll(
+    @Query() pagination: PaginationDto
+  ): Promise<ResponseDto<ActivityResponse[]>> {
     return await this.activityService.findAll(
       pagination.page,
       pagination.limit
@@ -53,7 +48,7 @@ export class ActivityController {
     ResponseDto<
       Array<
         Activity & {
-          times: Omit<ActivityTime, 'activity_id'>[];
+          times: Omit<ActivityTime, 'activityId'>[];
         }
       >
     >
@@ -72,91 +67,73 @@ export class ActivityController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
-    return await this.activityService.findOne(+id);
+  async findOne(
+    @Param('id') id: string
+  ): Promise<ResponseDto<ActivityResponse>> {
+    return { data: await this.activityService.findOne(id) };
   }
 
   @UseGuards(JwtGuard)
   @Get('member/:id')
   async getMember(
-    @Param('id') id: number
+    @Param('id') id: string
   ): Promise<ResponseDto<GetMemberResponseDto[]>> {
-    return await this.activityService.getMember(+id);
+    return { data: await this.activityService.getMember(id) };
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Get('trash/:id')
-  async findOneDeleted(@Param('id') id: number): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
-    return await this.activityService.findOneDeleted(+id);
+  async findOneDeleted(
+    @Param('id') id: string
+  ): Promise<ResponseDto<ActivityResponse>> {
+    return { data: await this.activityService.findOneDeleted(id) };
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Post()
-  async create(@Body() data: CreateActivityDto): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
-    return await this.activityService.create(data);
+  async create(
+    @Body() data: CreateActivityDto
+  ): Promise<ResponseDto<ActivityResponse>> {
+    return { data: await this.activityService.create(data) };
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() data: UpdateActivityDto
-  ): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
-    return await this.activityService.update(+id, data);
+  ): Promise<ResponseDto<ActivityResponse>> {
+    return { data: await this.activityService.update(id, data) };
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Delete(':id')
-  async softDelete(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.softDelete(+id);
+  async softDelete(@Param('id') id: string): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.activityService.softDelete(id) };
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Put('restore/:id')
-  async restore(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.restore(+id);
+  async restore(@Param('id') id: string): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.activityService.restore(id) };
   }
 
   @UseGuards(JwtGuard)
   @Post('register')
   async register(
-    @GetUser('id') userId: number,
+    @GetUser('id') userId: string,
     @Body() data: RegistryActivityDto
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.register(userId, data);
+    return { data: await this.activityService.register(userId, data) };
   }
 
   @UseGuards(JwtGuard)
   @Put('withdrawn/:id')
   async withdrawn(
-    @GetUser('id') userId: number,
-    @Param('id') timeId: number
+    @GetUser('id') userId: string,
+    @Param('id') timeId: string
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.withdrawn(userId, +timeId);
+    return { data: await this.activityService.withdrawn(userId, timeId) };
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
@@ -164,12 +141,12 @@ export class ActivityController {
   async approveUser(
     @Body() data: ApproveDto
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.approve(data);
+    return { data: await this.activityService.approve(data) };
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Post('reject')
   async rejectUser(@Body() data: ApproveDto): Promise<ResponseDto<MessageDto>> {
-    return await this.activityService.reject(data);
+    return { data: await this.activityService.reject(data) };
   }
 }

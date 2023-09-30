@@ -57,8 +57,8 @@ export class GroupController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<ResponseDto<Group>> {
-    return await this.groupService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<ResponseDto<Group>> {
+    return { data: await this.groupService.findOne(id) };
   }
 
   @Roles(
@@ -68,8 +68,8 @@ export class GroupController {
     Position.TRUONG_HANH_CHINH
   )
   @Get('trash/:id')
-  async findOneDeleted(@Param('id') id: number): Promise<ResponseDto<Group>> {
-    return await this.groupService.findOneDeleted(id);
+  async findOneDeleted(@Param('id') id: string): Promise<ResponseDto<Group>> {
+    return { data: await this.groupService.findOneDeleted(id) };
   }
 
   @Roles(
@@ -79,7 +79,7 @@ export class GroupController {
     Position.TRUONG_HANH_CHINH
   )
   @Put(':id')
-  async update(@Param('id') id: number, @Body() data: UpdateGroupDto) {
+  async update(@Param('id') id: string, @Body() data: UpdateGroupDto) {
     return await this.groupService.update(id, data);
   }
 
@@ -90,8 +90,8 @@ export class GroupController {
     Position.TRUONG_HANH_CHINH
   )
   @Delete(':id')
-  async softDelete(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
-    return await this.groupService.softRemove(id);
+  async softDelete(@Param('id') id: string): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.groupService.softRemove(id) };
   }
 
   @Roles(
@@ -101,7 +101,7 @@ export class GroupController {
     Position.TRUONG_HANH_CHINH
   )
   @Put('restore/:id')
-  async restore(@Param('id') id: number): Promise<ResponseDto<Group>> {
-    return await this.groupService.restore(id);
+  async restore(@Param('id') id: string): Promise<ResponseDto<Group>> {
+    return { data: await this.groupService.restore(id) };
   }
 }

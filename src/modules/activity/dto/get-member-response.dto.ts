@@ -1,15 +1,15 @@
-import { UserActivityStatus } from '@prisma/client';
+import { UserJoinStatus } from '@prisma/client';
 
 export interface Member {
-  id: number;
+  id: string;
   username: string;
   fullname: string;
   avatar: string | null;
-  status: UserActivityStatus;
+  status: UserJoinStatus;
 }
 
 export interface GetMemberResponseDto {
-  id: number;
+  id: string;
   name: string;
   member: Member[];
 }

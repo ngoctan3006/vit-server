@@ -11,11 +11,11 @@ export class CreateUserDto {
   hometown?: string;
   address?: string;
   school?: string;
-  student_id?: string;
+  studentId?: string;
   class?: string;
   cccd?: string;
-  date_join?: string | number;
-  date_out?: string | number;
+  dateJoin?: string | number;
+  dateOut?: string | number;
   gender?: Gender;
   position?: Position;
 }

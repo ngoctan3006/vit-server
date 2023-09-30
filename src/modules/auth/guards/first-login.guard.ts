@@ -6,10 +6,10 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Status } from '@prisma/client';
+import { UserStatus } from '@prisma/client';
 import { Request } from 'express';
 import { httpErrors } from 'src/shares/exception';
-import { UserService } from './../../user/user.service';
+import { UserService } from '../../user/user.service';
 
 @Injectable()
 export class FirstLoginGuard implements CanActivate {
@@ -31,9 +31,9 @@ export class FirstLoginGuard implements CanActivate {
     try {
       const payload = await this.jwtService.verifyAsync(token);
       const user = await this.userService.getUserInfoById(payload.id);
-      if (user.status === Status.BLOCKED)
+      if (user.status === UserStatus.BLOCKED)
         throw new HttpException(httpErrors.BLOCKED_USER, HttpStatus.FORBIDDEN);
-      if ((user.status = Status.ACTIVE))
+      if ((user.status = UserStatus.ACTIVE))
         throw new HttpException(httpErrors.ACTIVE_USER, HttpStatus.FORBIDDEN);
       req['user'] = user;
       return true;

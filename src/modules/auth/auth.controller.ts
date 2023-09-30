@@ -37,15 +37,15 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @Get('me')
-  async getMe(@GetUser('id') userId: number): Promise<ResponseDto<User>> {
-    return await this.authService.getMe(userId);
+  async getMe(@GetUser('id') userId: string): Promise<ResponseDto<User>> {
+    return { data: await this.authService.getMe(userId) };
   }
 
   @Post('signin')
   async signin(
     @Body() signinData: SigninDto
   ): Promise<ResponseDto<ResponseLoginDto>> {
-    return await this.authService.signin(signinData);
+    return { data: await this.authService.signin(signinData) };
   }
 
   @Roles(
@@ -56,8 +56,10 @@ export class AuthController {
   )
   @ApiBearerAuth()
   @Post('signup')
-  async signup(@Body() signupData: SignupDto) {
-    return await this.authService.signup(signupData);
+  async signup(
+    @Body() signupData: SignupDto
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.authService.signup(signupData) };
   }
 
   @Roles(
@@ -77,22 +79,22 @@ export class AuthController {
   async importMany(
     @UploadedFile() file: Express.Multer.File,
     @Query() { isSendMail }: IsSendMailDto
-  ) {
-    return await this.authService.importMany(file, isSendMail);
+  ): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.authService.importMany(file, isSendMail) };
   }
 
   @Post('refresh-token')
   async refreshToken(
     @Body() { refreshToken }: RefreshTokenDto
   ): Promise<ResponseDto<{ accessToken: string }>> {
-    return await this.authService.refreshToken(refreshToken);
+    return { data: await this.authService.refreshToken(refreshToken) };
   }
 
   @Post('request-reset-password')
   async requestResetPassword(
     @Body() data: RequestResetPasswordDto
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.authService.requestResetPassword(data);
+    return { data: await this.authService.requestResetPassword(data) };
   }
 
   @Post('token')
@@ -107,14 +109,14 @@ export class AuthController {
   async resetPassword(
     @Body() data: ResetPasswordDto
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.authService.resetPassword(data);
+    return { data: await this.authService.resetPassword(data) };
   }
 
   @ApiBearerAuth()
   @UseGuards(FirstLoginGuard)
   @Put('first-login')
   async firstLogin(
-    @GetUser('id') id: number,
+    @GetUser('id') id: string,
     @Body() data: ChangePasswordFirstLoginDto
   ): Promise<ResponseDto<MessageDto>> {
     return {

@@ -4,7 +4,6 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -41,6 +40,6 @@ export class CreateActivityDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsNumber()
-  event_id: number;
+  @IsString()
+  eventId: string;
 }

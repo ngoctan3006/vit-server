@@ -1,17 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ApproveDto {
   @ApiProperty()
-  @Transform(({ value }) => parseInt(value))
   @IsNotEmpty()
-  @IsNumber()
-  userId: number;
+  @IsString()
+  userId: string;
 
   @ApiProperty()
-  @Transform(({ value }) => parseInt(value))
   @IsNotEmpty()
-  @IsNumber()
-  timeId: number;
+  @IsString()
+  timeId: string;
 }

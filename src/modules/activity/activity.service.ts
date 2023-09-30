@@ -1,13 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Activity, ActivityTime, UserActivityStatus } from '@prisma/client';
+import { UserJoinStatus } from '@prisma/client';
 import * as moment from 'moment';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
 import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserService } from './../user/user.service';
+import { UserService } from '../user/user.service';
 import {
+  ActivityResponse,
   ApproveDto,
   CreateActivityDto,
   GetMemberResponseDto,
@@ -21,10 +22,12 @@ export class ActivityService {
   private readonly selectTimes: {
     id: boolean;
     name: boolean;
-    number_require: boolean;
-    start_time: boolean;
-    end_time: boolean;
+    numberRequire: boolean;
+    startTime: boolean;
+    endTime: boolean;
   };
+
+  private readonly filterAllActivity: { [key: string]: any };
 
   constructor(
     private readonly prisma: PrismaService,
@@ -34,15 +37,25 @@ export class ActivityService {
     this.selectTimes = {
       id: true,
       name: true,
-      number_require: true,
-      start_time: true,
-      end_time: true,
+      numberRequire: true,
+      startTime: true,
+      endTime: true,
+    };
+    this.filterAllActivity = {
+      OR: [
+        {
+          deletedAt: null,
+        },
+        {
+          deletedAt: { isSet: false },
+        },
+      ],
     };
   }
 
-  async checkActivityNotDeleted(id: number): Promise<boolean> {
+  async checkActivityNotDeleted(id: string): Promise<boolean> {
     const count = await this.prisma.activity.count({
-      where: { id, deleted_at: null },
+      where: { id, ...this.filterAllActivity },
     });
     if (count === 0)
       throw new HttpException(
@@ -52,13 +65,11 @@ export class ActivityService {
     return true;
   }
 
-  async checkActivityDeleted(id: number): Promise<boolean> {
+  async checkActivityDeleted(id: string): Promise<boolean> {
     const count = await this.prisma.activity.count({
       where: {
         id,
-        deleted_at: {
-          not: null,
-        },
+        deletedAt: { not: null },
       },
     });
     if (count === 0)
@@ -69,70 +80,57 @@ export class ActivityService {
     return true;
   }
 
-  async create(createActivityDto: CreateActivityDto): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
+  async create(
+    createActivityDto: CreateActivityDto
+  ): Promise<ActivityResponse> {
     const { times, ...data } = createActivityDto;
-    if (data.event_id) await this.eventService.findOne(data.event_id);
-    let activity_id: number;
+    if (data.eventId) await this.eventService.findOne(data.eventId);
+    let activityId: string;
     await this.prisma.$transaction(async (transactionClient) => {
       const activity = await transactionClient.activity.create({
         data,
-        select: {
-          id: true,
-        },
+        select: { id: true },
       });
-      activity_id = activity.id;
+      activityId = activity.id;
       await transactionClient.activityTime.createMany({
         data: times.map((time) => ({
-          activity_id,
+          activityId,
           ...time,
         })),
       });
     });
-    return await this.findOne(activity_id);
+    return await this.findOne(activityId);
   }
 
   async findAll(
     page: number,
     limit: number
-  ): Promise<
-    ResponseDto<
-      Array<
-        Activity & {
-          times: Omit<ActivityTime, 'activity_id'>[];
-        }
-      >
-    >
-  > {
+  ): Promise<ResponseDto<ActivityResponse[]>> {
     if (isNaN(page) || isNaN(limit))
       throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.activity.findMany({
-        where: { deleted_at: null },
+        where: this.filterAllActivity,
         skip: (page - 1) * limit,
         take: limit,
         include: {
           times: {
             select: this.selectTimes,
             orderBy: {
-              start_time: 'asc',
+              startTime: 'asc',
             },
           },
         },
         orderBy: {
-          created_at: 'desc',
+          createdAt: 'desc',
         },
       }),
-      metadata: {
+      pagination: {
         totalPage: Math.ceil(
-          (await this.prisma.activity.count({ where: { deleted_at: null } })) /
-            limit
+          (await this.prisma.activity.count({
+            where: this.filterAllActivity,
+          })) / limit
         ),
       },
     };
@@ -141,46 +139,30 @@ export class ActivityService {
   async findAllDeleted(
     page: number,
     limit: number
-  ): Promise<
-    ResponseDto<
-      Array<
-        Activity & {
-          times: Omit<ActivityTime, 'activity_id'>[];
-        }
-      >
-    >
-  > {
+  ): Promise<ResponseDto<ActivityResponse[]>> {
     if (isNaN(page) || isNaN(limit))
       throw new HttpException(httpErrors.QUERY_INVALID, HttpStatus.BAD_REQUEST);
 
     return {
       data: await this.prisma.activity.findMany({
         where: {
-          NOT: {
-            deleted_at: null,
-          },
+          NOT: { deletedAt: null },
         },
         skip: (page - 1) * limit,
         take: limit,
         include: {
           times: {
             select: this.selectTimes,
-            orderBy: {
-              start_time: 'asc',
-            },
+            orderBy: { startTime: 'asc' },
           },
         },
-        orderBy: {
-          deleted_at: 'desc',
-        },
+        orderBy: { deletedAt: 'desc' },
       }),
-      metadata: {
+      pagination: {
         totalPage: Math.ceil(
           (await this.prisma.activity.count({
             where: {
-              NOT: {
-                deleted_at: null,
-              },
+              NOT: { deletedAt: null },
             },
           })) / limit
         ),
@@ -188,45 +170,37 @@ export class ActivityService {
     };
   }
 
-  async findOne(id: number): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
+  async findOne(id: string): Promise<ActivityResponse> {
     const activity = await this.prisma.activity.findUnique({
       where: { id },
       include: {
         times: {
           select: this.selectTimes,
-          orderBy: {
-            start_time: 'asc',
-          },
+          orderBy: { startTime: 'asc' },
         },
       },
     });
-    if (!activity || activity.deleted_at)
+    if (!activity || activity.deletedAt)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_FOUND,
         HttpStatus.NOT_FOUND
       );
-    return { data: activity };
+    return activity;
   }
 
-  async getMember(id: number): Promise<ResponseDto<GetMemberResponseDto[]>> {
+  async getMember(id: string): Promise<GetMemberResponseDto[]> {
     const activity = await this.prisma.activity.findUnique({
       where: { id },
       include: {
         times: {
           select: this.selectTimes,
           orderBy: {
-            start_time: 'asc',
+            startTime: 'asc',
           },
         },
       },
     });
-    if (!activity || activity.deleted_at)
+    if (!activity || activity.deletedAt)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_FOUND,
         HttpStatus.NOT_FOUND
@@ -235,7 +209,7 @@ export class ActivityService {
     const activityMember: GetMemberResponseDto[] = [];
     for (const time of activity.times) {
       const member = await this.prisma.userActivity.findMany({
-        where: { time_id: time.id },
+        where: { timeId: time.id },
         include: {
           user: {
             select: {
@@ -257,53 +231,41 @@ export class ActivityService {
       });
     }
 
-    return { data: activityMember };
+    return activityMember;
   }
 
-  async findOneDeleted(id: number): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
+  async findOneDeleted(id: string): Promise<ActivityResponse> {
     const activity = await this.prisma.activity.findUnique({
       where: { id },
       include: {
         times: {
           select: this.selectTimes,
           orderBy: {
-            start_time: 'asc',
+            startTime: 'asc',
           },
         },
       },
     });
-    if (!activity || !activity.deleted_at)
+    if (!activity || !activity.deletedAt)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_FOUND,
         HttpStatus.NOT_FOUND
       );
-    return { data: activity };
+    return activity;
   }
 
   async update(
-    id: number,
+    id: string,
     updateActivityDto: UpdateActivityDto
-  ): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activity_id'>[];
-      }
-    >
-  > {
-    const { data: activity } = await this.findOne(id);
+  ): Promise<ActivityResponse> {
+    const activity = await this.findOne(id);
     const timesId = activity.times.map(({ id }) => id);
     const { times, ...data } = updateActivityDto;
     const timesIdToUpdate = times.map(({ id }) => id);
 
     await this.checkTimesInActivity(
       id,
-      timesIdToUpdate.filter((id) => id !== 0)
+      timesIdToUpdate.filter((id) => id !== '0')
     );
     await this.prisma.$transaction(async (transactionClient) => {
       await transactionClient.activity.update({
@@ -312,7 +274,7 @@ export class ActivityService {
       });
       for (const time of times) {
         const { id: timeId, ...data } = time;
-        if (timeId !== 0)
+        if (timeId !== '0')
           await transactionClient.activityTime.update({
             where: { id: timeId },
             data,
@@ -320,7 +282,7 @@ export class ActivityService {
         else
           await transactionClient.activityTime.create({
             data: {
-              activity_id: id,
+              activityId: id,
               ...data,
             },
           });
@@ -336,30 +298,28 @@ export class ActivityService {
     return await this.findOne(id);
   }
 
-  async softDelete(id: number): Promise<ResponseDto<MessageDto>> {
+  async softDelete(id: string): Promise<MessageDto> {
     await this.checkActivityNotDeleted(id);
     await this.prisma.activity.update({
       where: { id },
-      data: { deleted_at: new Date() },
+      data: { deletedAt: new Date() },
     });
 
-    return { data: messageSuccess.ACTIVITY_DELETE };
+    return messageSuccess.ACTIVITY_DELETE;
   }
 
-  async restore(id: number): Promise<ResponseDto<MessageDto>> {
+  async restore(id: string): Promise<MessageDto> {
     await this.checkActivityDeleted(id);
     await this.prisma.activity.update({
       where: { id },
-      data: { deleted_at: null },
+      data: { deletedAt: null },
     });
 
-    return {
-      data: messageSuccess.ACTIVITY_RESTORED,
-    };
+    return messageSuccess.ACTIVITY_RESTORED;
   }
 
-  async checkTimesInActivity(id: number, times: number[]): Promise<true> {
-    const { data: activity } = await this.findOne(id);
+  async checkTimesInActivity(id: string, times: string[]): Promise<true> {
+    const activity = await this.findOne(id);
     const timesId = activity.times.map(({ id }) => id);
 
     if (times.length === 0 || !times.every((item) => timesId.includes(item))) {
@@ -372,12 +332,12 @@ export class ActivityService {
   }
 
   async register(
-    userId: number,
+    userId: string,
     data: RegistryActivityDto
-  ): Promise<ResponseDto<MessageDto>> {
+  ): Promise<MessageDto> {
     const { timeId, activityId } = data;
     await this.userService.checkUserExisted(userId);
-    const { data: activity } = await this.findOne(activityId);
+    const activity = await this.findOne(activityId);
     if (Date.now() > new Date(activity.deadline).getTime())
       throw new HttpException(
         httpErrors.ACTIVITY_EXPIRED,
@@ -390,16 +350,13 @@ export class ActivityService {
       );
     const registered = await this.prisma.userActivity.findUnique({
       where: {
-        user_id_time_id: {
-          user_id: userId,
-          time_id: timeId,
-        },
+        userId_timeId: { userId, timeId },
       },
     });
     if (registered) {
       if (
-        registered.status === UserActivityStatus.REGISTERED ||
-        registered.status === UserActivityStatus.ACCEPTED
+        registered.status === UserJoinStatus.REGISTERED ||
+        registered.status === UserJoinStatus.ACCEPTED
       ) {
         throw new HttpException(
           httpErrors.ACTIVITY_REGISTERED,
@@ -408,129 +365,103 @@ export class ActivityService {
       } else {
         await this.prisma.userActivity.update({
           where: {
-            user_id_time_id: {
-              user_id: userId,
-              time_id: timeId,
-            },
+            userId_timeId: { userId, timeId },
           },
           data: {
-            status: UserActivityStatus.REGISTERED,
+            status: UserJoinStatus.REGISTERED,
           },
         });
       }
     } else {
       await this.prisma.userActivity.create({
-        data: { user_id: userId, time_id: timeId },
+        data: { userId, timeId, activityId },
       });
     }
 
-    return {
-      data: messageSuccess.ACTIVITY_REGISTER,
-    };
+    return messageSuccess.ACTIVITY_REGISTER;
   }
 
-  async withdrawn(
-    userId: number,
-    timeId: number
-  ): Promise<ResponseDto<MessageDto>> {
+  async withdrawn(userId: string, timeId: string): Promise<MessageDto> {
     await this.userService.checkUserExisted(userId);
     const isRegistered = await this.prisma.userActivity.findUnique({
       where: {
-        user_id_time_id: {
-          user_id: userId,
-          time_id: timeId,
-        },
+        userId_timeId: { userId, timeId },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
+    if (!isRegistered || isRegistered.status === UserJoinStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
       );
-    if (isRegistered.status === UserActivityStatus.REJECTED)
+    if (isRegistered.status === UserJoinStatus.REJECTED)
       throw new HttpException(
         httpErrors.ACTIVITY_REJECTED,
         HttpStatus.BAD_REQUEST
       );
     await this.prisma.userActivity.update({
       where: {
-        user_id_time_id: {
-          user_id: userId,
-          time_id: timeId,
-        },
+        userId_timeId: { userId, timeId },
       },
-      data: { status: UserActivityStatus.WITHDRAWN },
+      data: { status: UserJoinStatus.WITHDRAWN },
     });
 
-    return { data: messageSuccess.ACTIVITY_WITHDRAWN };
+    return messageSuccess.ACTIVITY_WITHDRAWN;
   }
 
-  async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+  async approve(data: ApproveDto): Promise<MessageDto> {
     const { timeId, userId } = data;
     await this.userService.checkUserExisted(userId);
     const isRegistered = await this.prisma.userActivity.findUnique({
       where: {
-        user_id_time_id: {
-          user_id: userId,
-          time_id: timeId,
-        },
+        userId_timeId: { userId, timeId },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
+    if (!isRegistered || isRegistered.status === UserJoinStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_USER_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
       );
-    else if (isRegistered.status === UserActivityStatus.ACCEPTED)
+    else if (isRegistered.status === UserJoinStatus.ACCEPTED)
       throw new HttpException(
         httpErrors.ACTIVITY_ACCEPTED,
         HttpStatus.BAD_REQUEST
       );
     await this.prisma.userActivity.update({
       where: {
-        user_id_time_id: {
-          user_id: userId,
-          time_id: timeId,
-        },
+        userId_timeId: { userId, timeId },
       },
-      data: { status: UserActivityStatus.ACCEPTED },
+      data: { status: UserJoinStatus.ACCEPTED },
     });
 
-    return { data: messageSuccess.ACTIVITY_APPROVE };
+    return messageSuccess.ACTIVITY_APPROVE;
   }
 
-  async reject(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+  async reject(data: ApproveDto): Promise<MessageDto> {
     const { timeId, userId } = data;
     await this.userService.checkUserExisted(userId);
     const isRegistered = await this.prisma.userActivity.findUnique({
       where: {
-        user_id_time_id: {
-          user_id: userId,
-          time_id: timeId,
-        },
+        userId_timeId: { userId, timeId },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
+    if (!isRegistered || isRegistered.status === UserJoinStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.ACTIVITY_USER_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
       );
-    else if (isRegistered.status === UserActivityStatus.REJECTED)
+    else if (isRegistered.status === UserJoinStatus.REJECTED)
       throw new HttpException(
         httpErrors.ACTIVITY_REGISTERED,
         HttpStatus.BAD_REQUEST
       );
     await this.prisma.userActivity.update({
       where: {
-        user_id_time_id: {
-          user_id: userId,
-          time_id: timeId,
-        },
+        userId_timeId: { userId, timeId },
       },
-      data: { status: UserActivityStatus.REJECTED },
+      data: { status: UserJoinStatus.REJECTED },
     });
 
-    return { data: messageSuccess.ACTIVITY_REJECT };
+    return messageSuccess.ACTIVITY_REJECT;
   }
 
   async getTopMember() {
@@ -540,7 +471,7 @@ export class ActivityService {
     const topMember: TopMember[] = [];
     const activities = await this.prisma.activity.findMany({
       where: {
-        deleted_at: null,
+        deletedAt: null,
         deadline: {
           gte: startOfMonth,
           lte: endOfMonth,
@@ -549,16 +480,16 @@ export class ActivityService {
     });
     const activitiesIds = activities.map((act) => act.id);
     for (const id of activitiesIds) {
-      const { data: activityMember } = await this.getMember(id);
+      const activityMember = await this.getMember(id);
       for (const { member } of activityMember) {
         for (const mem of member) {
           const isExisted = topMember.findIndex((item) => item.id === mem.id);
           if (isExisted !== -1) {
-            if (mem.status === UserActivityStatus.ACCEPTED) {
+            if (mem.status === UserJoinStatus.ACCEPTED) {
               topMember[isExisted].count += 1;
             }
           } else {
-            if (mem.status === UserActivityStatus.ACCEPTED) {
+            if (mem.status === UserJoinStatus.ACCEPTED) {
               delete mem.status;
               topMember.push({
                 ...mem,

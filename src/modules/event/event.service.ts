@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Event, UserActivityStatus } from '@prisma/client';
+import { Event, UserJoinStatus } from '@prisma/client';
 import { MessageDto, ResponseDto } from 'src/shares/dto';
 import { httpErrors } from 'src/shares/exception';
 import { messageSuccess } from 'src/shares/message';
@@ -14,18 +14,9 @@ export class EventService {
     private readonly userService: UserService
   ) {}
 
-  // async create(data: CreateEventDto): Promise<ResponseDto<Event>> {
-  //   const { start_date, end_date, ...rest } = data;
-  //   return {
-  //     data: await this.prisma.event.create({
-  //       data: {
-  //         ...rest,
-  //         start_date: new Date(start_date),
-  //         end_date: new Date(end_date),
-  //       },
-  //     }),
-  //   };
-  // }
+  async create(data: CreateEventDto): Promise<Event> {
+    return await this.prisma.event.create({ data });
+  }
 
   async findAll(page: number, limit: number): Promise<ResponseDto<Event[]>> {
     if (isNaN(page) || isNaN(limit))
@@ -33,13 +24,13 @@ export class EventService {
 
     return {
       data: await this.prisma.event.findMany({
-        where: { deleted_at: null },
+        where: { deletedAt: null },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      metadata: {
+      pagination: {
         totalPage: Math.ceil(
-          (await this.prisma.event.count({ where: { deleted_at: null } })) /
+          (await this.prisma.event.count({ where: { deletedAt: null } })) /
             limit
         ),
       },
@@ -56,101 +47,83 @@ export class EventService {
     return {
       data: await this.prisma.event.findMany({
         where: {
-          deleted_at: { not: null },
+          deletedAt: { not: null },
         },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: {
-          deleted_at: 'desc',
-        },
+        orderBy: { deletedAt: 'desc' },
       }),
-      metadata: {
+      pagination: {
         totalPage: Math.ceil(
           (await this.prisma.event.count({
-            where: {
-              deleted_at: { not: null },
-            },
+            where: { deletedAt: { not: null } },
           })) / limit
         ),
       },
     };
   }
 
-  async findOne(id: number): Promise<ResponseDto<Event>> {
+  async findOne(id: string): Promise<Event> {
     const event = await this.prisma.event.findUnique({ where: { id } });
-    if (!event || event.deleted_at)
+    if (!event || event.deletedAt)
       throw new HttpException(httpErrors.EVENT_NOT_FOUND, HttpStatus.NOT_FOUND);
-    return { data: event };
+    return event;
   }
 
-  async findOneDeleted(id: number): Promise<ResponseDto<Event>> {
+  async findOneDeleted(id: string): Promise<Event> {
     const event = await this.prisma.event.findUnique({ where: { id } });
-    if (!event || !event.deleted_at)
+    if (!event || !event.deletedAt)
       throw new HttpException(httpErrors.EVENT_NOT_FOUND, HttpStatus.NOT_FOUND);
-    return { data: event };
+    return event;
   }
 
-  // async update(id: number, data: UpdateEventDto): Promise<ResponseDto<Event>> {
-  //   await this.findOne(id);
-  //   const { start_date, end_date, ...rest } = data;
-  //   const { data: event } = await this.findOne(id);
-
-  //   await this.prisma.event.update({
-  //     where: { id },
-  //     data: {
-  //       ...rest,
-  //       start_date: start_date ? new Date(start_date) : event.start_date,
-  //       end_date: end_date ? new Date(end_date) : event.end_date,
-  //     },
-  //   });
-
-  //   return await this.findOne(id);
-  // }
-
-  async softDelete(id: number): Promise<ResponseDto<MessageDto>> {
+  async update(id: string, data: UpdateEventDto): Promise<Event> {
     await this.findOne(id);
+    const event = await this.findOne(id);
+
     await this.prisma.event.update({
       where: { id },
-      data: { deleted_at: new Date() },
-    });
-
-    return { data: messageSuccess.EVENT_DELETE };
-  }
-
-  async restore(id: number): Promise<ResponseDto<Event>> {
-    await this.findOneDeleted(id);
-    await this.prisma.event.update({
-      where: { id },
-      data: { deleted_at: null },
+      data,
     });
 
     return await this.findOne(id);
   }
 
-  async register(
-    userId: number,
-    eventId: number
-  ): Promise<ResponseDto<MessageDto>> {
+  async softDelete(id: string): Promise<MessageDto> {
+    await this.findOne(id);
+    await this.prisma.event.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+
+    return messageSuccess.EVENT_DELETE;
+  }
+
+  async restore(id: string): Promise<Event> {
+    await this.findOneDeleted(id);
+    await this.prisma.event.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+
+    return await this.findOne(id);
+  }
+
+  async register(userId: string, eventId: string): Promise<MessageDto> {
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userEvent.findUnique({
       where: {
-        user_id_event_id: {
-          user_id: userId,
-          event_id: eventId,
-        },
+        userId_eventId: { userId, eventId },
       },
     });
     if (isRegistered) {
-      if (isRegistered.status === UserActivityStatus.WITHDRAWN)
+      if (isRegistered.status === UserJoinStatus.WITHDRAWN)
         await this.prisma.userEvent.update({
           where: {
-            user_id_event_id: {
-              user_id: userId,
-              event_id: eventId,
-            },
+            userId_eventId: { userId, eventId },
           },
-          data: { status: UserActivityStatus.REGISTERED },
+          data: { status: UserJoinStatus.REGISTERED },
         });
       else
         throw new HttpException(
@@ -159,79 +132,61 @@ export class EventService {
         );
     } else
       await this.prisma.userEvent.create({
-        data: {
-          user_id: userId,
-          event_id: eventId,
-        },
+        data: { userId, eventId },
       });
 
-    return { data: messageSuccess.EVENT_REGISTER };
+    return messageSuccess.EVENT_REGISTER;
   }
 
-  async cancelRegister(
-    userId: number,
-    eventId: number
-  ): Promise<ResponseDto<MessageDto>> {
+  async cancelRegister(userId: string, eventId: string): Promise<MessageDto> {
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userEvent.findUnique({
       where: {
-        user_id_event_id: {
-          user_id: userId,
-          event_id: eventId,
-        },
+        userId_eventId: { userId, eventId },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
+    if (!isRegistered || isRegistered.status === UserJoinStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.EVENT_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
       );
     await this.prisma.userEvent.update({
       where: {
-        user_id_event_id: {
-          user_id: userId,
-          event_id: eventId,
-        },
+        userId_eventId: { userId, eventId },
       },
-      data: { status: UserActivityStatus.WITHDRAWN },
+      data: { status: UserJoinStatus.WITHDRAWN },
     });
 
-    return { data: messageSuccess.EVENT_CANCEL };
+    return messageSuccess.EVENT_CANCEL;
   }
 
-  async approve(data: ApproveDto): Promise<ResponseDto<MessageDto>> {
+  async approve(data: ApproveDto): Promise<MessageDto> {
     const { eventId, userId } = data;
     await this.findOne(eventId);
     await this.userService.getUserInfoById(userId);
     const isRegistered = await this.prisma.userEvent.findUnique({
       where: {
-        user_id_event_id: {
-          user_id: userId,
-          event_id: eventId,
-        },
+        userId_eventId: { userId, eventId },
       },
     });
-    if (!isRegistered || isRegistered.status === UserActivityStatus.WITHDRAWN)
+    if (!isRegistered || isRegistered.status === UserJoinStatus.WITHDRAWN)
       throw new HttpException(
         httpErrors.EVENT_USER_NOT_REGISTERED,
         HttpStatus.BAD_REQUEST
       );
-    else if (isRegistered.status === UserActivityStatus.ACCEPTED)
+    else if (isRegistered.status === UserJoinStatus.ACCEPTED)
       throw new HttpException(
         httpErrors.EVENT_ACCEPTED,
         HttpStatus.BAD_REQUEST
       );
     await this.prisma.userEvent.update({
       where: {
-        user_id_event_id: {
-          user_id: userId,
-          event_id: eventId,
-        },
+        userId_eventId: { userId, eventId },
       },
-      data: { status: UserActivityStatus.ACCEPTED },
+      data: { status: UserJoinStatus.ACCEPTED },
     });
 
-    return { data: messageSuccess.EVENT_APPROVE };
+    return messageSuccess.EVENT_APPROVE;
   }
 }

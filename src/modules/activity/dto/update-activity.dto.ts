@@ -1,11 +1,6 @@
-import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsOptional,
-  ValidateNested,
-} from 'class-validator';
+import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
 import { ActivityTimeUpdateDto, CreateActivityDto } from './';
 
 export class UpdateActivityDto extends OmitType(CreateActivityDto, ['times']) {

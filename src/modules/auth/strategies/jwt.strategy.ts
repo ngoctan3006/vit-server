@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Status } from '@prisma/client';
+import { UserStatus } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from 'src/modules/user/user.service';
 import { EnvConstant } from 'src/shares/constants';
@@ -31,10 +31,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         HttpStatus.UNAUTHORIZED
       );
     }
-    if (user.status === Status.BLOCKED) {
+    if (user.status === UserStatus.BLOCKED) {
       throw new HttpException(httpErrors.BLOCKED_USER, HttpStatus.FORBIDDEN);
     }
-    if (user.status === Status.INACTIVE) {
+    if (user.status === UserStatus.INACTIVE) {
       throw new HttpException(httpErrors.INACTIVE_USER, HttpStatus.FORBIDDEN);
     }
     delete user.password;

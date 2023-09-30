@@ -1,14 +1,20 @@
 import { Position } from '@prisma/client';
-import { removeAccents } from '../../../shares/utils';
+import { removeAccents } from 'src/shares/utils';
 
 export const getPosition = (position?: string): Position => {
-  if (!position) return Position.MEMBER;
+  if (!position) return Position.THANH_VIEN;
   const rmAc = removeAccents(position).toLowerCase();
   switch (rmAc) {
+    case 'admin':
+      return Position.ADMIN;
     case 'doi truong':
       return Position.DOI_TRUONG;
     case 'doi pho':
       return Position.DOI_PHO;
+    case 'mang truong':
+      return Position.MANG_TRUONG;
+    case 'mang pho':
+      return Position.MANG_PHO;
     case 'truong mang phong trao':
       return Position.TRUONG_PHONG_TRAO;
     case 'truong mang hanh chinh':
@@ -25,6 +31,8 @@ export const getPosition = (position?: string): Position => {
       return Position.PHO_HAU_CAN;
     case 'pho mang truyen thong':
       return Position.PHO_TRUYEN_THONG;
+    case 'chu nhiem':
+      return Position.CHU_NHIEM;
     case 'chu nhiem vit dancer':
       return Position.CN_DANCER;
     case 'chu nhiem vit media':
@@ -35,7 +43,11 @@ export const getPosition = (position?: string): Position => {
       return Position.NHOM_TRUONG;
     case 'nhom pho':
       return Position.NHOM_PHO;
+    case 'out':
+      return Position.OUT;
+    case 'leader':
+      return Position.LEADER;
     default:
-      return Position.MEMBER;
+      return Position.THANH_VIEN;
   }
 };

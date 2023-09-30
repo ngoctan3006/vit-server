@@ -1,11 +1,8 @@
 import {
   Body,
   Controller,
-  FileTypeValidator,
   Get,
   Param,
-  ParseFilePipe,
-  ParseIntPipe,
   Put,
   Query,
   UploadedFile,
@@ -44,16 +41,14 @@ export class UserController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async getUserById(
-    @Param('id', new ParseIntPipe()) id: number
-  ): Promise<ResponseDto<User>> {
+  async getUserById(@Param('id') id: string): Promise<ResponseDto<User>> {
     return { data: await this.userService.getUserInfoById(id) };
   }
 
   @UseGuards(JwtGuard)
   @Put('password')
   async changePassword(
-    @GetUser('id') id: number,
+    @GetUser('id') id: string,
     @Body() data: ChangePasswordDto
   ): Promise<ResponseDto<MessageDto>> {
     return { data: await this.userService.changePassword(id, data) };
@@ -68,16 +63,9 @@ export class UserController {
     type: FileUploadDto,
   })
   async changeAvatar(
-    @GetUser('id') id: number,
+    @GetUser('id') id: string,
     @UploadedFile()
-    file: // new ParseFilePipe({
-    //   validators: [
-    //     new FileTypeValidator({
-    //       fileType: /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/,
-    //     }),
-    //   ],
-    // })
-    Express.Multer.File
+    file: Express.Multer.File
   ): Promise<ResponseDto<User>> {
     return { data: await this.userService.changeAvatar(id, file) };
   }
@@ -85,10 +73,10 @@ export class UserController {
   @UseGuards(JwtGuard)
   @Put('profile')
   async updateProfile(
-    @GetUser('id') id: number,
+    @GetUser('id') id: string,
     @Body() data: UpdateUserDto
   ): Promise<ResponseDto<User>> {
-    const { fullname, date_join, date_out, gender, status, position, ...rest } =
+    const { fullname, dateJoin, dateOut, gender, status, position, ...rest } =
       data;
     return { data: await this.userService.update(id, rest) };
   }
@@ -96,7 +84,7 @@ export class UserController {
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.TRUONG_HANH_CHINH)
   @Put('update-info/:id')
   async adminUpdateUserInfo(
-    @Param('id', new ParseIntPipe()) id: number,
+    @Param('id') id: string,
     @Body() data: UpdateUserDto
   ): Promise<ResponseDto<User>> {
     return { data: await this.userService.update(id, data) };

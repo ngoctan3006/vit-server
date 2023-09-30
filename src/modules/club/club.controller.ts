@@ -47,31 +47,31 @@ export class ClubController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<ResponseDto<Club>> {
+  async findOne(@Param('id') id: string): Promise<ResponseDto<Club>> {
     return await this.clubService.findOne(id);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Get('trash/:id')
-  async findOneDeleted(@Param('id') id: number): Promise<ResponseDto<Club>> {
+  async findOneDeleted(@Param('id') id: string): Promise<ResponseDto<Club>> {
     return await this.clubService.findOneDeleted(id);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Put(':id')
-  async update(@Param('id') id: number, @Body() data: UpdateClubDto) {
+  async update(@Param('id') id: string, @Body() data: UpdateClubDto) {
     return await this.clubService.update(id, data);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Delete(':id')
-  async softDelete(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
+  async softDelete(@Param('id') id: string): Promise<ResponseDto<MessageDto>> {
     return await this.clubService.softRemove(id);
   }
 
   @Roles(Position.ADMIN, Position.DOI_TRUONG, Position.DOI_PHO)
   @Put('restore/:id')
-  async restore(@Param('id') id: number): Promise<ResponseDto<Club>> {
+  async restore(@Param('id') id: string): Promise<ResponseDto<Club>> {
     return await this.clubService.restore(id);
   }
 }

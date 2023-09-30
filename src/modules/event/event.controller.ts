@@ -23,16 +23,16 @@ import { EventService } from './event.service';
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  // @Roles(
-  //   Position.ADMIN,
-  //   Position.DOI_TRUONG,
-  //   Position.DOI_PHO,
-  //   Position.TRUONG_HANH_CHINH
-  // )
-  // @Post()
-  // async create(@Body() data: CreateEventDto): Promise<ResponseDto<Event>> {
-  //   return await this.eventService.create(data);
-  // }
+  @Roles(
+    Position.ADMIN,
+    Position.DOI_TRUONG,
+    Position.DOI_PHO,
+    Position.TRUONG_HANH_CHINH
+  )
+  @Post()
+  async create(@Body() data: CreateEventDto): Promise<ResponseDto<Event>> {
+    return { data: await this.eventService.create(data) };
+  }
 
   @UseGuards(JwtGuard)
   @Get()
@@ -57,8 +57,8 @@ export class EventController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<ResponseDto<Event>> {
-    return await this.eventService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<ResponseDto<Event>> {
+    return { data: await this.eventService.findOne(id) };
   }
 
   @Roles(
@@ -68,8 +68,8 @@ export class EventController {
     Position.TRUONG_HANH_CHINH
   )
   @Get('trash/:id')
-  async findOneDeleted(@Param('id') id: number): Promise<ResponseDto<Event>> {
-    return await this.eventService.findOneDeleted(+id);
+  async findOneDeleted(@Param('id') id: string): Promise<ResponseDto<Event>> {
+    return { data: await this.eventService.findOneDeleted(id) };
   }
 
   @Roles(
@@ -78,13 +78,14 @@ export class EventController {
     Position.DOI_PHO,
     Position.TRUONG_HANH_CHINH
   )
-  // @Put(':id')
-  // async update(
-  //   @Param('id') id: number,
-  //   @Body() data: UpdateEventDto
-  // ): Promise<ResponseDto<Event>> {
-  //   return await this.eventService.update(+id, data);
-  // }
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() data: UpdateEventDto
+  ): Promise<ResponseDto<Event>> {
+    return { data: await this.eventService.update(id, data) };
+  }
+
   @Roles(
     Position.ADMIN,
     Position.DOI_TRUONG,
@@ -92,8 +93,8 @@ export class EventController {
     Position.TRUONG_HANH_CHINH
   )
   @Delete(':id')
-  async softDelete(@Param('id') id: number): Promise<ResponseDto<MessageDto>> {
-    return await this.eventService.softDelete(+id);
+  async softDelete(@Param('id') id: string): Promise<ResponseDto<MessageDto>> {
+    return { data: await this.eventService.softDelete(id) };
   }
 
   @Roles(
@@ -103,26 +104,26 @@ export class EventController {
     Position.TRUONG_HANH_CHINH
   )
   @Put('restore/:id')
-  async restore(@Param('id') id: number): Promise<ResponseDto<Event>> {
-    return await this.eventService.restore(+id);
+  async restore(@Param('id') id: string): Promise<ResponseDto<Event>> {
+    return { data: await this.eventService.restore(id) };
   }
 
   @UseGuards(JwtGuard)
   @Put('register/:id')
   async register(
-    @GetUser('id') userId: number,
-    @Param('id') eventId: number
+    @GetUser('id') userId: string,
+    @Param('id') eventId: string
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.eventService.register(userId, +eventId);
+    return { data: await this.eventService.register(userId, eventId) };
   }
 
   @UseGuards(JwtGuard)
   @Put('cancel/:id')
   async cancelRegister(
-    @GetUser('id') userId: number,
-    @Param('id') eventId: number
+    @GetUser('id') userId: string,
+    @Param('id') eventId: string
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.eventService.cancelRegister(userId, +eventId);
+    return { data: await this.eventService.cancelRegister(userId, eventId) };
   }
 
   @Roles(
@@ -135,6 +136,6 @@ export class EventController {
   async approveUser(
     @Body() data: ApproveDto
   ): Promise<ResponseDto<MessageDto>> {
-    return await this.eventService.approve(data);
+    return { data: await this.eventService.approve(data) };
   }
 }

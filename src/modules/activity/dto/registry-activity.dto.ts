@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class RegistryActivityDto {
   @ApiProperty()
   @IsNotEmpty()
-  @IsNumber()
-  timeId: number;
+  @IsString()
+  timeId: string;
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsNumber()
-  activityId: number;
+  @IsString()
+  activityId: string;
 }

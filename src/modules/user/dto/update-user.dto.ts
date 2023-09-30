@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender, Position, Status } from '@prisma/client';
+import { Gender, Position, UserStatus } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
 
@@ -53,7 +53,7 @@ export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  student_id?: string;
+  studentId?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -68,22 +68,22 @@ export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_join?: string;
+  dateJoin?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_out?: string;
+  dateOut?: string;
 
   @ApiProperty({ required: false, enum: Gender })
   @IsOptional()
   @IsString()
   gender?: Gender;
 
-  @ApiProperty({ required: false, enum: Status })
+  @ApiProperty({ required: false, enum: UserStatus })
   @IsOptional()
   @IsString()
-  status?: Status;
+  status?: UserStatus;
 
   @ApiProperty({ required: false, enum: Position })
   @IsOptional()

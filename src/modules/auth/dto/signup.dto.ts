@@ -55,7 +55,7 @@ export class SignupDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  student_id: string;
+  studentId: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -70,12 +70,12 @@ export class SignupDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_join: string | number;
+  dateJoin: string | number;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  date_out: string | number;
+  dateOut: string | number;
 
   @ApiProperty({ required: false, enum: Gender })
   @IsOptional()
