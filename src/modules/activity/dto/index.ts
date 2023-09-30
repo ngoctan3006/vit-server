@@ -1,3 +1,4 @@
+export * from './activity-response.dto';
 export * from './activity-time-update.dto';
 export * from './activity-time.dto';
 export * from './approve.dto';
