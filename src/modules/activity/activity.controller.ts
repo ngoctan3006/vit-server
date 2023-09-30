@@ -16,6 +16,7 @@ import { MessageDto, PaginationDto, ResponseDto } from 'src/shares/dto';
 import { JwtGuard } from '../auth/guards';
 import { ActivityService } from './activity.service';
 import {
+  ActivityResponse,
   ApproveDto,
   CreateActivityDto,
   GetMemberResponseDto,
@@ -32,15 +33,9 @@ export class ActivityController {
 
   @UseGuards(JwtGuard)
   @Get()
-  async findAll(@Query() pagination: PaginationDto): Promise<
-    ResponseDto<
-      Array<
-        Activity & {
-          times: Omit<ActivityTime, 'activityId'>[];
-        }
-      >
-    >
-  > {
+  async findAll(
+    @Query() pagination: PaginationDto
+  ): Promise<ResponseDto<ActivityResponse[]>> {
     return await this.activityService.findAll(
       pagination.page,
       pagination.limit
@@ -72,13 +67,9 @@ export class ActivityController {
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activityId'>[];
-      }
-    >
-  > {
+  async findOne(
+    @Param('id') id: string
+  ): Promise<ResponseDto<ActivityResponse>> {
     return { data: await this.activityService.findOne(id) };
   }
 
@@ -92,25 +83,17 @@ export class ActivityController {
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Get('trash/:id')
-  async findOneDeleted(@Param('id') id: string): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activityId'>[];
-      }
-    >
-  > {
+  async findOneDeleted(
+    @Param('id') id: string
+  ): Promise<ResponseDto<ActivityResponse>> {
     return { data: await this.activityService.findOneDeleted(id) };
   }
 
   @Roles(Position.ADMIN, Position.TRUONG_HANH_CHINH)
   @Post()
-  async create(@Body() data: CreateActivityDto): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activityId'>[];
-      }
-    >
-  > {
+  async create(
+    @Body() data: CreateActivityDto
+  ): Promise<ResponseDto<ActivityResponse>> {
     return { data: await this.activityService.create(data) };
   }
 
@@ -119,13 +102,7 @@ export class ActivityController {
   async update(
     @Param('id') id: string,
     @Body() data: UpdateActivityDto
-  ): Promise<
-    ResponseDto<
-      Activity & {
-        times: Omit<ActivityTime, 'activityId'>[];
-      }
-    >
-  > {
+  ): Promise<ResponseDto<ActivityResponse>> {
     return { data: await this.activityService.update(id, data) };
   }
 
