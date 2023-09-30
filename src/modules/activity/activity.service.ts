@@ -26,6 +26,8 @@ export class ActivityService {
     endTime: boolean;
   };
 
+  private readonly filterAllActivity: { [key: string]: any };
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
@@ -37,6 +39,16 @@ export class ActivityService {
       numberRequire: true,
       startTime: true,
       endTime: true,
+    };
+    this.filterAllActivity = {
+      OR: [
+        {
+          deletedAt: null,
+        },
+        {
+          deletedAt: { isSet: false },
+        },
+      ],
     };
   }
 
@@ -108,7 +120,7 @@ export class ActivityService {
 
     return {
       data: await this.prisma.activity.findMany({
-        where: { deletedAt: null },
+        where: this.filterAllActivity,
         skip: (page - 1) * limit,
         take: limit,
         include: {
@@ -125,8 +137,9 @@ export class ActivityService {
       }),
       pagination: {
         totalPage: Math.ceil(
-          (await this.prisma.activity.count({ where: { deletedAt: null } })) /
-            limit
+          (await this.prisma.activity.count({
+            where: this.filterAllActivity,
+          })) / limit
         ),
       },
     };
